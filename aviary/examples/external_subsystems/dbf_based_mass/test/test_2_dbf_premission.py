@@ -73,12 +73,7 @@ class TestMassPremission(unittest.TestCase):
         self.assertTrue(total > 0)
 
     def test_sum(self):
-        wing = self.prob.get_val(Aircraft.Wing.MASS)[0]
-        htail   = self.prob.get_val(Aircraft.HorizontalTail.MASS)[0]
-        vtail   = self.prob.get_val(Aircraft.VerticalTail.MASS)[0]
-        fuselage = self.prob.get_val(Aircraft.Fuselage.MASS)[0]
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)[0]
-
         self.assertAlmostEqual(total, 50.1555346, places=6)
 
 if __name__ == "__main__":

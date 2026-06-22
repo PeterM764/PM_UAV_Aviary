@@ -24,21 +24,16 @@ class MassSummation(om.Group):
                 Aircraft.VerticalTail.MASS,
             ],
             promotes_outputs=[Aircraft.Design.STRUCTURE_MASS])
-        
-        #Commented out are the subsystems that considered motor mass and battery mass because
-        #Aviary doens't have an Operating Mass variable-- these can be added back in
-        #if the operating mass variable is also added back in through variables.py and 
-        #variable_metadata.py
 
-        # self.add_subsystem(
-        #     'total_mass_sum',
-        #     TotalMass(),
-        #     promotes_inputs=[
-        #         Aircraft.Design.STRUCTURE_MASS,
-        #         Aircraft.Battery.MASS,
-        #         Aircraft.Engine.Motor.MASS
-        #     ],
-        #     promotes_outputs=[Aircraft.Design.OPERATING_MASS])
+        self.add_subsystem(
+            'total_mass_sum',
+            TotalMass(),
+            promotes_inputs=[
+                Aircraft.Design.STRUCTURE_MASS,
+                Aircraft.Battery.MASS,
+                Aircraft.Engine.Motor.MASS
+            ],
+            promotes_outputs=[Aircraft.Design.OPERATING_MASS])
         
 class StructureMass(om.ExplicitComponent):
     def setup(self):
@@ -59,17 +54,17 @@ class StructureMass(om.ExplicitComponent):
             inputs[Aircraft.VerticalTail.MASS]
         )
 
-# class TotalMass(om.ExplicitComponent):
-#     def setup(self):
-#         add_aviary_input(self, Aircraft.Design.STRUCTURE_MASS, val=0.0, units='kg')
-#         add_aviary_input(self, Aircraft.Battery.MASS, val=0.0, units='kg')
-#         add_aviary_input(self, Aircraft.Engine.Motor.MASS, val=0.0, units='kg')
+class TotalMass(om.ExplicitComponent):
+    def setup(self):
+        add_aviary_input(self, Aircraft.Design.STRUCTURE_MASS, val=0.0, units='kg')
+        add_aviary_input(self, Aircraft.Battery.MASS, val=0.0, units='kg')
+        add_aviary_input(self, Aircraft.Engine.Motor.MASS, val=0.0, units='kg')
 
-#         add_aviary_output(self, Aircraft.Design.OPERATING_MASS, units='kg')
+        add_aviary_output(self, Aircraft.Design.OPERATING_MASS, units='kg')
 
-#     def compute(self, inputs, outputs):
-#         outputs[Aircraft.Design.OPERATING_MASS] = (
-#             inputs[Aircraft.Design.STRUCTURE_MASS] +
-#             inputs[Aircraft.Battery.MASS] +
-#             inputs[Aircraft.Engine.Motor.MASS]
-#         )
+    def compute(self, inputs, outputs):
+        outputs[Aircraft.Design.OPERATING_MASS] = (
+            inputs[Aircraft.Design.STRUCTURE_MASS] +
+            inputs[Aircraft.Battery.MASS] +
+            inputs[Aircraft.Engine.Motor.MASS]
+        )

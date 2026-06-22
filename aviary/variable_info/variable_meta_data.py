@@ -1581,6 +1581,14 @@ add_meta_data(
 )
 
 add_meta_data(
+    Aircraft.Design.OPERATING_MASS,
+    meta_data=_MetaData,
+    units='kg',
+    desc='Operating mass (structure + battery + engine motor)',
+    default_value=0
+)
+
+add_meta_data(
     Aircraft.Design.PART25_STRUCTURAL_CATEGORY,
     meta_data=_MetaData,
     historical_name={'GASP': 'INGASP.CATD', 'FLOPS': None},

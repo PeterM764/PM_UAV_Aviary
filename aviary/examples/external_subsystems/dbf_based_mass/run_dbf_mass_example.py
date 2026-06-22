@@ -15,10 +15,7 @@ def run_level3_dbf_example():
     prob = om.Problem()
     model = prob.model
 
-    # -----------------------------
     # Configure fuselage
-    # -----------------------------
-    
     fuselage = DBFFuselageMass()
     ribs = np.array([0]*14 + [1]*5 + [2])
     bulkhead_materials = np.where(ribs != 0, 'Ply', 'Balsa').tolist()
@@ -45,9 +42,7 @@ def run_level3_dbf_example():
     fuselage.set_option(Aircraft.Fuselage.Dbf.MISC_MASS, val=0.0, units='kg')
     model.add_subsystem('fuselage', fuselage, promotes_inputs=['*'], promotes_outputs=['*'])
 
-    # -----------------------------
     # Configure vertical tail
-    # -----------------------------
     vtail = DBFVerticalTailMass()
     rib_thicks_v = np.array([0.125]*5)
     rib_materials_v = ['Balsa'] * 4 + ['Ply'] * 1
@@ -73,9 +68,7 @@ def run_level3_dbf_example():
     vtail.set_option(Aircraft.VerticalTail.Dbf.MISC_MASS, val=0.0, units='kg')
     model.add_subsystem('vtail', vtail, promotes_inputs=['*'], promotes_outputs=['*'])
 
-    # -----------------------------
     # Configure horizontal tail
-    # -----------------------------
     htail = DBFHorizontalTailMass()
     rib_thicks_h = np.array([0.125]*8)
     rib_materials_h = ['Balsa'] * 6 + ['Ply'] * 2
@@ -101,9 +94,7 @@ def run_level3_dbf_example():
     htail.set_option(Aircraft.HorizontalTail.Dbf.MISC_MASS, val=0.0, units='kg')
     model.add_subsystem('htail', htail, promotes_inputs=['*'], promotes_outputs=['*'])
 
-    # -----------------------------
     # Configure wing
-    # -----------------------------
     wing = DBFWingMass()
     ribs = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
     rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
@@ -130,15 +121,10 @@ def run_level3_dbf_example():
     wing.set_option(Aircraft.Wing.Dbf.MISC_MASS, val=0.0, units='kg')
     model.add_subsystem('wing', wing, promotes_inputs=['*'], promotes_outputs=['*'])
 
-    # -----------------------------
     # Total mass calculation
-    # -----------------------------
     model.add_subsystem('mass_group', MassSummation(), promotes_inputs=['*'], promotes_outputs=['*'])
 
-
-    # -----------------------------
     # Setup + Run
-    # -----------------------------
     prob.setup()
 
     prob.set_val(Aircraft.Battery.MASS, 0.707, units='kg')
@@ -163,9 +149,7 @@ def run_level3_dbf_example():
 
     prob.run_model()
 
-    # -----------------------------
     # Output
-    # -----------------------------
     print("\n===== DBF Mass Breakdown =====")
     print(f"Fuselage Mass: {prob.get_val(Aircraft.Fuselage.MASS)[0]:.4f} kg")
     print(f"Vertical Tail Mass: {prob.get_val(Aircraft.VerticalTail.MASS)[0]:.4f} kg")
@@ -174,8 +158,6 @@ def run_level3_dbf_example():
     print(f"Battery Mass: {prob.get_val(Aircraft.Battery.MASS)[0]:.4f} kg")
     print(f"Motor Mass: {prob.get_val(Aircraft.Engine.Motor.MASS)[0]:.4f} kg")
     print(f"Total Mass: {prob.get_val(Aircraft.Design.OPERATING_MASS)[0]:.4f} kg")
-    print(prob.get_val(Aircraft.Design.OPERATING_MASS))
-
 
 if __name__ == '__main__':
     run_level3_dbf_example()

@@ -139,18 +139,13 @@ class TestMassPremission(unittest.TestCase):
 
     def test_mass_summation(self):
 
-        """Does MassSummation correctly sums subsystem masses?"""
+        """Test if MassSummation correctly sums subsystem masses?"""
 
         wing = self.prob.get_val(Aircraft.Wing.MASS)
         ht = self.prob.get_val(Aircraft.HorizontalTail.MASS)
         vt = self.prob.get_val(Aircraft.VerticalTail.MASS)
         fuse = self.prob.get_val(Aircraft.Fuselage.MASS)
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)
-        print(wing)
-        print(ht)
-        print(vt)
-        print(fuse)
-        print(total)
 
         expected = 3.45377793
         self.assertAlmostEqual(total[0], expected, places=6)
