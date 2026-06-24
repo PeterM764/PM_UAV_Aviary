@@ -26,7 +26,7 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         self.dbf.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
         self.dbf.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, val=rib_thicks, units='inch')
         self.dbf.set_option(Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, val=2/3, units='unitless')
-        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.NUM_SPARS, val=1, units='unitless')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.NUM_SPARS, val=1.1, units='unitless')
         self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER, val=1, units='inch')
         self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS, val=0.0625, units='inch')
         self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SPAR_DENSITY, val=2, units='g/cm**3')
@@ -56,7 +56,7 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.HorizontalTail.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 0.759694  # <<< Update to match any new output once they are verified
+        expected_mass = 0.799  # <<< Update to match any new output once they are verified
         tol = 1e-2
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)

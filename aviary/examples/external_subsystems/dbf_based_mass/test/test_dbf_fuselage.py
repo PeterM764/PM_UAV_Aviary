@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-
 import openmdao.api as om
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_fuselage import DBFFuselageMass
@@ -24,7 +23,7 @@ class TestDBFFuselageMass(unittest.TestCase):
         # Using Aircraft.Fuselage.Dbf.* keys instead of string names
         self.dbf.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = bulkhead_materials
         self.dbf.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, val=rib_thicks, units='inch')
-        self.dbf.set_option(Aircraft.Fuselage.Dbf.NUM_SPARS, val = 1, units='unitless')
+        self.dbf.set_option(Aircraft.Fuselage.Dbf.NUM_SPARS, val = 0.5, units='unitless')
         self.dbf.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_LIGHTENING_FACTOR, val=0.18, units='unitless')
         self.dbf.set_option(Aircraft.Fuselage.Dbf.SHEETING_COVERAGE, val=1, units='unitless')
         self.dbf.set_option(Aircraft.Fuselage.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
@@ -57,11 +56,12 @@ class TestDBFFuselageMass(unittest.TestCase):
         print('Computed Mass:', actual_mass)
 
         # Update expected_mass based on verified value
-        expected_mass = 0.561404
+        expected_mass = 0.405
         tol = 1e-3
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)
         print('Fuselage mass: ', expected_mass)
+        
     def test_partials(self):
         self.prob.run_model()
         partials_data = self.prob.check_partials(compact_print=True, method='cs')

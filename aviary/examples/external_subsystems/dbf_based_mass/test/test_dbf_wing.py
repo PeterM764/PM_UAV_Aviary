@@ -54,13 +54,13 @@ class TestDBFWingMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.Wing.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 0.798549  # <<< Update to match new output once verified
+        expected_mass = 0.799  # <<< Update to match new output once verified
         tol = 1e-2
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)
 
     def test_partials(self):
-        self.prob.run_model()
+        self.prob.run_model() 
         partials_data = self.prob.check_partials(compact_print=False, method='cs')
         assert_check_partials(partials_data, atol=1e-6, rtol=1e-6)
 

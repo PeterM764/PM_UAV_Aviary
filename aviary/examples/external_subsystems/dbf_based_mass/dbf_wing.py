@@ -3,6 +3,7 @@ import os
 
 import openmdao.api as om
 from openmdao.utils.cs_safe import abs as cs_abs
+import jax.numpy as jnp
 
 from openmdao.utils.units import convert_units
 from aviary.examples.external_subsystems.dbf_based_mass.materials_database import materials
@@ -14,38 +15,10 @@ from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_v
     ExtendedMetaData,
 )
 
-def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=ExtendedMetaData):
-    meta = meta_data[var_key]
-    default_units = meta['units']
-
-    if units is None:
-        units = default_units
-    if desc is None:
-        desc = meta['desc']
-    if default_val is None:
-        default_val = meta['default_value']
-
-    # Capture units locally so it's always available
-    def set_func(meta_unused, val):
-        # val might be tuple or raw value
-        if isinstance(val, tuple):
-            return wrapped_convert_units(val, units)
-        else:
-            return wrapped_convert_units((val, units), units)
-
-    return {
-        'name': var_key,
-        'default': default_val,
-        'set_function': set_func,
-        'desc': desc,
-    }
-
-class DBFWingMass(om.ExplicitComponent):
+class DBFWingMass(om.JaxExplicitComponent):
     def initialize(self):
         self.options.declare(Aircraft.Wing.Dbf.AIRFOIL_PATH, types=str, allow_none=False)
         self.options.declare(Aircraft.Wing.Dbf.RIB_MATERIALS, types=(list,))
-
-        # Declare options using Aircraft.Wing.Dbf metadata keys
         self.options.declare(**make_units_option(Aircraft.Wing.Dbf.NUM_SPARS, 'unitless'))
         self.options.declare(**make_units_option(Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER, 'm'))
         self.options.declare(**make_units_option(Aircraft.Wing.Dbf.SPAR_DENSITY, 'kg/m**3'))
@@ -62,6 +35,60 @@ class DBFWingMass(om.ExplicitComponent):
         self.options.declare(**make_units_option(Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR, 'unitless'))
         self.options.declare(**make_units_option(Aircraft.Wing.Dbf.NUM_STRINGERS, 'unitless'))
         self.options.declare(**make_units_option(Aircraft.Wing.Dbf.MISC_MASS, 'kg'))
+        self._airfoil_loaded = False
+
+    def setup(self):
+        add_aviary_input(self, Aircraft.Wing.SPAN, units='m', meta_data=ExtendedMetaData, primal_name='span')
+        add_aviary_input(self, Aircraft.Wing.ROOT_CHORD, units='m', meta_data=ExtendedMetaData, primal_name='root_chord')
+        add_aviary_input(self, Aircraft.Wing.WETTED_AREA, units='m**2', meta_data=ExtendedMetaData, primal_name='wetted_area')
+
+        add_aviary_output(self, Aircraft.Wing.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
+    
+    def compute_primal(self, span, root_chord, wetted_area):
+        self._load_airfoil_if_needed()
+        chord = root_chord
+        num_spars = self.options[Aircraft.Wing.Dbf.NUM_SPARS]
+        rib_lightening_factor = self.options[Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR]
+        rib_thickness = jnp.atleast_1d(self.options[Aircraft.Wing.Dbf.RIB_THICKNESS]).reshape(-1)
+        rho_skin = self.options[Aircraft.Wing.Dbf.SKIN_DENSITY]
+        spar_outer_diameter = self.options[Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER]
+        rho_spar = self.options[Aircraft.Wing.Dbf.SPAR_DENSITY]
+        spar_wall_thickness = self.options[Aircraft.Wing.Dbf.SPAR_WALL_THICKNESS]
+        glue_factor = self.options[Aircraft.Wing.Dbf.GLUE_FACTOR]
+        stringer_thickness = self.options[Aircraft.Wing.Dbf.STRINGER_THICKNESS]
+        rho_stringer = self.options[Aircraft.Wing.Dbf.STRINGER_DENSITY]
+        sheeting_thickness = self.options[Aircraft.Wing.Dbf.SHEETING_THICKNESS]
+        sheeting_coverage = self.options[Aircraft.Wing.Dbf.SHEETING_COVERAGE]
+        rho_sheeting = self.options[Aircraft.Wing.Dbf.SHEETING_DENSITY]
+        sheeting_lightening_factor = self.options[Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR]
+        num_stringer = self.options[Aircraft.Wing.Dbf.NUM_STRINGERS]
+        misc_mass = self.options[Aircraft.Wing.Dbf.MISC_MASS]
+
+        cs_area = self.n_area * (chord**2) * rib_lightening_factor
+        rho_rib = self.rho_rib.reshape(-1)
+
+        rib_volumes = cs_area * rib_thickness
+        spar_volume = (
+            num_spars
+            * span
+            * jnp.pi
+            * (spar_outer_diameter * spar_wall_thickness - spar_wall_thickness**2)
+        )
+        sheeting_volume = (
+            wetted_area * sheeting_coverage * sheeting_lightening_factor * sheeting_thickness
+        )
+        stringer_volume = stringer_thickness**2 * num_stringer * span
+
+        rib_mass = jnp.sum(rib_volumes * rho_rib)
+        sheeting_mass = sheeting_volume * rho_sheeting
+        stringer_mass = stringer_volume * rho_stringer
+        spar_mass = spar_volume * rho_spar
+        skin_mass = rho_skin * wetted_area
+
+        structural_mass = stringer_mass + sheeting_mass + rib_mass + spar_mass + skin_mass
+        total_mass = (1 + glue_factor) * structural_mass + misc_mass
+
+        return total_mass
     
     def _convert(self, val, units):
         """
@@ -85,25 +112,7 @@ class DBFWingMass(om.ExplicitComponent):
             return val
 
         return convert_units(val, units, target)
-
-    def setup(self):
-        # Still user inputs:
-        add_aviary_input(self, Aircraft.Wing.SPAN, units='m', meta_data=ExtendedMetaData)
-        add_aviary_input(self, Aircraft.Wing.ROOT_CHORD, units='m', meta_data=ExtendedMetaData)
-        add_aviary_input(self, Aircraft.Wing.WETTED_AREA, units='m**2', meta_data=ExtendedMetaData)
-
-        add_aviary_output(self, Aircraft.Wing.MASS, units='kg', meta_data=ExtendedMetaData)
-
-    def setup_partials(self):
-        self.declare_partials(
-            of=Aircraft.Wing.MASS,
-            wrt=[
-                Aircraft.Wing.SPAN,
-                Aircraft.Wing.ROOT_CHORD,
-                Aircraft.Wing.WETTED_AREA,
-            ],
-        )
-
+    
     def set_option(self, key, val=None, units=None):
         """
         Store the option value in SI units.
@@ -136,126 +145,48 @@ class DBFWingMass(om.ExplicitComponent):
         x_normalized = (x - x_min) / chord_length
         y_normalized = y / chord_length
 
-        return x_normalized, y_normalized
+        return np.array(x_normalized), np.array(y_normalized)
+    
+    def _load_airfoil_if_needed(self):
+        if getattr(self, "_airfoil_loaded", False):
+            return
 
-    def shoelace_area(self, x, y):
-        return 0.5 * cs_abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+        # Correct namespace
+        path = self.options[Aircraft.Wing.Dbf.AIRFOIL_PATH]
+        x, y = self.load_airfoil_csv(path, header=True)
 
-    def compute(self, inputs, outputs):
-        # From inputs
-        span = inputs[Aircraft.Wing.SPAN]
-        chord = inputs[Aircraft.Wing.ROOT_CHORD]
-        wetted_area = inputs[Aircraft.Wing.WETTED_AREA]
-
-        if span <= 0:
-            raise ValueError(f'Wing span must be > 0, got {span}')
-        if chord <= 0:
-            raise ValueError(f'Root chord must be > 0, got {chord}')
-        if wetted_area <= 0:
-            raise ValueError(f'Wetted area must be > 0, got {wetted_area}')
-
-        # From options
-        num_spars = self.options[Aircraft.Wing.Dbf.NUM_SPARS]
-        rib_lightening_factor = self.options[Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR]
-        rib_thickness = self.options[Aircraft.Wing.Dbf.RIB_THICKNESS]
-        rho_skin = self.options[Aircraft.Wing.Dbf.SKIN_DENSITY]
-        spar_outer_diameter = self.options[Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER]
-        rho_spar = self.options[Aircraft.Wing.Dbf.SPAR_DENSITY]
-        spar_wall_thickness = self.options[Aircraft.Wing.Dbf.SPAR_WALL_THICKNESS]
-        glue_factor = self.options[Aircraft.Wing.Dbf.GLUE_FACTOR]
-        stringer_thickness = self.options[Aircraft.Wing.Dbf.STRINGER_THICKNESS]
-        rho_stringer = self.options[Aircraft.Wing.Dbf.STRINGER_DENSITY]
-        sheeting_thickness = self.options[Aircraft.Wing.Dbf.SHEETING_THICKNESS]
-        sheeting_coverage = self.options[Aircraft.Wing.Dbf.SHEETING_COVERAGE]
-        rho_sheeting = self.options[Aircraft.Wing.Dbf.SHEETING_DENSITY]
-        sheeting_lightening_factor = self.options[Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR]
-        num_stringer = self.options[Aircraft.Wing.Dbf.NUM_STRINGERS]
-        rib_materials = self.options[Aircraft.Wing.Dbf.RIB_MATERIALS]  # stays string key
-        airfoil_data_file = self.options[Aircraft.Wing.Dbf.AIRFOIL_PATH]  # stays string key
-        misc_mass = self.options[Aircraft.Wing.Dbf.MISC_MASS]
-
-        if len(rib_materials) != len(rib_thickness):
-            raise ValueError(
-                f'Length mismatch: {len(rib_materials)} rib_materials vs '
-                f'{len(rib_thickness)} rib_thicknesses. These must match.'
-            )
-
-        rho_rib = np.array([(materials.get_item(m)[0]) for m in rib_materials])
-
-        x_coords, y_coords = self.load_airfoil_csv(airfoil_data_file, header=True)
-        n_area = self.shoelace_area(x_coords, y_coords)
-
-        if n_area < 0.01:
-            raise ValueError(
-                f'Computed normalized airfoil area is suspiciously small: {n_area:.5f}'
-            )
-
-        cs_area = n_area * (chord**2) * rib_lightening_factor
-
-        rib_volumes = cs_area * rib_thickness
-        spar_volume = (
-            num_spars
-            * span
-            * np.pi
-            * (spar_outer_diameter * spar_wall_thickness - spar_wall_thickness**2)
-        )
-        sheeting_volume = (
-            wetted_area * sheeting_coverage * sheeting_lightening_factor * sheeting_thickness
-        )
-        stringer_volume = stringer_thickness**2 * num_stringer * span
-
-        rib_mass = np.sum(rib_volumes * rho_rib)
-        sheeting_mass = sheeting_volume * rho_sheeting
-        stringer_mass = stringer_volume * rho_stringer
-        spar_mass = spar_volume * rho_spar
-        skin_mass = rho_skin * wetted_area
-
-        structural_mass = stringer_mass + sheeting_mass + rib_mass + spar_mass + skin_mass
-        total_mass = (1 + glue_factor) * structural_mass + misc_mass
-
-        outputs[Aircraft.Wing.MASS] = total_mass
-
-    def compute_partials(self, inputs, J):
-        # From inputs
-        chord = inputs[Aircraft.Wing.ROOT_CHORD]
-
-        # From options
-        num_spars = self.options[Aircraft.Wing.Dbf.NUM_SPARS]
-        rib_lightening_factor = self.options[Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR]
-        rib_thickness = self.options[Aircraft.Wing.Dbf.RIB_THICKNESS]
-        rho_skin = self.options[Aircraft.Wing.Dbf.SKIN_DENSITY]
-        spar_outer_diameter = self.options[Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER]
-        rho_spar = self.options[Aircraft.Wing.Dbf.SPAR_DENSITY]
-        spar_wall_thickness = self.options[Aircraft.Wing.Dbf.SPAR_WALL_THICKNESS]
-        glue_factor = self.options[Aircraft.Wing.Dbf.GLUE_FACTOR]
-        stringer_thickness = self.options[Aircraft.Wing.Dbf.STRINGER_THICKNESS]
-        rho_stringer = self.options[Aircraft.Wing.Dbf.STRINGER_DENSITY]
-        sheeting_thickness = self.options[Aircraft.Wing.Dbf.SHEETING_THICKNESS]
-        sheeting_coverage = self.options[Aircraft.Wing.Dbf.SHEETING_COVERAGE]
-        rho_sheeting = self.options[Aircraft.Wing.Dbf.SHEETING_DENSITY]
-        sheeting_lightening_factor = self.options[Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR]
-        num_stringer = self.options[Aircraft.Wing.Dbf.NUM_STRINGERS]
+        # Compute area with NumPy (NOT JAX)
+        self.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))        
         rib_materials = self.options[Aircraft.Wing.Dbf.RIB_MATERIALS]
-        airfoil_data_file = self.options[Aircraft.Wing.Dbf.AIRFOIL_PATH]
+        self.rho_rib = np.array([materials.get_item(m)[0] for m in rib_materials])
 
-        rho_rib = np.array([(materials.get_item(m)[0]) for m in rib_materials])
+        rib_thickness = self.options[Aircraft.Wing.Dbf.RIB_THICKNESS]
+        if len(rib_materials) != len(rib_thickness):
+            raise ValueError("Mismatch in rib materials/thicknesses")
 
-        x_coords, y_coords = self.load_airfoil_csv(airfoil_data_file, header=True)
-        n_area = self.shoelace_area(x_coords, y_coords)
+        self._airfoil_loaded = True
+def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=ExtendedMetaData):
+    meta = meta_data[var_key]
+    default_units = meta['units']
 
-        J[Aircraft.Wing.MASS, Aircraft.Wing.SPAN] = (
-            num_stringer * rho_stringer * stringer_thickness**2
-            + num_spars
-            * rho_spar
-            * np.pi
-            * (spar_outer_diameter * spar_wall_thickness - spar_wall_thickness**2)
-        ) * (1 + glue_factor)
+    if units is None:
+        units = default_units
+    if desc is None:
+        desc = meta['desc']
+    if default_val is None:
+        default_val = meta['default_value']
 
-        J[Aircraft.Wing.MASS, Aircraft.Wing.WETTED_AREA] = (
-            rho_skin
-            + (sheeting_coverage * sheeting_lightening_factor * sheeting_thickness * rho_sheeting)
-        ) * (1 + glue_factor)
+    # Capture units locally so it's always available
+    def set_func(meta_unused, val):
+        # val might be tuple or raw value
+        if isinstance(val, tuple):
+            return wrapped_convert_units(val, units)
+        else:
+            return wrapped_convert_units((val, units), units)
 
-        J[Aircraft.Wing.MASS, Aircraft.Wing.ROOT_CHORD] = (
-            2 * chord * rib_lightening_factor * n_area * np.sum(rib_thickness * rho_rib)
-        ) * (1 + glue_factor)
+    return {
+        'name': var_key,
+        'default': default_val,
+        'set_function': set_func,
+        'desc': desc,
+    }

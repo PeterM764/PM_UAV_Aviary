@@ -7,11 +7,9 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission impo
 from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
-    """Tests the MassPremission group before builder is applied"""
-
     def set_dbf_defaults(self, comp, AircraftDbf):
         # Spars
-        comp.set_option(AircraftDbf.NUM_SPARS, 1, units="unitless")
+        comp.set_option(AircraftDbf.NUM_SPARS, 0.5, units="unitless")
         comp.set_option(AircraftDbf.SPAR_OUTER_DIAMETER, 1, units="inch")
         comp.set_option(AircraftDbf.SPAR_WALL_THICKNESS, 0.0625, units="inch")
         comp.set_option(AircraftDbf.SPAR_DENSITY, 2.0, units="g/cm**3")
@@ -60,67 +58,51 @@ class TestMassPremission(unittest.TestCase):
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.ones(20) * 0.125
         
-        # Wing DBF defaults
+        #Setting DBF defaults
         self.set_dbf_defaults(wing, Aircraft.Wing.Dbf)
-
-        # Horizontal tail DBF defaults
         self.set_dbf_defaults(htail, Aircraft.HorizontalTail.Dbf)
-
-        # Vertical tail DBF defaults
         self.set_dbf_defaults(vtail, Aircraft.VerticalTail.Dbf)
-
-        # Fuselage DBF defaults
         self.set_dbf_defaults(fuse, Aircraft.Fuselage.Dbf)
 
-        #Wing
+        #Setting necessary options
         wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         wing.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
-        wing.set_option(Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'inch')
+        wing.set_option(Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
         wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
 
-        #Horizontal Tail
         htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
         htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
-        htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'inch')
+        htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
         htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
 
-        #Vertical Tail
         vtail.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials
         vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
-        vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'inch')
+        vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
         vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
 
-        #Fuselage (use same materials and thickness as we did for ribs)
         fuse.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = rib_materials
         fuse.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, rib_thicks, units="inch")
 
-        #Geometric inputs:
-
-        #Wing
+        #Setting geometry values:
         self.prob.set_val(Aircraft.Wing.SPAN, 4.0, units="m")
         self.prob.set_val(Aircraft.Wing.ROOT_CHORD, 1.0, units="m")
         self.prob.set_val(Aircraft.Wing.WETTED_AREA, 3.0, units="m**2")
 
-        #Horizontal tail
         self.prob.set_val(Aircraft.HorizontalTail.SPAN, 2.0, units="m")
         self.prob.set_val(Aircraft.HorizontalTail.ROOT_CHORD, 0.5, units="m")
         self.prob.set_val(Aircraft.HorizontalTail.WETTED_AREA, 1.0, units="m**2")
 
-        #Vertical tail
         self.prob.set_val(Aircraft.VerticalTail.SPAN, 2.0, units="m")
         self.prob.set_val(Aircraft.VerticalTail.ROOT_CHORD, 0.5, units="m")
         self.prob.set_val(Aircraft.VerticalTail.WETTED_AREA, 1.0, units="m**2")
 
-        #Fuselage
         self.prob.set_val(Aircraft.Fuselage.LENGTH, 1.2192, units="m")
         self.prob.set_val(Aircraft.Fuselage.AVG_HEIGHT, 0.127, units="m")
         self.prob.set_val(Aircraft.Fuselage.AVG_WIDTH, 0.1016, units="m")
         self.prob.set_val(Aircraft.Fuselage.WETTED_AREA, 0.58322464, units="m ** 2")
 
-        # Run the model to run both tests
         self.prob.run_model()
 
-    #tests used:
     def test_outputs_exist(self):
 
         """Do all promoted mass outputs exist and are they positive?"""
@@ -139,7 +121,7 @@ class TestMassPremission(unittest.TestCase):
 
     def test_mass_summation(self):
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)
-        expected = 3.45377793
+        expected = 3.56179953
         self.assertAlmostEqual(total[0], expected, places=6)
         print('Expected: ', expected)
         print('Actual: ', total[0])

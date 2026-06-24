@@ -11,35 +11,31 @@ class TestMassPremission(unittest.TestCase):
         self.prob = om.Problem(model=MassPremission())
         self.prob.setup()
 
-        #minimal required dbf options and parameters below
-
+        #Defining rib parameters
         rib_materials = ["Balsa"] * 20
         rib_thicks = np.ones(20) * 0.125
 
-        # Wing
+        #Setting options
         wing = self.prob.model.wing_mass
         wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         wing.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
 
-        # Horizontal tail
         htail = self.prob.model.horizontal_tail_mass
         htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
         htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
 
-        # Vertical tail
         vtail = self.prob.model.vertical_tail_mass
         vtail.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials
         vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
 
-        # Fuselage (bulkheads instead of ribs)
         fuse = self.prob.model.fuselage_mass
         fuse.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = rib_materials
         fuse.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, rib_thicks, units="inch")
 
-        # --- MINIMAL GEOMETRY ---
+        #Setting geometry values
         self.prob.set_val(Aircraft.Wing.SPAN, 4.0, units="m")
         self.prob.set_val(Aircraft.Wing.ROOT_CHORD, 1.0, units="m")
         self.prob.set_val(Aircraft.Wing.WETTED_AREA, 3.0, units="m**2")

@@ -54,7 +54,7 @@ class TestDBFVerticalTailMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.VerticalTail.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 0.798549  # <<< Update to match new output once verified
+        expected_mass = 0.799  # <<< Update to match new output once verified
         tol = 1e-2
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)
