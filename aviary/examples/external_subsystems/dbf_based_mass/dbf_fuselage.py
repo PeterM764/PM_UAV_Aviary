@@ -5,10 +5,13 @@ from openmdao.utils.units import convert_units
 from aviary.examples.external_subsystems.dbf_based_mass.materials_database import materials
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
-from aviary.variable_info.variables import Aircraft
-from aviary.variable_info.variable_meta_data import _MetaData
 
-def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=_MetaData):
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variable_metadata import (
+    ExtendedMetaData,
+)
+
+def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=ExtendedMetaData):
     meta = meta_data[var_key]
     default_units = meta['units']
 
@@ -79,12 +82,12 @@ class DBFFuselageMass(om.ExplicitComponent):
 
     def setup(self):
         # Required geometry inputs
-        add_aviary_input(self, Aircraft.Fuselage.LENGTH, units='m')
-        add_aviary_input(self, Aircraft.Fuselage.AVG_HEIGHT, units='m')
-        add_aviary_input(self, Aircraft.Fuselage.WETTED_AREA, units='m**2')
-        add_aviary_input(self, Aircraft.Fuselage.AVG_WIDTH, units='m')
+        add_aviary_input(self, Aircraft.Fuselage.LENGTH, units='m', meta_data=ExtendedMetaData)
+        add_aviary_input(self, Aircraft.Fuselage.AVG_HEIGHT, units='m', meta_data=ExtendedMetaData)
+        add_aviary_input(self, Aircraft.Fuselage.WETTED_AREA, units='m**2', meta_data=ExtendedMetaData)
+        add_aviary_input(self, Aircraft.Fuselage.AVG_WIDTH, units='m', meta_data=ExtendedMetaData)
 
-        add_aviary_output(self, Aircraft.Fuselage.MASS, units='kg',)
+        add_aviary_output(self, Aircraft.Fuselage.MASS, units='kg', meta_data=ExtendedMetaData)
 
     def setup_partials(self):
         self.declare_partials(

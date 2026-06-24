@@ -1,12 +1,12 @@
 import numpy as np
 import openmdao.api as om
 
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_fuselage import DBFFuselageMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import DBFVerticalTailMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import DBFHorizontalTailMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_wing import DBFWingMass
-from aviary.variable_info.variables import Aircraft, Mission
+from aviary.variable_info.variables import Aircraft
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variable_metadata import (
+    ExtendedMetaData,
+)
 
 class MassSummation(om.Group):
     """
@@ -27,14 +27,14 @@ class MassSummation(om.Group):
         
 class StructureMass(om.ExplicitComponent):
     def setup(self):
-        add_aviary_input(self, Aircraft.Wing.MASS, val=0.0, units='kg')
-        add_aviary_input(self, Aircraft.Fuselage.MASS, val=0.0, units='kg')
-        add_aviary_input(self, Aircraft.HorizontalTail.MASS, val=0.0, units='kg')
-        add_aviary_input(self, Aircraft.VerticalTail.MASS, val=0.0, units='kg')
+        add_aviary_input(self, Aircraft.Wing.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData)
+        add_aviary_input(self, Aircraft.Fuselage.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData)
+        add_aviary_input(self, Aircraft.HorizontalTail.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData)
+        add_aviary_input(self, Aircraft.VerticalTail.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData)
         
         # More masses can be added, i.e., tail, spars, flaps, etc. as needed
 
-        add_aviary_output(self, Aircraft.Design.STRUCTURE_MASS, units='kg')
+        add_aviary_output(self, Aircraft.Design.STRUCTURE_MASS, units='kg', meta_data=ExtendedMetaData)
 
     def compute(self, inputs, outputs):
         outputs[Aircraft.Design.STRUCTURE_MASS] = (

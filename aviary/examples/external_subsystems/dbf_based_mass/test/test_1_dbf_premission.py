@@ -4,7 +4,7 @@ import openmdao.api as om
 import os 
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
-from aviary.variable_info.variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
     """Tests the MassPremission group before builder is applied"""
@@ -138,15 +138,7 @@ class TestMassPremission(unittest.TestCase):
         self.assertTrue(total > 0)
 
     def test_mass_summation(self):
-
-        """Test if MassSummation correctly sums subsystem masses?"""
-
-        wing = self.prob.get_val(Aircraft.Wing.MASS)
-        ht = self.prob.get_val(Aircraft.HorizontalTail.MASS)
-        vt = self.prob.get_val(Aircraft.VerticalTail.MASS)
-        fuse = self.prob.get_val(Aircraft.Fuselage.MASS)
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)
-
         expected = 3.45377793
         self.assertAlmostEqual(total[0], expected, places=6)
         print('Expected: ', expected)

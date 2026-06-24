@@ -5,8 +5,7 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_fuselage import DBFF
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import DBFHorizontalTailMass
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import DBFVerticalTailMass
 from aviary.examples.external_subsystems.dbf_based_mass.mass_summation import MassSummation
-
-from aviary.variable_info.variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
 
 class MassPremission(om.Group):
     def initialize(self):

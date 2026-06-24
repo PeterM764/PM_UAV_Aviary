@@ -8,8 +8,7 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import DBFHorizontalTailMass
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_wing import DBFWingMass
 from aviary.examples.external_subsystems.dbf_based_mass.mass_summation import MassSummation
-from aviary.variable_info.variables import Aircraft
-
+from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
 
 def run_level3_dbf_example():
     prob = om.Problem()
@@ -124,11 +123,7 @@ def run_level3_dbf_example():
     # Total mass calculation
     model.add_subsystem('mass_group', MassSummation(), promotes_inputs=['*'], promotes_outputs=['*'])
 
-    # Setup + Run
     prob.setup()
-
-    prob.set_val(Aircraft.Battery.MASS, 0.707, units='kg')
-    prob.set_val(Aircraft.Engine.Motor.MASS, 0.288, units='kg')
 
     prob.set_val(Aircraft.Fuselage.LENGTH, 4, units='ft')
     prob.set_val(Aircraft.Fuselage.AVG_HEIGHT, 5, units='inch')
@@ -149,15 +144,12 @@ def run_level3_dbf_example():
 
     prob.run_model()
 
-    # Output
     print("\n===== DBF Mass Breakdown =====")
     print(f"Fuselage Mass: {prob.get_val(Aircraft.Fuselage.MASS)[0]:.4f} kg")
     print(f"Vertical Tail Mass: {prob.get_val(Aircraft.VerticalTail.MASS)[0]:.4f} kg")
     print(f"H-Tail Mass: {prob.get_val(Aircraft.HorizontalTail.MASS)[0]:.4f} kg")
     print(f"Wing Mass: {prob.get_val(Aircraft.Wing.MASS)[0]:.4f} kg")
-    print(f"Battery Mass: {prob.get_val(Aircraft.Battery.MASS)[0]:.4f} kg")
-    print(f"Motor Mass: {prob.get_val(Aircraft.Engine.Motor.MASS)[0]:.4f} kg")
-    print(f"Total Mass: {prob.get_val(Aircraft.Design.OPERATING_MASS)[0]:.4f} kg")
+    print (f"Summed Mass: {prob.get_val(Aircraft.Design.STRUCTURE_MASS)[0]:.4f} kg")
 
 if __name__ == '__main__':
     run_level3_dbf_example()
