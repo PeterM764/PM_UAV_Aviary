@@ -7,7 +7,7 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail impor
     DBFHorizontalTailMass,
 )
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 class TestDBFHorizontalTailMass(unittest.TestCase):
     def setUp(self):

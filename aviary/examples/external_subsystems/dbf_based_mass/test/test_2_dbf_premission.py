@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
 

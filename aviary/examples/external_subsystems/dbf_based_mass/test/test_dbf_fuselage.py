@@ -4,7 +4,7 @@ import openmdao.api as om
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_fuselage import DBFFuselageMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 class TestDBFFuselageMass(unittest.TestCase):
     def setUp(self):

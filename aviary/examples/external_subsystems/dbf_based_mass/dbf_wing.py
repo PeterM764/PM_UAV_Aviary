@@ -10,8 +10,8 @@ from aviary.examples.external_subsystems.dbf_based_mass.materials_database impor
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
 
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variable_metadata import (
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variable_metadata import (
     ExtendedMetaData,
 )
 

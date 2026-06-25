@@ -8,7 +8,7 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import DBFHorizontalTailMass
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_wing import DBFWingMass
 from aviary.examples.external_subsystems.dbf_based_mass.mass_summation import MassSummation
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 def run_level3_dbf_example():
     

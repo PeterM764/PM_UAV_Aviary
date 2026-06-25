@@ -5,7 +5,7 @@ import os
 import openmdao.api as om
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import DBFVerticalTailMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 class TestDBFVerticalTailMass(unittest.TestCase):
     def setUp(self):
