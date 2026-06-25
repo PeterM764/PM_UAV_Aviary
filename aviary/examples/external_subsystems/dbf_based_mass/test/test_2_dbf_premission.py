@@ -1,6 +1,7 @@
 import unittest
 import openmdao.api as om
 import numpy as np
+import os
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
 from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
@@ -8,6 +9,10 @@ from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_v
 class TestMassPremission(unittest.TestCase):
 
     def setUp(self):
+
+        base = os.path.dirname(__file__)
+        airfoil = os.path.abspath(os.path.join(base, "..", "mh84-il.csv"))
+    
         self.prob = om.Problem(model=MassPremission())
         self.prob.setup()
 
@@ -19,17 +24,18 @@ class TestMassPremission(unittest.TestCase):
         wing = self.prob.model.wing_mass
         wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         wing.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
-        wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
+        wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
 
         htail = self.prob.model.horizontal_tail_mass
         htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
         htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
-        htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
+        htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = airfoil
+
 
         vtail = self.prob.model.vertical_tail_mass
         vtail.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials
         vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
-        vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
+        vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = airfoil
 
         fuse = self.prob.model.fuselage_mass
         fuse.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = rib_materials

@@ -147,15 +147,16 @@ class DBFHorizontalTailMass(om.JaxExplicitComponent):
         return convert_units(val, units, target)
     
     def _load_airfoil_if_needed(self):
+
         if getattr(self, "_airfoil_loaded", False):
             return
 
-        # Correct namespace
         path = self.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH]
-        x, y = self.load_airfoil_csv(path, header=True)
+        path = os.path.abspath(path)
 
-        # Compute area with NumPy (NOT JAX)
+        x, y = self.load_airfoil_csv(path, header=True)
         self.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+
         rib_materials = self.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS]
         self.rho_rib = np.array([materials.get_item(m)[0] for m in rib_materials])
 

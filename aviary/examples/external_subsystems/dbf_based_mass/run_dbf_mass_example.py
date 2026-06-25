@@ -1,5 +1,5 @@
 import numpy as np
-
+import os
 import openmdao.api as om
 
 # DBF mass components
@@ -11,6 +11,13 @@ from aviary.examples.external_subsystems.dbf_based_mass.mass_summation import Ma
 from aviary.examples.external_subsystems.dbf_based_mass.variable_info.dbf_mass_variables import Aircraft
 
 def run_level3_dbf_example():
+    
+    base = os.path.dirname(__file__)
+
+    # Absolute paths to the airfoil CSVs
+    mh84 = os.path.abspath(os.path.join(base, "mh84-il.csv"))
+    n0012 = os.path.abspath(os.path.join(base, "n0012-il.csv"))
+
     prob = om.Problem()
     model = prob.model
 
@@ -46,9 +53,7 @@ def run_level3_dbf_example():
     rib_thicks_v = np.array([0.125]*5)
     rib_materials_v = ['Balsa'] * 4 + ['Ply'] * 1
     vtail.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials_v
-    vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = (
-        r'aviary\examples\external_subsystems\dbf_based_mass\n0012-il.csv'
-    )
+    vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = n0012
     vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_THICKNESS, val=rib_thicks_v, units='inch')
     vtail.set_option(Aircraft.VerticalTail.Dbf.SHEETING_COVERAGE, val=0.7, units='unitless')
     vtail.set_option(Aircraft.VerticalTail.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
@@ -72,9 +77,7 @@ def run_level3_dbf_example():
     rib_thicks_h = np.array([0.125]*8)
     rib_materials_h = ['Balsa'] * 6 + ['Ply'] * 2
     htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials_h
-    htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = (
-        r'aviary\examples\external_subsystems\dbf_based_mass\n0012-il.csv'
-    )
+    htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = n0012
     htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, val=rib_thicks_h, units='inch')
     htail.set_option(Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE, val=0.7, units='unitless')
     htail.set_option(Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
@@ -99,9 +102,7 @@ def run_level3_dbf_example():
     rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
     rib_thicks = np.where(ribs != 0, 0.125, 0.125)
     wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
-    wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = (
-        r'aviary\examples\external_subsystems\dbf_based_mass\mh84-il.csv'
-    )
+    wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = n0012
     wing.set_option(Aircraft.Wing.Dbf.SHEETING_COVERAGE, val=0.4, units='unitless')
     wing.set_option(Aircraft.Wing.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
     wing.set_option(Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR, val=1, units='unitless')

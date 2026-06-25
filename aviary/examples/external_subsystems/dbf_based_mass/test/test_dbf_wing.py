@@ -64,6 +64,5 @@ class TestDBFWingMass(unittest.TestCase):
         partials_data = self.prob.check_partials(compact_print=False, method='cs')
         assert_check_partials(partials_data, atol=1e-6, rtol=1e-6)
 
-
 if __name__ == '__main__':
     unittest.main()

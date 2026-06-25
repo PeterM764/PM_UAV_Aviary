@@ -148,15 +148,16 @@ class DBFWingMass(om.JaxExplicitComponent):
         return np.array(x_normalized), np.array(y_normalized)
     
     def _load_airfoil_if_needed(self):
+
         if getattr(self, "_airfoil_loaded", False):
             return
 
-        # Correct namespace
         path = self.options[Aircraft.Wing.Dbf.AIRFOIL_PATH]
-        x, y = self.load_airfoil_csv(path, header=True)
+        path = os.path.abspath(path)
 
-        # Compute area with NumPy (NOT JAX)
-        self.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))        
+        x, y = self.load_airfoil_csv(path, header=True)
+        self.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+
         rib_materials = self.options[Aircraft.Wing.Dbf.RIB_MATERIALS]
         self.rho_rib = np.array([materials.get_item(m)[0] for m in rib_materials])
 
@@ -165,6 +166,7 @@ class DBFWingMass(om.JaxExplicitComponent):
             raise ValueError("Mismatch in rib materials/thicknesses")
 
         self._airfoil_loaded = True
+        
 def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=ExtendedMetaData):
     meta = meta_data[var_key]
     default_units = meta['units']

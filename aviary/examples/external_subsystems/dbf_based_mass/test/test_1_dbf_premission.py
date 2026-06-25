@@ -44,6 +44,10 @@ class TestMassPremission(unittest.TestCase):
         comp.set_option(AircraftDbf.MISC_MASS, 0.0, units="kg")
 
     def setUp(self):
+
+        base = os.path.dirname(__file__)
+        airfoil = os.path.abspath(os.path.join(base, "..", "mh84-il.csv"))
+
         self.prob = om.Problem()
         self.prob.model = MassPremission()
 
@@ -68,18 +72,18 @@ class TestMassPremission(unittest.TestCase):
         wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         wing.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         wing.set_option(Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
-        wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
+        wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
 
         htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
         htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
-        htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
+        htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = airfoil
 
         vtail.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials
         vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         vtail.set_option(Aircraft.VerticalTail.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
-        vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = "aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv"
-
+        vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = airfoil
+        
         fuse.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = rib_materials
         fuse.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, rib_thicks, units="inch")
 

@@ -148,18 +148,18 @@ class DBFVerticalTailMass(om.JaxExplicitComponent):
         return x_normalized, y_normalized
     
     def _load_airfoil_if_needed(self):
+
         if getattr(self, "_airfoil_loaded", False):
             return
 
-        # Correct namespace
         path = self.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH]
-        x, y = self.load_airfoil_csv(path, header=True)
+        path = os.path.abspath(path)
 
-        # Compute area with NumPy (NOT JAX)
+        x, y = self.load_airfoil_csv(path, header=True)
         self.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
 
         rib_materials = self.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS]
-        self.rho_rib = jnp.array([materials.get_item(m)[0] for m in rib_materials])
+        self.rho_rib = np.array([materials.get_item(m)[0] for m in rib_materials])
 
         rib_thickness = self.options[Aircraft.VerticalTail.Dbf.RIB_THICKNESS]
         if len(rib_materials) != len(rib_thickness):
