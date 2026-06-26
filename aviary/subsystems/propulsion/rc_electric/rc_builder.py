@@ -3,7 +3,6 @@ from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import 
 from aviary.utils.aviary_values import AviaryValues
 from aviary.subsystems.propulsion.engine_model import EngineModel
 
-from aviary.subsystems.subsystem_builder import SubsystemBuilder as SubsystemBuilderBase
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.variable_info.variables import Mission
 

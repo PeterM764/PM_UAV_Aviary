@@ -16,7 +16,7 @@ from aviary.utils.preprocessors import preprocess_options
 from aviary.utils.test_utils.default_subsystems import get_default_mission_subsystems
 from aviary.validation_cases.validation_tests import do_validation_test
 from aviary.variable_info.functions import setup_model_options
-from aviary.variable_info.variables import Aircraft, Dynamic
+from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 from aviary.variable_info.enums import LegacyCode
 
@@ -25,26 +25,26 @@ from aviary.variable_info.enums import LegacyCode
 #     def test_case(self):
 inputs = AviaryValues()
 
-inputs.set_val(av.Aircraft.Engine.NUM_ENGINES, 2)
-# inputs.set_val(av.Aircraft.Wing.AREA, 3.17750636, units = 'ft**2')
+inputs.set_val(Aircraft.Engine.NUM_ENGINES, 2)
+# inputs.set_val(Aircraft.Wing.AREA, 3.17750636, units = 'ft**2')
 inputs.set_val(av.Settings.MASS_METHOD, LegacyCode.FLOPS)
 inputs.set_val(av.Mission.Landing.LIFT_COEFFICIENT_MAX, 1.3)
-inputs.set_val(av.Aircraft.Battery.MASS, 0.707, units='kg')
-inputs.set_val(av.Aircraft.Battery.RESISTANCE, 0.05, units='ohm')
-inputs.set_val(av.Aircraft.Battery.VOLTAGE, 22.2, units='V')
-inputs.set_val(av.Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-inputs.set_val(av.Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
-inputs.set_val(av.Aircraft.Engine.Motor.MASS, 0.288, units='kg')
-inputs.set_val(av.Aircraft.Engine.Motor.KV, 420, units='rpm/V')
+inputs.set_val(Aircraft.Battery.MASS, 0.707, units='kg')
+inputs.set_val(Aircraft.Battery.RESISTANCE, 0.05, units='ohm')
+inputs.set_val(Aircraft.Battery.VOLTAGE, 22.2, units='V')
+inputs.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
+inputs.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
+inputs.set_val(Aircraft.Engine.Motor.MASS, 0.288, units='kg')
+inputs.set_val(Aircraft.Engine.Motor.KV, 420, units='rpm/V')
 inputs.set_val(Aircraft.Engine.Motor.RESISTANCE, 0.032, units='ohm')
-inputs.set_val(av.Aircraft.Engine.Propeller.DIAMETER, 20, units='inch')
-inputs.set_val(av.Aircraft.Engine.Propeller.PITCH, 10, units='inch')
-inputs.set_val(av.Dynamic.Mission.ALTITUDE, 200, units='ft')
-# inputs.set_val(av.Dynamic.Mission.VELOCITY, 20, units='m/s')
+inputs.set_val(Aircraft.Engine.Propeller.DIAMETER, 20, units='inch')
+inputs.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')
+inputs.set_val(Dynamic.Mission.ALTITUDE, 200, units='ft')
+# inputs.set_val(Dynamic.Mission.VELOCITY, 20, units='m/s')
 inputs.set_val(Dynamic.Atmosphere.DENSITY, 1.225, units='kg/m**3')
 inputs.set_val(Dynamic.Atmosphere.MACH, 0.058309, units='unitless')
 
-# inputs.set_val(av.Dynamic.Atmosphere.)
+# inputs.set_val(Dynamic.Atmosphere.)
 
 prob = om.Problem()
 
@@ -65,7 +65,7 @@ prob.model.add_subsystem(
         num_nodes=nn,
         throttle_enforcement='bounded',
         # subsystem_options=landing_subsystem_options,
-        core_subsystems=[prop],
+        subsystems=[prop],
         aviary_options=aviary_options,
     ),
     promotes_inputs=['*'],
@@ -86,3 +86,6 @@ try:
     prob.run_model()
 except: 
     prob.model.list_vars(print_arrays=True, units=True)
+
+if __name__ == '__main__':
+    unittest.main()
