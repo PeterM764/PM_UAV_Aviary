@@ -22,10 +22,10 @@ class Battery(om.ExplicitComponent):
         nn = self.options['num_nodes']
 
         #TODO: add Battery options
-        add_aviary_input(self, Aircraft.Battery.VOLTAGE, val=0.0, units = "V")
-        add_aviary_input(self, Aircraft.Battery.RESISTANCE, val=0.0, units='ohm')
+        add_aviary_input(self, Aircraft.Battery.VOLTAGE, units = "V")
+        add_aviary_input(self, Aircraft.Battery.RESISTANCE, units='ohm')
         add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
-        add_aviary_input(self, Aircraft.Battery.MASS, val = 0.0, units= 'kg')
+        add_aviary_input(self, Aircraft.Battery.MASS,  units= 'kg')
         # self.add_input('current', val=np.zeros(nn), units='A')
 
         self.add_output('voltage_out', val=np.zeros(nn), units='V')
@@ -135,11 +135,11 @@ class Motor(om.ExplicitComponent):
     def setup(self):
         nn = self.options['num_nodes']
 
-        add_aviary_input(self, Aircraft.Engine.Motor.MASS, val= 0.0, units= 'kg')
-        add_aviary_input(self, Aircraft.Engine.Motor.IDLE_CURRENT, val=0.0, units='A')
-        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, val=0.0, units='A')
-        add_aviary_input(self, Aircraft.Engine.Motor.RESISTANCE, val=0.0, units='ohm')
-        add_aviary_input(self, Aircraft.Engine.Motor.KV, val=0.0, units='rpm/V')
+        add_aviary_input(self, Aircraft.Engine.Motor.MASS, units= 'kg')
+        add_aviary_input(self, Aircraft.Engine.Motor.IDLE_CURRENT,  units='A')
+        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, units='A')
+        add_aviary_input(self, Aircraft.Engine.Motor.RESISTANCE, units='ohm')
+        add_aviary_input(self, Aircraft.Engine.Motor.KV, units='rpm/V')
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
         add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
         self.add_input('current', val=np.zeros(nn), units = 'A')
@@ -232,8 +232,8 @@ class Vectorization(om.ExplicitComponent):
         self.options.declare('num_nodes', default=1, types=int)
     def setup(self):
         nn=self.options['num_nodes']
-        add_aviary_input(self, Aircraft.Engine.Propeller.DIAMETER, val=0.4826, units = 'm')
-        add_aviary_input(self, Aircraft.Engine.Propeller.PITCH, val=12, units = 'inch')
+        add_aviary_input(self, Aircraft.Engine.Propeller.DIAMETER, units = 'm')
+        add_aviary_input(self, Aircraft.Engine.Propeller.PITCH, units = 'inch')
 
         self.add_output('temp_diameter', val=np.zeros(nn), units='m')
         self.add_output('temp_pitch', val=np.zeros(nn), units='inch')
@@ -312,7 +312,7 @@ class Propeller(om.ExplicitComponent):
         nn = self.options['num_nodes']
         num_eng = self.options[Aircraft.Engine.NUM_ENGINES]
         add_aviary_input(self, Dynamic.Atmosphere.DENSITY, val=np.zeros(nn), units = 'kg/m**3')
-        add_aviary_input(self, Aircraft.Engine.Propeller.DIAMETER, val=0.4826, units = 'm')
+        add_aviary_input(self, Aircraft.Engine.Propeller.DIAMETER, units = 'm')
         add_aviary_input(self, Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn), units = 'rev/s')
         self.add_input("ct", val=np.zeros(nn), units='unitless')
         self.add_input("cp", val=np.zeros(nn), units='unitless')
@@ -474,8 +474,8 @@ class RCPropGroup(om.Group):
                 Aircraft.Engine.Motor.MAX_CONT_CURRENT,
                 Aircraft.Engine.Motor.MASS,
                 Aircraft.Engine.Motor.KV,
-                Aircraft.Engine.Motor.RESISTANCE
-
+                Aircraft.Engine.Motor.RESISTANCE,
+                Dynamic.Vehicle.Propulsion.CURRENT,
                 ],
             promotes_outputs=[
                 Dynamic.Vehicle.Propulsion.RPM,

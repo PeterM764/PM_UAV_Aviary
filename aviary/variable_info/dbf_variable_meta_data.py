@@ -1,7 +1,6 @@
 """Extended variable metadata for the RC electric propulsion subsystem."""
 
 
-
 from copy import deepcopy
 
 import aviary.api as av

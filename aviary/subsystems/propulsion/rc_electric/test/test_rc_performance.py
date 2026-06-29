@@ -17,7 +17,7 @@ class RCPerformanceTest(unittest.TestCase):
         prob = om.Problem()
         prob.model.add_subsystem(
             'group',
-            RCPropGroup(num_nodes=1, **{Aircraft.Engine.NUM_ENGINES: 1}),
+            RCPropGroup(num_nodes=1),
             promotes=['*'],
         )
 
@@ -67,7 +67,7 @@ class RCPerformanceTest(unittest.TestCase):
         prob = om.Problem()
         prob.model.add_subsystem(
             'group',
-            RCPropGroup(num_nodes=3, **{Aircraft.Engine.NUM_ENGINES: 1}),
+            RCPropGroup(num_nodes=3),
             promotes=['*'],
         )
 
@@ -193,6 +193,6 @@ class RCPerformanceTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-    test = PropellerPerformanceTest()
-    test.setUp()
-    test.test_case_15_16_17()
+    # test = PropellerPerformanceTest()
+    # test.setUp()
+    # test.test_case_15_16_17()

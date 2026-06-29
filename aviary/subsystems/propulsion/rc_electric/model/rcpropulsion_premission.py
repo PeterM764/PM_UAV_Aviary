@@ -1,30 +1,26 @@
 import openmdao.api as om
-
-from aviary.utils.aviary_values import AviaryValues
 from functools import partial
 
+from aviary.utils.aviary_values import AviaryValues
+from aviary.variable_info.dbf_variables import Aircraft, Dynamic
+from aviary.variable_info.dbf_variable_meta_data import ExtendedMetaData
 from aviary.variable_info.functions import add_aviary_input as _add_aviary_input
 from aviary.variable_info.functions import add_aviary_option as _add_aviary_option
 from aviary.variable_info.functions import add_aviary_output as _add_aviary_output
-from aviary.variable_info.dbf_variables import Aircraft, Dynamic
-from aviary.variable_info.dbf_variable_meta_data import ExtendedMetaData
 
-# RC electric variables live in ExtendedMetaData; bind it onto the add_aviary_* helpers.
-add_aviary_input = partial(_add_aviary_input, meta_data=ExtendedMetaData)
+# RC electric variables live in ExtendedMetaData; bind it onto the helpers.
+add_aviary_input  = partial(_add_aviary_input,  meta_data=ExtendedMetaData)
 add_aviary_output = partial(_add_aviary_output, meta_data=ExtendedMetaData)
 add_aviary_option = partial(_add_aviary_option, meta_data=ExtendedMetaData)
 
-
 class RCPropPreMission(om.Group):
-    """Calculate electric motor mass for a single motor."""
+    """Calculate RC electric propulsion premission motor and battery properties."""
 
     def initialize(self):
-        # self.options.declare('m', default = 1.3132, desc='m coefficient for kv(mass, max_current): kv = m * max_current/mass + b')
-        # self.options.declare('b', default = 0.01, desc='b coefficient for kv(mass, max_current): kv = m * max_current/mass + b')
         
-        add_aviary_option(self, Aircraft.Engine.Motor.KV_EQ_SLOPE)
-        add_aviary_option(self, Aircraft.Engine.Motor.KV_EQ_INT)
-        
+        add_aviary_option(self, Aircraft.Engine.Motor.KV_EQ_SLOPE)    # m = KV_EQ_SLOPE
+        add_aviary_option(self, Aircraft.Engine.Motor.KV_EQ_INT)      # b = KV_EQ_INT
+      
         self.options.declare(
             'aviary_options',
             types=AviaryValues,
@@ -34,13 +30,11 @@ class RCPropPreMission(om.Group):
         self.name = 'rcpropulsion_premission'
 
     def setup(self):
-        # Determine max torque of scaled motor
-
-        # We create a set of default inputs for this group so that in pre-mission, the
-        #   group can be instantiated with only scale_factor as an input.
-        # Without inputs it will return the max torque based on the non-dimensional
-        #   scale factor chosen by the optimizer.
-        # The max torque is then used in pre-mission to determine weight of the system.
+        #battery mass
+        # battery voltage
+        # idle current
+        # max continuous current
+        # motor mass
         
         #TODO: CITE!
         self.add_subsystem(
@@ -59,9 +53,7 @@ class RCPropPreMission(om.Group):
         self.add_subsystem(
             'motor_resistance_calc',
             om.ExecComp(
-                # maximum() floors idle_current so an out-of-bounds optimizer probe
-                # (idle_current -> 0 or negative) can't make resistance inf/NaN.
-                'resistance = 0.0467 * maximum(idle_current, 0.1) ** -1.892',
+                'resistance = 0.0467 * idle_current ** -1.892', 
                 idle_current={'val': 0.0, 'units': 'A'},
                 resistance={'val': 0.0, 'units': 'ohm'}
             ),
@@ -73,16 +65,11 @@ class RCPropPreMission(om.Group):
         self.add_subsystem(
             'motor_kv_calc',
             om.ExecComp(
-                # Clamp the KV *output* to [250, 600] rpm/V (the realistic window for
-                # these 7 kg planes). Clamping the result -- rather than the mass input --
-                # is bulletproof: KV stays valid for ANY motor-mass probe regardless of
-                # the slope/intercept coefficients or the value of max_current, so the
-                # powertrain can never be driven into its too-slow/NaN region. The inner
-                # maximum(motor_mass, 1.0) just avoids a divide-by-zero.
-                'kv = minimum(maximum(m * max_current / maximum(motor_mass, 1.0) + b, 250.0), 600.0)',
-                kv={'val': 400.0, 'units': 'rpm/V'},
+                'kv = m * max_current / (motor_mass * 1000.0) + b', # The KV empirical fit appears to use motor mass in grams. Aviary provides motor_mass here in kg, so convert kg -> g. or else the number becomes unrealistically high.
+
+                kv={'val': 0.0, 'units': 'rpm/V'},
                 max_current={'val': 0.0, 'units': 'A'},
-                motor_mass={'val': 0.0, 'units': 'g'},
+                motor_mass={'val': 0.0, 'units': 'kg'},
                 m=self.options[Aircraft.Engine.Motor.KV_EQ_SLOPE],
                 b=self.options[Aircraft.Engine.Motor.KV_EQ_INT],
             ),
@@ -92,10 +79,8 @@ class RCPropPreMission(om.Group):
             ],
             promotes_outputs=[('kv', Aircraft.Engine.Motor.KV)]
         )
-        
-        # KV is now hard-clamped to [250, 600] in the ExecComp above, so an explicit
-        # optimizer constraint on it would be redundant (and degenerate when railed).
-        # self.add_constraint(Aircraft.Engine.Motor.KV, lower=250, upper=600, ref=500, units='rpm/V')
+        # commented out for now, may add back in later
+        # self.add_constraint(Aircraft.Engine.Motor.KV, upper=540, units='rpm/V')
         # self.add_subsystem(
         #     'total_mass',
         #     om.ExecComp(
