@@ -27,10 +27,8 @@ def PropDataReader():
 
     # Looping through lines of .dat file
     for xline, yline in zip(fx.readlines(), fy.readlines()):
-
         if xline.strip().startswith("#"):
-            continue
-
+                    continue
         # Converting line into array
         xlineArr = np.array([float(i) for i in xline.strip().split(" ")])
         ylineArr = np.array([float(i) for i in yline.strip().split(" ")])

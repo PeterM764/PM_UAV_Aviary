@@ -1,4 +1,4 @@
-# from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
+from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
 from aviary.utils.aviary_values import AviaryValues
 from aviary.subsystems.propulsion.engine_model import EngineModel
@@ -13,9 +13,9 @@ class RCBuilder(EngineModel):
         super().__init__(name, options)
 
         self.power_balance_mode = power_balance_mode
-    # def build_pre_mission(self, aviary_inputs, **kwargs):  # m, b,
-    #     """Builds an OpenMDAO system for the pre-mission computations of the subsystem."""
-    #     return RCPropPreMission(aviary_options=self.options)
+    def build_pre_mission(self, aviary_inputs, **kwargs):  # m, b,
+        """Builds an OpenMDAO system for the pre-mission computations of the subsystem."""
+        return RCPropPreMission(aviary_options=self.options)
 
     def build_mission(self, num_nodes, aviary_inputs, **kwargs):
         """Builds an OpenMDAO system for the mission computations of the subsystem."""
