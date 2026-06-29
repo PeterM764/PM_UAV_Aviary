@@ -20,6 +20,12 @@ class TestDBFWingMass(unittest.TestCase):
         ribs = np.array([0] * 15 + [1] * 5)
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.where(ribs != 0, 0.125, 0.125)
+        
+        self.dbf.options[Aircraft.Wing.Dbf.TYPE] = 'medium'
+        self.dbf.set_option(Aircraft.Wing.Dbf.FOAM_DENSITY, val=2.0, units='kg/m**3')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_DENSITY, val=1000, units='kg/m**3')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_RADIUS, val=0.015, units='m')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_THICKNESS, val=0.005, units='m')
 
         self.dbf.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         self.dbf.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, val=rib_thicks, units='inch')

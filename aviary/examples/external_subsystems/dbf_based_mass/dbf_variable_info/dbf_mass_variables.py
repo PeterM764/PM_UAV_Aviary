@@ -87,6 +87,7 @@ class Aircraft(AviaryAircraft):
 
         class Dbf:
             AIRFOIL_PATH = 'aircraft:wing:dbf:airfoil_path'
+            FOAM_DENSITY = 'aircraft:wing:dbf:foam_density'
             GLUE_FACTOR = 'aircraft:wing:dbf:glue_factor'
             MISC_MASS = 'aircraft:wing:dbf:misc_mass'
             NUM_RIBS = 'aircraft:wing:dbf:number_of_ribs'
@@ -96,6 +97,9 @@ class Aircraft(AviaryAircraft):
             RIB_LIGHTENING_FACTOR = 'aircraft:wing:dbf:rib_lightening_factor'
             RIB_MATERIALS = 'aircraft:wing:dbf:rib_materials'
             RIB_THICKNESS = 'aircraft:wing:dbf:rib_thickness'
+            ROD_DENSITY = 'aircraft:wing:dbf:rod_density'
+            ROD_RADIUS = 'aircraft:wing:dbf:rod_radius'
+            ROD_THICKNESS = 'aircraft:wing:dbf:rod_thickness'
             SHEETING_COVERAGE = 'aircraft:wing:dbf:sheeting_coverage'
             SHEETING_DENSITY = 'aircraft:wing:dbf:sheeting_density'
             SHEETING_LIGHTENING_FACTOR = 'aircraft:wing:dbf:sheeting_lightening_factor'
@@ -106,3 +110,4 @@ class Aircraft(AviaryAircraft):
             SPAR_WALL_THICKNESS = 'aircraft:wing:dbf:spar_wall_thickness'
             STRINGER_DENSITY = 'aircraft:wing:dbf:stringer_density'
             STRINGER_THICKNESS = 'aircraft:wing:dbf:stringer_thickness'
+            TYPE = 'aircraft:wing:dbf:type'
