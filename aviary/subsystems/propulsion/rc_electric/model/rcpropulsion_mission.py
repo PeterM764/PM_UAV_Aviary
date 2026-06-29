@@ -295,4 +295,4 @@ class RCPropMission(om.Group):
         # self.nonlinear_solver.linesearch.options["bound_enforcement"] = "scalar"
         # self.linear_solver = om.DirectSolver(assemble_jac=True)
 
-        # # self.add_constraint(Dynamic.Vehicle.Propulsion.CURRENT, lower=0)python
+        # # self.add_constraint(Dynamic.Vehicle.Propulsion.CURRENT, lower=0)
