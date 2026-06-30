@@ -1,5 +1,3 @@
-#This tests the mass pre-mission file with the simple wing design
-
 import numpy as np
 import os
 
