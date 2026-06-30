@@ -81,7 +81,7 @@ class TestMassPremission(unittest.TestCase):
         wing.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         wing.set_option(Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR, val = 2/3, units = 'unitless')
         wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
-        wing.options[Aircraft.Wing.Dbf.TYPE] = 'simple'
+        wing.options[Aircraft.Wing.Dbf.TYPE] = 'medium'
 
         htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
         htail.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
@@ -126,11 +126,6 @@ class TestMassPremission(unittest.TestCase):
         fuse = self.prob.get_val(Aircraft.Fuselage.MASS)
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)
 
-        print(wing)
-        print(ht)
-        print(vt)
-        print(fuse)
-        print(total)
         self.assertTrue(wing > 0)
         self.assertTrue(ht > 0)
         self.assertTrue(vt > 0)
@@ -139,7 +134,7 @@ class TestMassPremission(unittest.TestCase):
 
     def test_mass_summation(self):
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)
-        expected = 2.40131596
+        expected = 2.0545722
         self.assertAlmostEqual(total[0], expected, places=6)
         print('Expected: ', expected)
         print('Actual: ', total[0])
