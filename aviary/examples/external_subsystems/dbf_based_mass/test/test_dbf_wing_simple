@@ -23,8 +23,8 @@ class TestDBFWingMass(unittest.TestCase):
         
         #Simple wing design options
         self.dbf.options[Aircraft.Wing.Dbf.TYPE] = 'simple'
-        self.dbf.set_option(Aircraft.Wing.Dbf.FOAM_DENSITY, val=32.0, units='lb/ft**3')
-        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_DENSITY, val=1550.0, units='lb/inch**3')
+        self.dbf.set_option(Aircraft.Wing.Dbf.FOAM_DENSITY, val=2.0, units='lb/ft**3')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_DENSITY, val=0.056, units='lb/inch**3')
         self.dbf.set_option(Aircraft.Wing.Dbf.ROD_RADIUS, val=0.00635, units='inch')
         self.dbf.set_option(Aircraft.Wing.Dbf.ROD_THICKNESS, val=0.00127, units='inch')
 
@@ -45,7 +45,9 @@ class TestDBFWingMass(unittest.TestCase):
         self.dbf.set_option(Aircraft.Wing.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
         self.dbf.set_option(Aircraft.Wing.Dbf.SHEETING_COVERAGE, val=0.4, units='unitless')
         self.dbf.set_option(Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR, val=1.0, units='unitless')
-        airfoil = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'mh84-il.csv'))
+        airfoil = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv')
+        )  
         self.dbf.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
         self.dbf.set_option(Aircraft.Wing.Dbf.MISC_MASS, val=0.0, units='kg')
 

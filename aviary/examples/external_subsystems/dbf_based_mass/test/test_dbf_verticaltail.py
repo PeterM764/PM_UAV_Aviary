@@ -37,7 +37,9 @@ class TestDBFVerticalTailMass(unittest.TestCase):
         self.dbf.set_option(Aircraft.VerticalTail.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
         self.dbf.set_option(Aircraft.VerticalTail.Dbf.SHEETING_COVERAGE, val=0.4, units='unitless')
         self.dbf.set_option(Aircraft.VerticalTail.Dbf.SHEETING_LIGHTENING_FACTOR, val=1.0, units='unitless')
-        airfoil = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'mh84-il.csv'))
+        airfoil = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv')
+        )  
         self.dbf.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = airfoil
         self.dbf.set_option(Aircraft.VerticalTail.Dbf.MISC_MASS, val=0.0, units='kg')
 
