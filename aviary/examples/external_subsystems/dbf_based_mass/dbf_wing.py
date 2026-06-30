@@ -1,3 +1,5 @@
+#This tests the mass pre-mission file with the simple wing design
+
 import numpy as np
 import os
 
@@ -5,7 +7,7 @@ import openmdao.api as om
 import jax.numpy as jnp
 
 from openmdao.utils.units import convert_units
-from aviary.examples.external_subsystems.dbf_based_mass.materials_database import materials
+from aviary.examples.external_subsystems.dbf_based_mass.option_info.materials_database import materials
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
 
@@ -81,6 +83,7 @@ class DBFWingMass(om.JaxExplicitComponent):
             rod_mass = 2 * rod_volume * rod_density
 
             total_mass = foam_mass_final + rod_mass
+
             return total_mass
         
         if type == 'medium':
@@ -146,6 +149,9 @@ class DBFWingMass(om.JaxExplicitComponent):
             'ft': 'm',
             'g/cm**3': 'kg/m**3',
             'g/m**2': 'kg/m**2',
+            'lb/ft**3': 'kg/m**3',
+            'lb/in**3': 'kg/m**3',
+            'lb/inch**3': 'kg/m**3',
             'unitless': None,
         }
 
