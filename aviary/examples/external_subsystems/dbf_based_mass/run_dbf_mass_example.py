@@ -13,10 +13,11 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_ma
 def run_level3_dbf_example():
     
     base = os.path.dirname(__file__)
+    airfoils = os.path.join(base, "option_info")
 
     # Absolute paths to the airfoil CSVs
-    mh84 = os.path.abspath(os.path.join(base, "mh84-il.csv"))
-    n0012 = os.path.abspath(os.path.join(base, "n0012-il.csv"))
+    mh84 = os.path.abspath(os.path.join(airfoils, "mh84-il.csv"))
+    n0012 = os.path.abspath(os.path.join(airfoils, "n0012-il.csv"))
 
     prob = om.Problem()
     model = prob.model
@@ -101,6 +102,8 @@ def run_level3_dbf_example():
     ribs = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1])
     rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
     rib_thicks = np.where(ribs != 0, 0.125, 0.125)
+
+    wing.options[Aircraft.Wing.Dbf.TYPE] = 'medium'
     wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
     wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = n0012
     wing.set_option(Aircraft.Wing.Dbf.SHEETING_COVERAGE, val=0.4, units='unitless')

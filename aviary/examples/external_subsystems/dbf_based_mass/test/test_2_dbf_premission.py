@@ -1,3 +1,5 @@
+#This tests the mass pre-mission with the 'medium' wing option
+
 import unittest
 import openmdao.api as om
 import numpy as np
@@ -10,8 +12,9 @@ class TestMassPremission(unittest.TestCase):
 
     def setUp(self):
 
-        base = os.path.dirname(__file__)
-        airfoil = os.path.abspath(os.path.join(base, "..", "mh84-il.csv"))
+        base = os.path.dirname(os.path.dirname(__file__))
+        airfoil_dir = os.path.join(base, "option_info")
+        airfoil = os.path.abspath(os.path.join(airfoil_dir, "mh84-il.csv"))
     
         self.prob = om.Problem(model=MassPremission())
         self.prob.setup()
@@ -25,6 +28,7 @@ class TestMassPremission(unittest.TestCase):
         wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         wing.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, rib_thicks, units="inch")
         wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
+        wing.options[Aircraft.Wing.Dbf.TYPE] = 'medium'
 
         htail = self.prob.model.horizontal_tail_mass
         htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials

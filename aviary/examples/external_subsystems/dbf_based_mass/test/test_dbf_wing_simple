@@ -20,7 +20,15 @@ class TestDBFWingMass(unittest.TestCase):
         ribs = np.array([0] * 15 + [1] * 5)
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.where(ribs != 0, 0.125, 0.125)
+        
+        #Simple wing design options
+        self.dbf.options[Aircraft.Wing.Dbf.TYPE] = 'simple'
+        self.dbf.set_option(Aircraft.Wing.Dbf.FOAM_DENSITY, val=2.0, units='lb/ft**3')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_DENSITY, val=0.056, units='lb/inch**3')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_RADIUS, val=0.00635, units='inch')
+        self.dbf.set_option(Aircraft.Wing.Dbf.ROD_THICKNESS, val=0.00127, units='inch')
 
+        #Medium wing design options
         self.dbf.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
         self.dbf.set_option(Aircraft.Wing.Dbf.RIB_THICKNESS, val=rib_thicks, units='inch')
         self.dbf.set_option(Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR, val=2/3, units='unitless')
@@ -37,7 +45,9 @@ class TestDBFWingMass(unittest.TestCase):
         self.dbf.set_option(Aircraft.Wing.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
         self.dbf.set_option(Aircraft.Wing.Dbf.SHEETING_COVERAGE, val=0.4, units='unitless')
         self.dbf.set_option(Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR, val=1.0, units='unitless')
-        airfoil = os.path.normpath(os.path.join(os.path.dirname(__file__), '..', 'mh84-il.csv'))
+        airfoil = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv')
+        )  
         self.dbf.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
         self.dbf.set_option(Aircraft.Wing.Dbf.MISC_MASS, val=0.0, units='kg')
 
@@ -54,7 +64,7 @@ class TestDBFWingMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.Wing.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 0.799  # <<< Update to match new output once verified
+        expected_mass = 0.89850143 # <<< Update to match new output once verified
         tol = 1e-2
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)

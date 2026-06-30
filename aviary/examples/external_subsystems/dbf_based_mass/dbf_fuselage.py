@@ -3,7 +3,7 @@ import openmdao.api as om
 import jax.numpy as jnp
 
 from openmdao.utils.units import convert_units
-from aviary.examples.external_subsystems.dbf_based_mass.materials_database import materials
+from aviary.examples.external_subsystems.dbf_based_mass.option_info.materials_database import materials
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
 

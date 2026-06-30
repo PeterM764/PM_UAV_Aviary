@@ -682,6 +682,15 @@ av.add_meta_data(
 )
 
 av.add_meta_data(
+    Aircraft.Wing.Dbf.FOAM_DENSITY,
+    units='kg/m**3',
+    desc='density of foam used for simple wing design',
+    default_value=2.0,
+    meta_data = ExtendedMetaData,
+    option=True
+)
+
+av.add_meta_data(
     Aircraft.Wing.Dbf.GLUE_FACTOR,
     units='unitless',
     desc='Added margin for glue. Only added to ribs, spars, and stringers',
@@ -765,6 +774,33 @@ av.add_meta_data(
     default_value=[0.0],
     meta_data = ExtendedMetaData,
     multivalue=True,
+    option=True,
+)
+
+av.add_meta_data(
+    Aircraft.Wing.Dbf.ROD_DENSITY,
+    units='kg/m**3',
+    desc='density of rod used for simple wing design',
+    default_value=2.0,
+    meta_data = ExtendedMetaData,
+    option=True
+)
+
+av.add_meta_data(
+    Aircraft.Wing.Dbf.ROD_RADIUS,
+    units='m',
+    desc='radius of rod for simple wing',
+    default_value=2.0,
+    meta_data = ExtendedMetaData,
+    option=True
+)
+
+av.add_meta_data(
+    Aircraft.Wing.Dbf.ROD_THICKNESS,
+    units='m',
+    desc='thickness of the rod in simple wing design',
+    default_value=2.0,
+    meta_data = ExtendedMetaData,
     option=True,
 )
 
@@ -856,4 +892,14 @@ av.add_meta_data(
     default_value=0.0625,
     meta_data = ExtendedMetaData,
     option=True,
+)
+
+av.add_meta_data(
+    Aircraft.Wing.Dbf.TYPE,
+    meta_data = ExtendedMetaData,
+    units='unitless',
+    desc='Specifies "simple" or "medium" wing design',
+    default_value='simple',
+    option=True,
+    types=str,
 )
