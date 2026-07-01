@@ -50,40 +50,38 @@ class CustomAeroBuilder(SubsystemBuilderBase):
         promotes = [
             Dynamic.Vehicle.DRAG,
             Dynamic.Vehicle.LIFT,
+            # Core aero's get_timeseries() registers these unconditionally (even with
+            # method='external'), so the external aero must supply them too.
+            Dynamic.Vehicle.DRAG_COEFFICIENT,
+            Dynamic.Vehicle.LIFT_COEFFICIENT,
         ]
         return promotes
 
-    def get_parameters(self, aviary_inputs=None, phase_info=None):
+    def get_parameters(self, aviary_inputs=None, user_options=None, subsystem_options=None, **kwargs):
         """
-        Return a dictionary of fixed values for the subsystem.
+        Return fixed parameter definitions for this subsystem.
 
-        Optional, used if subsystems have fixed values.
+        Use this when the subsystem has values that stay constant within a
+        phase. These parameters can still be optimized when `opt=True`.
 
-        Used in the phase builders (e.g. cruise_phase.py) when other parameters are added to the phase.
-
-        This is distinct from `get_design_vars` in a nuanced way. Design variables
-        are variables that are optimized by the problem that are not at the phase level.
-        An example would be something that occurs in the pre-mission level of the problem.
-        Parameters are fixed values that are held constant throughout a phase, but if
-        `opt=True`, they are able to change during the optimization.
+        This differs from `get_design_vars`: design variables are optimized
+        outside the phase-level parameter setup.
 
         Parameters
         ----------
         phase_info : dict
-            The phase_info subdict for this phase.
+            Phase-specific settings.
 
         Returns
         -------
         fixed_values : dict
-            A dictionary where the keys are the names of the fixed variables
-            and the values are dictionaries with the following keys:
+            Mapping of variable names to OpenMDAO metadata:
 
             - 'value': float or array
-                The fixed value for the variable.
+                Fixed value for the variable.
             - 'units': str
-                The units for the fixed value (optional).
-            - any additional keyword arguments required by OpenMDAO for the fixed
-              variable.
+                Units for the value (optional).
+            - any additional keyword arguments required by OpenMDAO.
         """
         params = {}
         params[Aircraft.Wing.AREA] = {
@@ -93,7 +91,7 @@ class CustomAeroBuilder(SubsystemBuilderBase):
         }
         return params
 
-    def needs_mission_solver(self, aviary_inputs):
+    def needs_mission_solver(self, aviary_inputs=None, subsystem_options=None, **kwargs):
         """
         Return True if the mission subsystem needs to be in the solver loop in mission, otherwise
         return False. Aviary will only place it in the solver loop when True. The default is

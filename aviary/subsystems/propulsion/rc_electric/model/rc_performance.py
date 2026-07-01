@@ -131,6 +131,8 @@ class ElectronicSpeedController(om.ExplicitComponent):
 class Motor(om.ExplicitComponent):
     def initialize(self):
         self.options.declare('num_nodes', default=1, types=int)
+        # Percentage multiply on no-load RPM to estimate load (1.0 = no derate).
+        self.options.declare('load_factor', default=1.0, types=float)
 
     def setup(self):
         nn = self.options['num_nodes']
@@ -147,10 +149,10 @@ class Motor(om.ExplicitComponent):
         ################ TODO Alex #####################
         add_aviary_output(self, Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn),  units='rpm')
 
-        # self.add_output(Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn), upper=7500, ref=1e3, units='rpm')
+        # (no bound here: RPM is derated via load_factor instead; an output upper= is inert on an explicit comp anyway)
         ################ TODO Alex #####################
         self.add_output('power', val=np.zeros(nn), units='W')
-        self.add_output('current_constraint', val=np.zeros(nn), units='A')
+        self.add_output('current_constraint', val=np.zeros(nn), units='A', desc='Ensure that you are not going over max amperage/NEGATIVE IS GOOD')
 
         ar=np.arange(nn)
 
@@ -192,23 +194,25 @@ class Motor(om.ExplicitComponent):
     def compute(self, inputs, outputs):
         R = inputs[Aircraft.Engine.Motor.RESISTANCE]
         kv = inputs[Aircraft.Engine.Motor.KV]
+        lf = self.options['load_factor']
         voltage_prop = inputs['voltage_in'] - inputs['current'] * R
-        outputs[Dynamic.Vehicle.Propulsion.RPM] = kv * voltage_prop
+        outputs[Dynamic.Vehicle.Propulsion.RPM] = lf * kv * voltage_prop
         outputs['power'] = -inputs['current']**2 * R - inputs[Aircraft.Engine.Motor.IDLE_CURRENT] * voltage_prop
         outputs['current_constraint'] = inputs[Dynamic.Vehicle.Propulsion.CURRENT] - inputs[Aircraft.Engine.Motor.MAX_CONT_CURRENT] 
 
     def compute_partials(self, inputs, partials):
         R = inputs[Aircraft.Engine.Motor.RESISTANCE]
-        
+        lf = self.options['load_factor']
+
         voltage_prop = inputs['voltage_in'] - inputs['current'] * R
         dvoltage_prop_dvoltage_in = 1
         dvoltage_prop_dcurrent = -R
         dvoltage_prop_dresistance = -inputs['current']
 
-        partials[Dynamic.Vehicle.Propulsion.RPM, 'voltage_in'] = inputs[Aircraft.Engine.Motor.KV] * dvoltage_prop_dvoltage_in
-        partials[Dynamic.Vehicle.Propulsion.RPM, 'current'] = inputs[Aircraft.Engine.Motor.KV] * dvoltage_prop_dcurrent
-        partials[Dynamic.Vehicle.Propulsion.RPM, Aircraft.Engine.Motor.RESISTANCE] = inputs[Aircraft.Engine.Motor.KV] * dvoltage_prop_dresistance
-        partials[Dynamic.Vehicle.Propulsion.RPM, Aircraft.Engine.Motor.KV] = voltage_prop
+        partials[Dynamic.Vehicle.Propulsion.RPM, 'voltage_in'] = lf * inputs[Aircraft.Engine.Motor.KV] * dvoltage_prop_dvoltage_in
+        partials[Dynamic.Vehicle.Propulsion.RPM, 'current'] = lf * inputs[Aircraft.Engine.Motor.KV] * dvoltage_prop_dcurrent
+        partials[Dynamic.Vehicle.Propulsion.RPM, Aircraft.Engine.Motor.RESISTANCE] = lf * inputs[Aircraft.Engine.Motor.KV] * dvoltage_prop_dresistance
+        partials[Dynamic.Vehicle.Propulsion.RPM, Aircraft.Engine.Motor.KV] = lf * voltage_prop
 
         partials['power', 'voltage_in'] = -inputs[Aircraft.Engine.Motor.IDLE_CURRENT] * dvoltage_prop_dvoltage_in
         partials['power', 'current'] = -2 * inputs['current'] * R - inputs[Aircraft.Engine.Motor.IDLE_CURRENT] * dvoltage_prop_dcurrent

@@ -17,7 +17,7 @@ phase_info = {
             'altitude_initial': (0.0, 'ft'),
             'altitude_final': (200.0, 'ft'),
             'throttle_enforcement': 'control',
-            'throttle_polynomial_order': 1, 
+            'throttle_polynomial_order': 1,
             'electric_current_polynomial_order': 3,
             'electric_current_max_polynomial_order': 3,
             'time_initial': (0.0, 'min'),
@@ -89,6 +89,6 @@ phase_info = {
     'post_mission': {
         'include_landing': False,
         # 'target_range': (200, 'ft'),
-        # 'constraint_range':True, 
+        # 'constraint_range':True,
     },
 }

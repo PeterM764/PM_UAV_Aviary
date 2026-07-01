@@ -28,7 +28,11 @@ class RCPropMission(om.Group):
 
         user_feedforward = self.options['power_balance_mode'] == 'feedforward'
 
-        
+        # Feedforward is a rough estimate, so derate no-load RPM to ~80% to mimic prop
+        # loading. Solver mode closes the real power balance, so leave it at 1.0.
+        motor_load_factor = 0.80 if user_feedforward else 1.0
+
+
         self.set_input_defaults('full_throttle', val=np.ones(nn), units='unitless')
         
         self.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
@@ -53,8 +57,8 @@ class RCPropMission(om.Group):
         )
 
         self.add_subsystem(
-            'motor', 
-            Motor(num_nodes=nn), 
+            'motor',
+            Motor(num_nodes=nn, load_factor=motor_load_factor),
             promotes_inputs=[
                 Aircraft.Engine.Motor.IDLE_CURRENT, 
                 Aircraft.Engine.Motor.MAX_CONT_CURRENT,
@@ -80,7 +84,6 @@ class RCPropMission(om.Group):
             PropCoefficients(method='lagrange2', extrapolate=True, training_data_gradients=True, vec_size=nn),
             promotes_inputs=[
                 Dynamic.Mission.VELOCITY,
-                Dynamic.Vehicle.Propulsion.RPM,
                 'temp_diameter',
                 'temp_pitch',
             ],
@@ -93,7 +96,6 @@ class RCPropMission(om.Group):
             Propeller(num_nodes=nn), 
             promotes_inputs=[
                 Aircraft.Engine.Propeller.DIAMETER, 
-                Dynamic.Vehicle.Propulsion.RPM, 
                 'ct', 
                 'cp', 
                 # Aircraft.Engine.NUM_ENGINES, 
@@ -106,6 +108,10 @@ class RCPropMission(om.Group):
                 ]
         )
 
+        self.connect(
+        Dynamic.Vehicle.Propulsion.RPM,
+        ['propco.' + Dynamic.Vehicle.Propulsion.RPM, 'prop.' + Dynamic.Vehicle.Propulsion.RPM]
+        )
 
         if user_feedforward:
             self.add_subsystem(
@@ -171,7 +177,7 @@ class RCPropMission(om.Group):
 
         self.add_subsystem(
             'motor_max',
-            Motor(num_nodes=nn),
+            Motor(num_nodes=nn, load_factor=motor_load_factor),
             promotes_inputs=[
                 Aircraft.Engine.Motor.IDLE_CURRENT,
                 Aircraft.Engine.Motor.MAX_CONT_CURRENT,
@@ -261,8 +267,10 @@ class RCPropMission(om.Group):
 
 
         if user_feedforward:
-            self.add_constraint('power_net', equals=0, ref=1e2)
-            self.add_constraint('power_net_max', equals=0, ref=1e2)
+
+            """ Having these constraints in caused the optimizer to fail to converge. The constraints are not needed because the power_net residuals are already being constrained to zero. """
+            # self.add_constraint('power_net', equals=0, ref=1e2)
+            # self.add_constraint('power_net_max', equals=0, ref=1e2)
             
             self.add_constraint('current_constraint_max', upper=0, ref=1e2)
             self.add_constraint(Dynamic.Vehicle.Propulsion.RPM_MAX, lower=1, upper=125, ref=1e3, units='rps')
