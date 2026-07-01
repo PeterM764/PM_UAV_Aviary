@@ -13,13 +13,8 @@ class DBFMassBuilder(SubsystemBuilder):
         subsystem_options = subsystem_options or {}
         return MassPremission(
 
-<<<<<<< HEAD
-    def build_pre_mission(self, aviary_inputs, subsystem_options=None, **kwargs):
-        group = om.Group()
-=======
             aviary_inputs = aviary_inputs,
             subsystem_options = subsystem_options,
->>>>>>> 875f2d1e08b38509849d3a4db0b818ecd5f4bc09
 
         )
     
@@ -54,3 +49,57 @@ class DBFMassBuilder(SubsystemBuilder):
             Aircraft.Design.STRUCTURE_MASS,
 
         ]
+    def __init__(self, name='dbf_mass'):
+        if name is None:
+            name = _default_name
+
+        super().__init__(name=name)
+
+    def build_pre_mission(self, aviary_inputs, subsystem_options=None, **kwargs):
+        group = om.Group()
+
+        # Add mass subsystems first, promote outputs to group
+        group.add_subsystem(
+            'wing_mass',
+            DBFWingMass(),
+            promotes_inputs=['aircraft:*'],
+            promotes_outputs=[Aircraft.Wing.MASS],
+        )
+
+        group.add_subsystem(
+            'horizontal_tail_mass',
+            DBFHorizontalTailMass(),
+            promotes_inputs=['aircraft:*'],
+            promotes_outputs=[Aircraft.HorizontalTail.MASS],
+        )
+
+        group.add_subsystem(
+            'vertical_tail_mass',
+            DBFVerticalTailMass(),
+            promotes_inputs=['aircraft:*'],
+            promotes_outputs=[Aircraft.VerticalTail.MASS],
+        )
+
+        group.add_subsystem(
+            'fuselage_mass',
+            DBFFuselageMass(),
+            promotes_inputs=['aircraft:*'],
+            promotes_outputs=[Aircraft.Fuselage.MASS],
+        )
+
+        group.add_subsystem(
+            'total_mass',
+            om.ExecComp(
+                'engine_mass = n_batt * batt_mass + n_mot * motor_mass',
+                batt_mass={'val': 0.0, 'units': 'kg'},
+                motor_mass={'val': 0.0, 'units': 'kg'},
+                engine_mass={'val': 0.0, 'units': 'kg'},
+                n_mot={'val': 1.0},
+                n_batt={'val': 1.0} #TODO Alex change
+            ),
+            promotes_inputs=[('batt_mass', Aircraft.Battery.MASS), ('motor_mass', Aircraft.Engine.Motor.MASS), ('n_mot', 'aircraft:engine:num_engines')],
+            promotes_outputs=[('engine_mass', Aircraft.Propulsion.MASS)]
+        )
+
+        return group
+
