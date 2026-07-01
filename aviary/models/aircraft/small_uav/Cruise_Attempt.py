@@ -243,6 +243,6 @@ print("\nSummary Gross Mass")
 print("kg :", prob.get_val('mission:gross_mass', units='kg'))
 print("lbm:", prob.get_val('mission:gross_mass', units='lbm'))
 
-# Save variable list
-with open("aviary/examples/small_uav/cruise_only_vars.txt", "w") as f:
-    prob.model.list_vars(print_arrays=True, out_stream=f, units=True)
+# Save variable list -- needs cruise_only_vars.txt in order to work
+# with open("aviary/examples/small_uav/cruise_only_vars.txt", "w") as f:
+#     prob.model.list_vars(print_arrays=True, out_stream=f, units=True)
