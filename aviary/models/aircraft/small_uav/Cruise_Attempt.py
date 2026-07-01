@@ -2,7 +2,7 @@ from copy import deepcopy
 import numpy as np
 import openmdao.api as om
 import aviary.api as av
-from aviary.examples.small_uav.phases.dbf_example_energy_phase import phase_info
+from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
 from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
@@ -32,7 +32,7 @@ phase_info['pre_mission']['external_subsystems'] = [DBFMassBuilder()]
 
 phase_info['cruise']['external_subsystems'] = [CustomAeroBuilder()]
 
-phase_info['cruise']['subsystem_options']['core_aerodynamics'] = {
+phase_info['cruise']['subsystem_options']['aerodynamics'] = {
     'method': 'external',
 }
 
@@ -91,7 +91,7 @@ prob.load_inputs(
     'validation_cases/validation_data/test_models/small_scale_uav.csv',
     phase_info,
 )
-prob.load_external_subsystems(external_subsystems=[rc_prop])
+prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder()])
 
 print("Loaded gross mass kg:",
       prob.aviary_inputs.get_val('mission:design:gross_mass', units='kg'))
@@ -107,9 +107,13 @@ prob.link_phases()
 
 # use_coloring=False: the coloring sparsity-detection perturbs design vars hard
 # enough to push the prop across its negative-thrust cliff at this speed, which
-# makes the throttle-balance Jacobian singular. IPOPT's own (smaller) steps stay
-# in the well-conditioned region, so skip coloring here.
-prob.add_driver('SLSQP', use_coloring=False)
+# makes the throttle-balance Jacobian singular.
+prob.add_driver('IPOPT', use_coloring=False)
+prob.driver.opt_settings['print_level'] = 5
+prob.driver.opt_settings['mu_strategy'] = 'adaptive'
+prob.driver.opt_settings['tol'] = 1e-5
+prob.driver.opt_settings['acceptable_tol'] = 1e-4
+prob.driver.opt_settings['acceptable_iter'] = 10
 prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
 prob.add_design_variables()
@@ -194,7 +198,7 @@ for _t in _throttle_targets:
         continue
 
 # Run
-prob.run_aviary_problem(suppress_solver_print=False)
+prob.run_aviary_problem(suppress_solver_print=True,desc = 'Is the Newton Convered output relating to the energy-state ode when throttle_enforcement is not control')
 
 print("\n===== MASS CHECK =====")
 

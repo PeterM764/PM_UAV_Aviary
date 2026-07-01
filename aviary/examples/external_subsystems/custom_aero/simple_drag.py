@@ -78,21 +78,21 @@ class SimpleAeroGroup(om.Group):
                 Dynamic.Vehicle.MASS,
                 Dynamic.Atmosphere.DYNAMIC_PRESSURE,
             ],
-            promotes_outputs=['cl', Dynamic.Vehicle.LIFT],
+            promotes_outputs=[Dynamic.Vehicle.LIFT_COEFFICIENT, Dynamic.Vehicle.LIFT],
         )
 
         self.add_subsystem(
             'SimpleDragCoeff',
             SimplestDragCoeff(num_nodes=nn),
-            promotes_inputs=['cl'],
-            promotes_outputs=['CD'],
+            promotes_inputs=[('cl', Dynamic.Vehicle.LIFT_COEFFICIENT)],
+            promotes_outputs=[('CD', Dynamic.Vehicle.DRAG_COEFFICIENT)],
         )
 
         self.add_subsystem(
             'SimpleDrag',
             SimpleDrag(num_nodes=nn),
             promotes_inputs=[
-                'CD',
+                Dynamic.Vehicle.DRAG_COEFFICIENT,
                 Dynamic.Atmosphere.DYNAMIC_PRESSURE,
                 Aircraft.Wing.AREA,
             ],
