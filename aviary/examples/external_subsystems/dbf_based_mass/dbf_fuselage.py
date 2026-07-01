@@ -5,7 +5,7 @@ import openmdao.api as om
 from aviary.examples.external_subsystems.dbf_based_mass.materials_database import materials
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
-from aviary.variable_info.variables import Aircraft
+from aviary.variable_info.dbf_variables import Aircraft
 from aviary.variable_info.variable_meta_data import _MetaData
 
 def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=_MetaData):
