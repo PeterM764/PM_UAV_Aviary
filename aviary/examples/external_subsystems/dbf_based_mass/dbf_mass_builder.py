@@ -1,70 +1,56 @@
-import openmdao.api as om
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from aviary.subsystems.subsystem_builder import SubsystemBuilder
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
 
-import aviary as av
-from aviary.variable_info.variables import Aircraft
-from aviary.subsystems.subsystem_builder import SubsystemBuilder as SubsystemBuilderBase
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_wing import DBFWingMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_fuselage import DBFFuselageMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import DBFHorizontalTailMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import DBFVerticalTailMass
-
-
-class DBFMassBuilder(SubsystemBuilderBase):
+class DBFMassBuilder(SubsystemBuilder):
+    
     """
-    Builder for DBF mass models including wing, horizontal tail, vertical tail, and fuselage.
+    Builder for DBF mass models (wing, htail, vtail, fuselage, ...)
     """
 
-    def __init__(self, name='dbf_mass'):
-        if name is None:
-            name = _default_name
+    def build_pre_mission(self, aviary_inputs, subsystem_options=None):
 
-        super().__init__(name=name)
+        subsystem_options = subsystem_options or {}
+        return MassPremission(
 
+<<<<<<< HEAD
     def build_pre_mission(self, aviary_inputs, subsystem_options=None, **kwargs):
         group = om.Group()
+=======
+            aviary_inputs = aviary_inputs,
+            subsystem_options = subsystem_options,
+>>>>>>> 875f2d1e08b38509849d3a4db0b818ecd5f4bc09
 
-        # Add mass subsystems first, promote outputs to group
-        group.add_subsystem(
-            'wing_mass',
-            DBFWingMass(),
-            promotes_inputs=['aircraft:*'],
-            promotes_outputs=[Aircraft.Wing.MASS],
         )
+    
+    def get_inputs(self):
 
-        group.add_subsystem(
-            'horizontal_tail_mass',
-            DBFHorizontalTailMass(),
-            promotes_inputs=['aircraft:*'],
-            promotes_outputs=[Aircraft.HorizontalTail.MASS],
-        )
+        return [
 
-        group.add_subsystem(
-            'vertical_tail_mass',
-            DBFVerticalTailMass(),
-            promotes_inputs=['aircraft:*'],
-            promotes_outputs=[Aircraft.VerticalTail.MASS],
-        )
+            Aircraft.Wing.SPAN,
+            Aircraft.Wing.ROOT_CHORD,
+            Aircraft.Wing.WETTED_AREA,
+            Aircraft.Fuselage.LENGTH,
+            Aircraft.Fuselage.AVG_HEIGHT,
+            Aircraft.Fuselage.AVG_WIDTH,
+            Aircraft.Fuselage.WETTED_AREA,
+            Aircraft.HorizontalTail.SPAN,
+            Aircraft.HorizontalTail.ROOT_CHORD,
+            Aircraft.HorizontalTail.WETTED_AREA,
+            Aircraft.VerticalTail.SPAN,
+            Aircraft.VerticalTail.ROOT_CHORD,
+            Aircraft.VerticalTail.WETTED_AREA,
 
-        group.add_subsystem(
-            'fuselage_mass',
-            DBFFuselageMass(),
-            promotes_inputs=['aircraft:*'],
-            promotes_outputs=[Aircraft.Fuselage.MASS],
-        )
+        ]
+    
+    def get_outputs(self):
 
-        group.add_subsystem(
-            'total_mass',
-            om.ExecComp(
-                'engine_mass = n_batt * batt_mass + n_mot * motor_mass',
-                batt_mass={'val': 0.0, 'units': 'kg'},
-                motor_mass={'val': 0.0, 'units': 'kg'},
-                engine_mass={'val': 0.0, 'units': 'kg'},
-                n_mot={'val': 1.0},
-                n_batt={'val': 1.0} #TODO Alex change
-            ),
-            promotes_inputs=[('batt_mass', Aircraft.Battery.MASS), ('motor_mass', Aircraft.Engine.Motor.MASS), ('n_mot', 'aircraft:engine:num_engines')],
-            promotes_outputs=[('engine_mass', Aircraft.Propulsion.MASS)]
-        )
+        return [
 
-        return group
+            Aircraft.Wing.MASS,
+            Aircraft.HorizontalTail.MASS,
+            Aircraft.VerticalTail.MASS,
+            Aircraft.Fuselage.MASS,
+            Aircraft.Design.STRUCTURE_MASS,
 
+        ]

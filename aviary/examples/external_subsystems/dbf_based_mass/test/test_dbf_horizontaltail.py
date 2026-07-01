@@ -1,14 +1,13 @@
 import unittest
 import numpy as np
-
+import os
 import openmdao.api as om
 
-from aviary.variable_info.variables import Aircraft
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import (
     DBFHorizontalTailMass,
 )
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 class TestDBFHorizontalTailMass(unittest.TestCase):
     def setUp(self):
@@ -24,26 +23,27 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.where(ribs != 0, 0.125, 0.125)
 
-        self.dbf.options['rib_materials'] = rib_materials
-        self.dbf.options['rib_thicknesses'] = (rib_thicks, 'inch')
-        self.dbf.options['rib_lightening_factor'] = (2 / 3, 'unitless')
-        self.dbf.options['num_spars'] = (1.1, 'unitless')
-        self.dbf.options['spar_outer_diameter'] = (1, 'inch')
-        self.dbf.options['spar_wall_thickness'] = (0.0625, 'inch')
-        self.dbf.options['spar_density'] = (2, 'g/cm**3')
-        self.dbf.options['skin_density'] = (20, 'g/m**2')
-        self.dbf.options['glue_factor'] = (0.15, 'unitless')
-        self.dbf.options['stringer_thickness'] = (0.375, 'inch')
-        self.dbf.options['stringer_density'] = (160, 'kg/m**3')
-        self.dbf.options['num_stringers'] = (2.5, 'unitless')
-        self.dbf.options['sheeting_thickness'] = (0.03125, 'inch')
-        self.dbf.options['sheeting_density'] = (160, 'kg/m**3')
-        self.dbf.options['sheeting_coverage'] = (0.4, 'unitless')
-        self.dbf.options['sheeting_lightening_factor'] = (1.0, 'unitless')
-        self.dbf.options['airfoil_data_file'] = (
-            'aviary/examples/external_subsystems/dbf_based_mass/mh84-il.csv'
-        )
-        self.dbf.options['misc_mass'] = (0.0, 'kg')
+        self.dbf.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, val=rib_thicks, units='inch')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, val=2/3, units='unitless')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.NUM_SPARS, val=1.1, units='unitless')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER, val=1, units='inch')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS, val=0.0625, units='inch')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SPAR_DENSITY, val=2, units='g/cm**3')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SKIN_DENSITY, val=20, units='g/m**2')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.GLUE_FACTOR, val=0.15, units='unitless')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS, val=0.375, units='inch')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY, val=160, units='kg/m**3')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.NUM_STRINGERS, val=2.5, units='unitless')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS, val=0.03125, units='inch')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE, val=0.4, units='unitless')
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR, val=1.0, units='unitless')
+        airfoil = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv')
+        )        
+        self.dbf.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = airfoil
+        self.dbf.set_option(Aircraft.HorizontalTail.Dbf.MISC_MASS, val=0.0, units='kg')
 
         self.prob.setup(force_alloc_complex=True)
 
@@ -58,7 +58,7 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.HorizontalTail.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 0.799  # <<< Update to match new output once verified
+        expected_mass = 0.799  # <<< Update to match any new output once they are verified
         tol = 1e-2
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)
