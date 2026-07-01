@@ -64,16 +64,16 @@ class RCBuilder(EngineModel):
                 'upper': 3.6, #TODO: this placeholder can be varied
                 # 'val': 2.2,  
             },
-            # MAX_CONT_CURRENT is intentionally NOT a design variable (KV depends on the
-            # current/mass ratio, so freeing both makes KV impossible to bound cleanly).
-            # With KV = 2105.54*max_current/motor_mass - 80.83, a realistic KV of 250-600
-            # corresponds to a motor mass of ~0.31-0.64 kg -- comfortably under 1 kg, as
-            # expected for these 7 kg planes.
+           
+            
+
+
+
         
             Aircraft.Engine.Motor.MASS: {
                
                 'units': 'lbm',
-                'lower': 0.5512,   # 0.25 kg
+                'lower': 1.0362,   # 0.47 kg -> KV low enough to keep rpm_max in the prop grid
                 'upper': 1.4330,   # 0.65 kg
             },
             # Aircraft.Engine.Propeller.PITCH: {
@@ -108,6 +108,21 @@ class RCBuilder(EngineModel):
         """
 
         #TODO add new variables, including dvs and optional inputs
+        # Pull the real prop geometry from the loaded inputs; a hardcoded 0.0 here was
+        # zeroing the pitch into the ct/cp surrogate (pitch=0 is below the trained 3-15in
+        # range -> extrapolates to negative ct). aviary_inputs is None on the existence
+        # check call, so guard it.
+        def _maybe(name, units, default=0.0):
+            if aviary_inputs is None:
+                return default
+            try:
+                return aviary_inputs.get_val(name, units)
+            except KeyError:
+                return default
+
+        prop_diam = _maybe(Aircraft.Engine.Propeller.DIAMETER, 'm')
+        prop_pitch = _maybe(Aircraft.Engine.Propeller.PITCH, 'inch')
+
         parameters = {
             Aircraft.Battery.VOLTAGE: {
                 'val': 22.2, 
@@ -134,11 +149,11 @@ class RCBuilder(EngineModel):
                 'units': 'A',
             },
             Aircraft.Engine.Propeller.DIAMETER: {
-                'val': 0.0,
+                'val': prop_diam,
                 'units': 'm',
             },
             Aircraft.Engine.Propeller.PITCH: {
-                'val': 0.0,
+                'val': prop_pitch,
                 'units': 'inch',
             },
         }
@@ -148,13 +163,12 @@ class RCBuilder(EngineModel):
     def get_controls(self, aviary_inputs = None, user_options = None, subsystem_options = None, phase_name=None):
 
         if self.power_balance_mode == 'feedforward':
-           return{}
-        return{
-            Dynamic.Vehicle.Propulsion.CURRENT: {
+           return{Dynamic.Vehicle.Propulsion.CURRENT: {
                 'targets': Dynamic.Vehicle.Propulsion.CURRENT,
                 'units': 'A',
                 'opt': True,
                 'lower': 10.0,
+                'upper': 100.0,
                 'ref': 1.0e2,
             },
             Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
@@ -162,6 +176,24 @@ class RCBuilder(EngineModel):
                 'units': 'A',
                 'opt': True,
                 'lower': 10.0,
+                'upper': 100.0,
+                'ref': 1.0e2,
+            },}
+        return{
+            Dynamic.Vehicle.Propulsion.CURRENT: {
+                'targets': Dynamic.Vehicle.Propulsion.CURRENT,
+                'units': 'A',
+                'opt': True,
+                'lower': 10.0,
+                'upper': 100.0,
+                'ref': 1.0e2,
+            },
+            Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
+                'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
+                'units': 'A',
+                'opt': True,
+                'lower': 10.0,
+                'upper': 100.0,
                 'ref': 1.0e2,
             },
         

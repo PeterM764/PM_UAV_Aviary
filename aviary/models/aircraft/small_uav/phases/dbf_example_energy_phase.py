@@ -1,5 +1,5 @@
 phase_info = {
-    'pre_mission': {'include_takeoff': False,  'optimize_mass': True},
+    'pre_mission': {'include_takeoff': False,  'optimize_mass': False},
     'climb': {
         'subsystem_options': {'core_aerodynamics': {'method': 'computed'}},
         'user_options': {
@@ -10,14 +10,14 @@ phase_info = {
             'mach_initial': (0.05, 'unitless'),
             'mach_final': (0.1, 'unitless'),
             'mass_ref': (1, 'kg'),
-            #'distance_initial': (0, 'ft'),
+            # 'distance_initial': (0, 'ft'), # Do not hard-fix climb initial distance.
             'distance_ref': (1.0e2, 'ft'),
             'altitude_optimize': True,
             'altitude_polynomial_order': 3,
             'altitude_initial': (0.0, 'ft'),
             'altitude_final': (200.0, 'ft'),
             'throttle_enforcement': 'control',
-            'throttle_polynomial_order': 1, 
+            'throttle_polynomial_order': 1,
             'electric_current_polynomial_order': 3,
             'electric_current_max_polynomial_order': 3,
             'time_initial': (0.0, 'min'),
@@ -32,7 +32,7 @@ phase_info = {
         },
         'initial_guesses': {
             'time': ([0, 6], 's'),
-            'mach': ([0.00, 0.1], 'unitless')
+            'mach': ([0.05, 0.1], 'unitless')
         },
     },
     'cruise': {
@@ -40,15 +40,15 @@ phase_info = {
         'user_options': {
             'num_segments': 1,
             'order': 3,
-            'mach_optimize': False,
+            'mach_optimize': True,
             'mach_polynomial_order': 1,
-            'mach_initial': (0.0538, 'unitless'),
+            'mach_initial': (0.1, 'unitless'),
             # 'mach_ref': (0.05, 'unitless'),
             'mass_ref': (1, 'kg'),
             'distance_initial': (0, 'ft'),
             'distance_ref': (1.0e2, 'ft'),
             # 'alt_ref': (100, 'ft'),
-            'mach_final': (0.0538, 'unitless'),
+            # 'mach_final': (0.05, 'unitless'),
             'altitude_optimize': False,
             'altitude_polynomial_order': 1,
             'altitude_initial': (200, 'ft'),
@@ -89,6 +89,6 @@ phase_info = {
     'post_mission': {
         'include_landing': False,
         # 'target_range': (200, 'ft'),
-        # 'constraint_range':True, 
+        # 'constraint_range':True,
     },
 }

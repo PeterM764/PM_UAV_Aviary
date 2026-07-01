@@ -5,7 +5,7 @@ import os
 def PropDataReader():
     """A function to read in propulsion data to ndarrays and apply reasonable
         restrictions to training data
-        Note that prop_xt.dat file units are given in [m deg rev/s m/s]
+        Note that prop_xt.dat file units are given in [m inch rev/s m/s]
 
     Returns:
         ndarrays: x data, thrust and power coefficients
