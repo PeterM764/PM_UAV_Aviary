@@ -2,7 +2,7 @@ from copy import deepcopy
 import numpy as np
 import openmdao.api as om
 import aviary.api as av
-from aviary.examples.small_uav.phases.dbf_example_energy_phase import phase_info
+from aviary.models.aircraft.small_uav.dbf_example_energy_phase import phase_info
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
 from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
@@ -132,9 +132,9 @@ prob.load_inputs(
 prob.load_external_subsystems(external_subsystems=[rc_prop])
 
 print("Loaded gross mass kg:",
-      prob.aviary_inputs.get_val('mission:design:gross_mass', units='kg'))
+      prob.aviary_inputs.get_val('aircraft:design:gross_mass', units='kg'))
 print("Loaded gross mass lbm:",
-      prob.aviary_inputs.get_val('mission:design:gross_mass', units='lbm'))
+      prob.aviary_inputs.get_val('aircraft:design:gross_mass', units='lbm'))
 
 prob.check_and_preprocess_inputs()
 
@@ -300,8 +300,8 @@ prob.run_aviary_problem(suppress_solver_print=False)
 print("\n===== MASS CHECK =====")
 
 print("Design Gross Mass")
-print("kg :", prob.get_val('mission:design:gross_mass', units='kg'))
-print("lbm:", prob.get_val('mission:design:gross_mass', units='lbm'))
+print("kg :", prob.get_val('aircraft:design:gross_mass', units='kg'))
+print("lbm:", prob.get_val('aircraft:design:gross_mass', units='lbm'))
 
 print("\nTrajectory Mass")
 print("kg :", prob.get_val('traj.cruise.states:mass', units='kg'))
