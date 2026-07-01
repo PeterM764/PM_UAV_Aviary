@@ -7,7 +7,7 @@ from openmdao.utils.cs_safe import abs as cs_abs
 from aviary.examples.external_subsystems.dbf_based_mass.materials_database import materials
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
-from aviary.variable_info.variables import Aircraft
+from aviary.variable_info.dbf_variables import Aircraft
 from aviary.variable_info.variable_meta_data import _MetaData
 
 

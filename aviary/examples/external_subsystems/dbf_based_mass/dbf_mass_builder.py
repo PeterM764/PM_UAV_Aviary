@@ -20,7 +20,7 @@ class DBFMassBuilder(SubsystemBuilderBase):
 
         super().__init__(name=name)
 
-    def build_pre_mission(self, aviary_inputs):
+    def build_pre_mission(self, aviary_inputs, subsystem_options=None, **kwargs):
         group = om.Group()
 
         # Add mass subsystems first, promote outputs to group
