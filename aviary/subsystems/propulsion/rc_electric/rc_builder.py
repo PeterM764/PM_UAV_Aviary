@@ -107,11 +107,10 @@ class RCBuilder(EngineModel):
         A dict of names for the propeller subsystem.
         """
 
-        #TODO add new variables, including dvs and optional inputs
-        # Pull the real prop geometry from the loaded inputs; a hardcoded 0.0 here was
-        # zeroing the pitch into the ct/cp surrogate (pitch=0 is below the trained 3-15in
-        # range -> extrapolates to negative ct). aviary_inputs is None on the existence
-        # check call, so guard it.
+        # Use loaded prop geometry when available.
+        #Is needed because the prop geometry is used to compute the propeller 
+        # performance in the mission phase.
+        #  If the prop geometry is not available, then the default values are used.
         def _maybe(name, units, default=0.0):
             if aviary_inputs is None:
                 return default
