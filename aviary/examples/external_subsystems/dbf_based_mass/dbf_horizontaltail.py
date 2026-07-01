@@ -7,11 +7,6 @@ from openmdao.utils.units import convert_units
 from aviary.examples.external_subsystems.dbf_based_mass.option_info.materials_database import materials
 from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
-<<<<<<< HEAD
-from aviary.variable_info.dbf_variables import Aircraft
-from aviary.variable_info.variable_meta_data import _MetaData
-=======
->>>>>>> 875f2d1e08b38509849d3a4db0b818ecd5f4bc09
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variable_metadata import (
