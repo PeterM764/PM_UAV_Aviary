@@ -12,33 +12,18 @@ compared.
 import numpy as np
 
 import aviary.api as av
-from aviary.examples.external_subsystems.OAS_mass.OAS_wing_mass_builder import OASWingMassBuilder
-
-# This problem can take a while to run - use the most performant optimizer installed
-optimizer = 'SLSQP'
-try:
-    from pyoptsparse import OPT
-except ImportError:
-    pass
-else:
-    try:
-        OPT('IPOPT')
-    except Exception:
-        pass
-    else:
-        optimizer = 'IPOPT'
-    try:
-        OPT('SNOPT')
-    except Exception:
-        pass
-    else:
-        optimizer = 'SNOPT'
-
+from aviary.examples.external_subsystems.OAS_weight.OAS_wing_weight_builder import (
+    OASWingWeightBuilder,
+)
 
 #################
 # Problem Setup #
 #################
-wing_mass_builder = OASWingMassBuilder()
+
+# flag to turn on/off OpenAeroStruct subsystem for comparison testing
+use_OAS = True
+
+wing_weight_builder = OASWingWeightBuilder()
 
 # Load the phase_info and other common setup tasks
 phase_info = {
@@ -114,10 +99,12 @@ phase_info = {
 }
 
 phase_info['pre_mission'] = {'include_takeoff': False, 'optimize_mass': True}
-phase_info['pre_mission']['external_subsystems'] = [wing_mass_builder]
+if use_OAS:
+    phase_info['pre_mission']['external_subsystems'] = [wing_weight_builder]
 
 aircraft_definition_file = 'models/aircraft/test_aircraft/aircraft_for_bench_FwFm.csv'
 make_plots = False
+optimizer = 'SLSQP'
 
 # create and begin setting up Aviary problem
 prob = av.AviaryProblem()
@@ -134,11 +121,12 @@ prob.add_objective()
 prob.setup()
 
 # define OAS inputs
-OAS_sys = 'pre_mission.wing_mass.aerostructures.'
+OAS_sys = 'pre_mission.wing_weight.aerostructures.'
 # block auto-formatting of tables
 # fmt: off
 prob.set_val(
     OAS_sys + 'box_upper_x',
+
     np.array(
         [
             0.1, 0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18, 0.19, 0.2, 0.21, 0.22,
@@ -149,7 +137,6 @@ prob.set_val(
     ),
     units='unitless',
 )
-
 prob.set_val(
     OAS_sys + 'box_lower_x',
     np.array(
@@ -162,7 +149,6 @@ prob.set_val(
     ),
     units='unitless',
 )
-
 prob.set_val(
     OAS_sys + 'box_upper_y',
     np.array(
@@ -177,7 +163,6 @@ prob.set_val(
     ),
     units='unitless',
 )
-
 prob.set_val(
     OAS_sys + 'box_lower_y',
     np.array(
@@ -192,7 +177,6 @@ prob.set_val(
     ),
     units='unitless',
 )
-
 # fmt: on
 prob.set_val(OAS_sys + 'twist_cp', np.array([-6.0, -6.0, -4.0, 0.0]), units='deg')
 prob.set_val(OAS_sys + 'spar_thickness_cp', np.array([0.004, 0.005, 0.008, 0.01]), units='m')
@@ -213,4 +197,4 @@ prob.set_val(OAS_sys + 'engine_location', np.array([25, -10.0, 0.0]), units='m')
 prob.set_initial_guesses()
 prob.run_aviary_problem(make_plots=False)
 
-print('wing mass =', prob.model.get_val(av.Aircraft.Wing.MASS, units='lbm'))
+print('wing mass = ', prob.model.get_val(av.Aircraft.Wing.MASS, units='lbm'))
