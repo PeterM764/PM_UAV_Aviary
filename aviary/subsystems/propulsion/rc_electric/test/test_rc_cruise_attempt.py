@@ -1,4 +1,7 @@
 import unittest
+import subprocess
+import sys
+from pathlib import Path
 import aviary.api as av
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 import numpy as np
@@ -297,6 +300,31 @@ class TestRCCruiseAttempt(unittest.TestCase):
         self.assertLess(
             abs(prob.get_val('cruise_distance_constraint.distance_resid')[0]), 1e-2,
             "Cruise distance constraint is not satisfied after optimization.")
+
+    def test_cruise_attempt_script_smoke(self):
+        repo_root = Path(__file__).resolve().parents[5]
+        script = repo_root / 'aviary' / 'models' / 'aircraft' / 'small_uav' / 'Cruise_Attempt.py'
+
+        result = subprocess.run(
+            [sys.executable, str(script)],
+            cwd=str(repo_root),
+            capture_output=True,
+            text=True,
+            timeout=900,
+        )
+
+        self.assertEqual(
+            result.returncode,
+            0,
+            msg=(
+                'Cruise_Attempt.py exited non-zero.\n'
+                f'STDOUT (tail):\n{result.stdout[-4000:]}\n\n'
+                f'STDERR (tail):\n{result.stderr[-4000:]}'
+            ),
+        )
+
+
+
 
 
 if __name__ == '__main__':
