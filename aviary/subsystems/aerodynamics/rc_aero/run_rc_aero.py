@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import aviary.api as av
-from aviary.subsystems.aerodynamics.rc_aero_builder import RCAeroBuilder
-from aviary.subsystems.aerodynamics.rc_aero import TotalAircraftAero
+from aviary.subsystems.aerodynamics.rc_aero.rc_aero_builder import RCAeroBuilder
+from aviary.subsystems.aerodynamics.rc_aero.rc_aero import TotalAircraftAero
 from aviary.utils.functions import set_aviary_initial_values
 from aviary.utils.aviary_values import AviaryValues
 
@@ -57,7 +57,7 @@ optimizer = 'IPOPT'
 
 prob = av.AviaryProblem(verbosity=1)
 
-prob.load_inputs('models/test_aircraft/aircraft_for_bench_FwFm.csv', phase_info=phase_info)
+prob.load_inputs('aviary/validation_cases/validation_data/test_models/aircraft_for_bench_FwFm.csv', phase_info=phase_info)
 
 prob.aviary_inputs.set_val(Dynamic.Mission.ALTITUDE, 520, units='m') 
 prob.aviary_inputs.set_val(Dynamic.Mission.VELOCITY, 36, units='m/s')

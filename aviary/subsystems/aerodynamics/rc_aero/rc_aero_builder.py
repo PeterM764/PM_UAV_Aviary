@@ -1,12 +1,12 @@
 import openmdao.api as om
 
-from aviary.subsystems.subsystem_builder_base import SubsystemBuilderBase
-from aviary.subsystems.aerodynamics.rc_aero import TotalAircraftAero
+from aviary.subsystems.subsystem_builder import SubsystemBuilder
+from aviary.subsystems.aerodynamics.rc_aero.rc_aero import TotalAircraftAero
 from aviary.variable_info.variables import Aircraft, Dynamic
 from aviary.utils.aviary_values import AviaryValues
 
 
-class RCAeroBuilder(SubsystemBuilderBase):
+class RCAeroBuilder(SubsystemBuilder):
     def __init__(self, name='rc_aero_analysis'):
         super().__init__(name)
 
