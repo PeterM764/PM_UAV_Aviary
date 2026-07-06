@@ -7,6 +7,11 @@ from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.variable_info.variables import Mission
 
 class RCBuilder(EngineModel):
+    # RCPropMission computes its own max-power chain (battery_max ... prop_max),
+    # so tell Aviary NOT to build a duplicate full-throttle copy of the engine.
+    # The duplicate re-declared every constraint and broke the optimizer (TOO_FEW_DOF).
+    compute_max_values = True
+
     def __init__(self, options: AviaryValues = None, name='rc_electric', power_balance_mode='feedforward'):
         """Initializes the PropellerBuilder object with a given name."""
         # aviary_inputs = AviaryValues()
@@ -166,7 +171,10 @@ class RCBuilder(EngineModel):
                 'targets': Dynamic.Vehicle.Propulsion.CURRENT,
                 'units': 'A',
                 'opt': True,
-                'lower': 10.0,
+                # 1 A floor, not 10: at light cruise the balanced current is only a
+                # few amps; a 10 A floor forces ~250 W through the powertrain and
+                # makes the thrust=drag constraint infeasible (IPOPT local infeas).
+                'lower': 1.0,
                 'upper': 100.0,
                 'ref': 1.0e2,
             },
@@ -176,6 +184,24 @@ class RCBuilder(EngineModel):
                 'opt': True,
                 'lower': 10.0,
                 'upper': 100.0,
+                'ref': 1.0e2,
+            },
+            # SAND: the RPM the prop table sees. Bounds keep it inside the
+            # training data (16.7 - 183 rev/s), so ct/cp are never extrapolated.
+            'rpm_lookup': {
+                'targets': 'rpm_lookup',
+                'units': 'rev/s',
+                'opt': True,
+                'lower': 20.0,
+                'upper': 180.0,
+                'ref': 1.0e2,
+            },
+            'rpm_lookup_max': {
+                'targets': 'rpm_lookup_max',
+                'units': 'rev/s',
+                'opt': True,
+                'lower': 20.0,
+                'upper': 180.0,
                 'ref': 1.0e2,
             },}
         return{

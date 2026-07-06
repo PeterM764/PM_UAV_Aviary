@@ -127,7 +127,9 @@ class TestRCCruiseAttempt(unittest.TestCase):
             'distance_ref': (1000.0, 'm'),
             'target_distance': (1000.0, 'm'),
             'mass_ref': (4.0, 'kg'),
-            'throttle_enforcement': 'bounded',
+            # SAND: throttle is an optimizer control; thrust=drag becomes a
+            # constraint instead of an inner Newton solve.
+            'throttle_enforcement': 'control',
             'throttle_bounds': ((0.2, 0.9), 'unitless'),
             'time_initial': (0.0, 's'),
             'time_duration_bounds': ((20, 90.0), 's'),
@@ -186,6 +188,10 @@ class TestRCCruiseAttempt(unittest.TestCase):
         prob.driver.opt_settings['tol'] = 1e-5
         prob.driver.opt_settings['acceptable_tol'] = 1e-4
         prob.driver.opt_settings['acceptable_iter'] = 10
+        # The ODE refs the thrust=drag residual at 1e6 lbf; on a ~1 lbf vehicle the
+        # default constraint tolerance would let IPOPT leave thrust != drag. Tighten it.
+        prob.driver.opt_settings['constr_viol_tol'] = 1e-7
+        prob.driver.opt_settings['acceptable_constr_viol_tol'] = 1e-6
 
         prob.driver.options["debug_print"] = []
 
@@ -238,42 +244,14 @@ class TestRCCruiseAttempt(unittest.TestCase):
         prob.set_val('aircraft:engine:motor:idle_current', 2.0, units='A')
         prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 
-        # Powertrain warm-start (matches Cruise_Attempt.py). The throttle-balance solver
-        # defaults throttle to 1.0 -- right next to the prop's negative-thrust cliff, where
-        # the ct/cp surrogate goes NaN. Seeding the well-conditioned ~0.54-throttle operating
-        # point (RPM ~3750, current ~12 A) keeps the first solve (and the optimizer) in the
-        # good region. The 'solver_sub.' path only exists when throttle is solved, so try both.
-        _rpm_targets = [
-            'traj.phases.cruise.rhs_all.solver_sub.core_propulsion.rc_electric.rotations_per_minute',
-            'traj.phases.cruise.rhs_all.core_propulsion.rc_electric.rotations_per_minute',
-        ]
-        _current_targets = [
-            'traj.phases.cruise.rhs_all.solver_sub.core_propulsion.rc_electric.current_flow',
-            'traj.phases.cruise.rhs_all.core_propulsion.rc_electric.current_flow',
-        ]
-        _throttle_targets = [
-            'traj.phases.cruise.rhs_all.solver_sub.throttle',
-            'traj.phases.cruise.rhs_all.solver_sub.core_propulsion.rc_electric.throttle',
-            'traj.phases.cruise.rhs_all.throttle',
-        ]
-        for _t in _rpm_targets:
-            try:
-                prob.set_val(_t, val=3750.0, units='rpm')
-                break
-            except Exception:
-                continue
-        for _t in _current_targets:
-            try:
-                prob.set_val(_t, val=12.0, units='A')
-                break
-            except Exception:
-                continue
-        for _t in _throttle_targets:
-            try:
-                prob.set_val(_t, val=0.54, units='unitless')
-                break
-            except Exception:
-                continue
+        # Warm-start the SAND controls near a thrust-capable operating point. At 18.29 m/s
+        # the prop needs ~90 rev/s to make cruise thrust (below ~65 rev/s it is close to
+        # its zero-thrust advance ratio). All of these are optimizer controls now.
+        prob.set_val('traj.cruise.controls:throttle', 0.7, units='unitless')
+        prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
+        prob.set_val('traj.cruise.controls:current_flow_max', 60.0, units='A')
+        prob.set_val('traj.cruise.controls:rpm_lookup', 90.0, units='rev/s')
+        prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
 
         # Step 1 (continuation): single-pass model run to settle coupled states.
         prob.run_aviary_problem(run_driver=False, suppress_solver_print = True, make_plots=False)

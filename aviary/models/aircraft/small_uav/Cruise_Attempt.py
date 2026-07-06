@@ -1,4 +1,5 @@
 from copy import deepcopy
+from weakref import ref
 import numpy as np
 import openmdao.api as om
 import aviary.api as av
@@ -6,6 +7,7 @@ from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import pha
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
 from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
+from aviary.variable_info.dbf_variables import Aircraft
 
 
 class MeanPowerComp(om.ExplicitComponent):
@@ -52,10 +54,6 @@ phase_info['cruise']['user_options'].update({
 
     #Fixed Speed
     # Cruise at ~60 ft/s (18.29 m/s, mach ~0.0538). Operating point is throttle ~0.54,
-    # RPM ~3750, current ~12 A - mid-throttle with a steep, well-conditioned thrust
-    # slope and lots of powertrain headroom. 100 ft/s ran the powertrain near full
-    # throttle (~0.85) next to the negative-thrust cliff, so IPOPT's sizing-variable
-    # steps kept pushing it into NaN/singular; 60 ft/s leaves room for that.
     'mach_optimize': False,
     'mach_initial': (0.0538, 'unitless'),
     'mach_final': (0.0538, 'unitless'),
@@ -73,9 +71,10 @@ phase_info['cruise']['user_options'].update({
     #Scaling
     'mass_ref': (4.0, 'kg'),
 
-    #Aviary Solves throttle
-
-    'throttle_enforcement': 'bounded',
+    
+    # ODE, so a throttle-balance Newton would be exactly singular.)
+    'throttle_enforcement': 'control',
+    'throttle_bounds': ((0.2, 0.9), 'unitless'),
 
     #Time 
     'time_initial': (0.0, 's'),
@@ -106,6 +105,14 @@ prob.load_inputs(
     phase_info,
 )
 prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder()])
+prob.aviary_inputs.set_val(Aircraft.Engine.Propeller.PITCH, 12.0, units='inch')
+
+
+#taking out fuel
+prob.aviary_inputs.set_val('aircraft:fuel:ignore_fuel_capacity_constraint', True, units='unitless')
+prob.aviary_inputs.set_val('mission:taxi:fuel_mass_taxi_out', 0.0, units='lbm')
+prob.aviary_inputs.set_val('mission:taxi:fuel_mass_taxi_in', 0.0, units='lbm')
+prob.aviary_inputs.set_val('mission:takeoff:fuel_mass', 0.0, units='lbm')
 
 for _k in ('mission:design:gross_mass', 'aircraft:design:gross_mass', 'mission:gross_mass'):
     try:
@@ -123,18 +130,42 @@ prob.add_phases()
 prob.add_post_mission_systems()
 prob.link_phases()
 
-# use_coloring=False: the coloring sparsity-detection perturbs design vars hard
-# enough to push the prop across its negative-thrust cliff at this speed, which
-# makes the throttle-balance Jacobian singular.
-prob.add_driver('IPOPT', use_coloring=False)
+# Tighten the existing thrust-balance constraint scaling for this mission case
+for _thrust_con in (
+    'traj.cruise.rhs_all.thrust_residual',
+    'traj.phases.cruise.rhs_all.throttle_balance.thrust_residual',
+):
+    try:
+        prob.model.set_constraint_options(_thrust_con, ref=10.0)
+        break
+    except Exception:
+        continue
+
+for _resp in (
+    'mission:constraints:mass_residual',
+):
+    prob.model._static_responses.pop(_resp, None)
+
+
+
+prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
-prob.driver.opt_settings['tol'] = 1e-5
-prob.driver.opt_settings['acceptable_tol'] = 1e-4
-prob.driver.opt_settings['acceptable_iter'] = 10
+prob.driver.opt_settings['tol'] = 1e-6
+prob.driver.opt_settings['acceptable_tol'] = 1e-6
+prob.driver.opt_settings['acceptable_iter'] = 0
+prob.driver.opt_settings['constr_viol_tol'] = 1e-7
+prob.driver.opt_settings['acceptable_constr_viol_tol'] = 1e-6
 prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
 prob.add_design_variables()
+
+# Aviary adds gross-mass DVs with transport-scale defaults (lbm, upper=None).
+# Replace them with UAV-scale kg bounds so the optimizer cannot drift to
+# unrealistically large mass in this electric cruise case.
+del prob.model._static_design_vars['aircraft:design:gross_mass']
+prob.model.add_design_var('aircraft:design:gross_mass', units='kg', lower=2.0, upper=10.0, ref=7.0)
+
 
 # Objective: MAXIMIZE endurance = battery energy / cruise electric power.
 prob.model.add_subsystem(
@@ -163,6 +194,7 @@ prob.model.set_input_defaults('aircraft:battery:voltage', val=22.2, units='V')
 prob.model.set_input_defaults('aircraft:engine:motor:idle_current', val=2.2, units='A')
 prob.model.set_input_defaults('aircraft:engine:motor:max_cont_current', val=100.0, units='A')
 
+
 prob.setup()
 
 prob.set_solver_print(level=0)
@@ -181,49 +213,12 @@ prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 prob.set_val('aircraft:engine:motor:mass', 0.45, units='kg')   # mid of [0.25, 0.65] -> KV ~370
 prob.set_val('aircraft:engine:motor:idle_current', 2.0, units='A')
 
-# Fix 1: kick-start RPM and battery current so the propeller thrust Jacobian
-# (d_thrust/d_rpm = 2*rho*n*D^4*ct, d_thrust/d_ct = rho*n^2*D^4) is non-zero at
-# the linearization point. With RPM = 0 those partials vanish, the throttle ->
-# thrust_net_total derivative chain goes to zero, and solver_sub's Jacobian
-# becomes singular. The 'solver_sub.' prefix only exists when throttle is solved
-# (not when throttle_enforcement == 'control'), so try both paths.
-_rpm_targets = [
-    'traj.phases.cruise.rhs_all.solver_sub.core_propulsion.rc_electric.rotations_per_minute',
-    'traj.phases.cruise.rhs_all.core_propulsion.rc_electric.rotations_per_minute',
-]
-_current_targets = [
-    'traj.phases.cruise.rhs_all.solver_sub.core_propulsion.rc_electric.current_flow',
-    'traj.phases.cruise.rhs_all.core_propulsion.rc_electric.current_flow',
-]
-# The throttle-balance solver defaults throttle to 1.0, which drives the prop to a
-# very different operating point than the cruise solution; seeding a mid-range
-# throttle keeps the Newton's first linearization well-conditioned.
-_throttle_targets = [
-    'traj.phases.cruise.rhs_all.solver_sub.throttle',
-    'traj.phases.cruise.rhs_all.solver_sub.core_propulsion.rc_electric.throttle',
-    'traj.phases.cruise.rhs_all.throttle',
-]
-for _t in _rpm_targets:
-    try:
-        prob.set_val(_t, val=3750.0, units='rpm')
-        print(f"Initial RPM guess set at: {_t}")
-        break
-    except Exception:
-        continue
-for _t in _current_targets:
-    try:
-        prob.set_val(_t, val=12.0, units='A')
-        print(f"Initial current guess set at: {_t}")
-        break
-    except Exception:
-        continue
-for _t in _throttle_targets:
-    try:
-        prob.set_val(_t, val=0.54, units='unitless')
-        print(f"Initial throttle guess set at: {_t}")
-        break
-    except Exception:
-        continue
+#
+prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
+prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
+prob.set_val('traj.cruise.controls:current_flow_max', 65, units='A')
+prob.set_val('traj.cruise.controls:rpm_lookup', 95, units='rev/s')
+prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
 
 # Run in two steps for continuation robustness.
 prob.run_aviary_problem(run_driver=False, suppress_solver_print=True, make_plots=False)
@@ -243,6 +238,3 @@ print("\nSummary Gross Mass")
 print("kg :", prob.get_val('mission:gross_mass', units='kg'))
 print("lbm:", prob.get_val('mission:gross_mass', units='lbm'))
 
-# Save variable list -- needs cruise_only_vars.txt in order to work
-# with open("aviary/examples/small_uav/cruise_only_vars.txt", "w") as f:
-#     prob.model.list_vars(print_arrays=True, out_stream=f, units=True)

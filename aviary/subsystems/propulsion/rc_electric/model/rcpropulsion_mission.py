@@ -28,9 +28,22 @@ class RCPropMission(om.Group):
 
         user_feedforward = self.options['power_balance_mode'] == 'feedforward'
 
-        # Feedforward is a rough estimate, so derate no-load RPM to ~80% to mimic prop
-        # loading. Solver mode closes the real power balance, so leave it at 1.0.
-        motor_load_factor = 0.80 if user_feedforward else 1.0
+
+        # constraint ties the motor to the prop load; in solver mode the solver does.
+        motor_load_factor = 1.0
+
+        #in feedforward mode the prop table reads rpm_lookup (a bounded
+        # optimizer control) instead of the motor RPM, so the lookup can never
+        # leave the training data. The rpm_balance comps below force the motor
+        # RPM to match it at the optimum.
+        if user_feedforward:
+            rpm_in = [(Dynamic.Vehicle.Propulsion.RPM, 'rpm_lookup')]
+            rpm_in_max = [(Dynamic.Vehicle.Propulsion.RPM, 'rpm_lookup_max')]
+            self.set_input_defaults('rpm_lookup', val=np.ones(nn) * 60.0, units='rev/s')
+            self.set_input_defaults('rpm_lookup_max', val=np.ones(nn) * 120.0, units='rev/s')
+        else:
+            rpm_in = []  # solver mode: motor RPM is connected straight in below
+            rpm_in_max = [(Dynamic.Vehicle.Propulsion.RPM, Dynamic.Vehicle.Propulsion.RPM_MAX)]
 
 
         self.set_input_defaults('full_throttle', val=np.ones(nn), units='unitless')
@@ -86,32 +99,48 @@ class RCPropMission(om.Group):
                 Dynamic.Mission.VELOCITY,
                 'temp_diameter',
                 'temp_pitch',
-            ],
+            ] + rpm_in,
             promotes_outputs=['ct', 'cp']
         )
-       
+
 
         self.add_subsystem(
-            'prop', 
-            Propeller(num_nodes=nn), 
+            'prop',
+            Propeller(num_nodes=nn),
             promotes_inputs=[
-                Aircraft.Engine.Propeller.DIAMETER, 
-                'ct', 
-                'cp', 
-                # Aircraft.Engine.NUM_ENGINES, 
+                Aircraft.Engine.Propeller.DIAMETER,
+                'ct',
+                'cp',
+                # Aircraft.Engine.NUM_ENGINES,
                 Dynamic.Atmosphere.DENSITY
-                ],
+                ] + rpm_in,
             promotes_outputs=[
-                Dynamic.Vehicle.Propulsion.PROP_POWER, 
+                Dynamic.Vehicle.Propulsion.PROP_POWER,
                 Dynamic.Vehicle.Propulsion.THRUST,
                 # Dynamic.Vehicle.Propulsion.THRUST_MAX,
                 ]
         )
 
-        self.connect(
-        Dynamic.Vehicle.Propulsion.RPM,
-        ['propco.' + Dynamic.Vehicle.Propulsion.RPM, 'prop.' + Dynamic.Vehicle.Propulsion.RPM]
-        )
+        if user_feedforward:
+            # rpm_defect = optimizer rpm - motor rpm, constrained to 0 below
+            self.add_subsystem(
+                'rpm_balance',
+                om.ExecComp(
+                    'rpm_defect = rpm_lookup - rpm_motor',
+                    rpm_defect={'val': np.zeros(nn), 'units': 'rev/s'},
+                    rpm_lookup={'val': np.zeros(nn), 'units': 'rev/s'},
+                    rpm_motor={'val': np.zeros(nn), 'units': 'rev/s'},
+                    has_diag_partials=True,
+                ),
+                promotes_inputs=['rpm_lookup'],
+            )
+            self.connect(Dynamic.Vehicle.Propulsion.RPM, 'rpm_balance.rpm_motor')
+        else:
+            # solver mode: motor RPM drives the prop table directly
+            self.connect(
+                Dynamic.Vehicle.Propulsion.RPM,
+                ['propco.' + Dynamic.Vehicle.Propulsion.RPM, 'prop.' + Dynamic.Vehicle.Propulsion.RPM]
+            )
 
         if user_feedforward:
             self.add_subsystem(
@@ -198,28 +227,41 @@ class RCPropMission(om.Group):
             PropCoefficients(method='lagrange2', extrapolate=True, training_data_gradients=True, vec_size=nn),
             promotes_inputs=[
                 Dynamic.Mission.VELOCITY,
-                (Dynamic.Vehicle.Propulsion.RPM, Dynamic.Vehicle.Propulsion.RPM_MAX),
                 'temp_diameter',
                 'temp_pitch',
-            ],
+            ] + rpm_in_max,
             promotes_outputs=[('ct', 'ct_max'), ('cp', 'cp_max')]
         )
-        
+
         self.add_subsystem(
             'prop_max',
             Propeller(num_nodes=nn),
             promotes_inputs=[
                 Aircraft.Engine.Propeller.DIAMETER,
-                (Dynamic.Vehicle.Propulsion.RPM, Dynamic.Vehicle.Propulsion.RPM_MAX),
                 ('ct', 'ct_max'),
                 ('cp', 'cp_max'),
                 Dynamic.Atmosphere.DENSITY
-                ],
+                ] + rpm_in_max,
             promotes_outputs=[
                 (Dynamic.Vehicle.Propulsion.PROP_POWER, Dynamic.Vehicle.Propulsion.PROP_POWER_MAX),
                 (Dynamic.Vehicle.Propulsion.THRUST, Dynamic.Vehicle.Propulsion.THRUST_MAX)
                 ]
         )
+
+        if user_feedforward:
+            # same idea as rpm_balance, but for the max-power chain
+            self.add_subsystem(
+                'rpm_balance_max',
+                om.ExecComp(
+                    'rpm_defect = rpm_lookup_max - rpm_motor',
+                    rpm_defect={'val': np.zeros(nn), 'units': 'rev/s'},
+                    rpm_lookup_max={'val': np.zeros(nn), 'units': 'rev/s'},
+                    rpm_motor={'val': np.zeros(nn), 'units': 'rev/s'},
+                    has_diag_partials=True,
+                ),
+                promotes_inputs=['rpm_lookup_max'],
+            )
+            self.connect(Dynamic.Vehicle.Propulsion.RPM_MAX, 'rpm_balance_max.rpm_motor')
 
         if user_feedforward:
             self.add_subsystem(
@@ -267,16 +309,25 @@ class RCPropMission(om.Group):
 
 
         if user_feedforward:
+            # Keep electrical power mismatch near zero 
+            self.add_constraint('power_net', lower=-0.2, upper=0.2, ref=1e2, units='W')
 
-            """ Having these constraints in caused the optimizer to fail to converge. The constraints are not needed because the power_net residuals are already being constrained to zero. """
-            # self.add_constraint('power_net', equals=0, ref=1e2)
-            # self.add_constraint('power_net_max', equals=0, ref=1e2)
-            
+            # Force commanded cruise RPM to match motor-computed RPM.
+            self.add_constraint('rpm_balance.rpm_defect', lower=-0.25, upper=0.25, ref=1e2, units='rev/s')
+
+            # Do the same RPM match for the max-power/full-throttle chain.
+            self.add_constraint('rpm_balance_max.rpm_defect', lower=-1.0, upper=1.0, ref=1e2, units='rev/s')
+
+            # Enforce motor continuous-current limit.
             self.add_constraint('current_constraint_max', upper=0, ref=1e2)
+
+            # Keep max RPM in a physically valid and table-safe range.
             self.add_constraint(Dynamic.Vehicle.Propulsion.RPM_MAX, lower=1, upper=125, ref=1e3, units='rps')
 
-            #Constraints to prevent ill-fated surrogate model predictions
+            # Keep prop thrust coefficient inside surrogate table validity range.
             self.add_constraint('ct_max', lower=0, upper=0.12, ref=1.0, units='unitless')
+
+            # Keep prop power coefficient inside surrogate table validity range.
             self.add_constraint('cp_max', lower=0.0034, upper=0.08, ref=1.0, units='unitless')
         else:
         # NonlinearBlockGS (fixed-point) is used rather than Newton+DirectSolver
