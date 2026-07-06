@@ -148,7 +148,7 @@ for _resp in (
 
 
 
-prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
+prob.add_driver('IPOPT', use_coloring=False, max_iter=50)
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
 prob.driver.opt_settings['tol'] = 1e-6
@@ -163,7 +163,8 @@ prob.add_design_variables()
 # Aviary adds gross-mass DVs with transport-scale defaults (lbm, upper=None).
 # Replace them with UAV-scale kg bounds so the optimizer cannot drift to
 # unrealistically large mass in this electric cruise case.
-del prob.model._static_design_vars['aircraft:design:gross_mass']
+prob.model._static_design_vars.pop('aircraft:design:gross_mass', None)
+prob.model._static_design_vars.pop('mission:gross_mass', None)
 prob.model.add_design_var('aircraft:design:gross_mass', units='kg', lower=2.0, upper=10.0, ref=7.0)
 
 
@@ -204,7 +205,6 @@ prob.set_solver_print(level=0)
 prob.set_initial_guesses()
 
 prob.set_val('aircraft:design:gross_mass', 7.0, units='kg')
-prob.set_val('mission:gross_mass', 7.0, units='kg')
 prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 
 # Start the motor-sizing design variables strictly INSIDE their bounds. The CSV
