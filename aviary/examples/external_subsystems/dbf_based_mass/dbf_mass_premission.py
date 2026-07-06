@@ -13,33 +13,61 @@ class MassPremission(om.Group):
         self.options.declare("subsystem_options", types=dict, default={})
     
     def setup(self):
+
+        # Pull the options dictionary the builder passed in
+        opts = self.options["subsystem_options"]
+
+        wing = DBFWingMass()
+        for key, val in opts.items():
+            if key.startswith("aircraft:wing:dbf"):
+                wing.options[key] = val
+
         self.add_subsystem(
-            'wing_mass', 
-            DBFWingMass(), 
-            promotes_inputs=['*'], 
+            'wing_mass',
+            wing,
+            promotes_inputs=['*'],
             promotes_outputs=[Aircraft.Wing.MASS],
         )
+
+        htail = DBFHorizontalTailMass()
+        for key, val in opts.items():
+            if key.startswith("aircraft:horizontal_tail:dbf"):
+                htail.options[key] = val
+
         self.add_subsystem(
             'horizontal_tail_mass',
-            DBFHorizontalTailMass(),
+            htail,
             promotes_inputs=['*'],
             promotes_outputs=[Aircraft.HorizontalTail.MASS],
         )
+
+        vtail = DBFVerticalTailMass()
+        for key, val in opts.items():
+            if key.startswith("aircraft:vertical_tail:dbf"):
+                vtail.options[key] = val
+
         self.add_subsystem(
             'vertical_tail_mass',
-            DBFVerticalTailMass(),
+            vtail,
             promotes_inputs=['*'],
             promotes_outputs=[Aircraft.VerticalTail.MASS],
         )
+
+        fus = DBFFuselageMass()
+        for key, val in opts.items():
+            if key.startswith("aircraft:fuselage:dbf"):
+                fus.options[key] = val
+
         self.add_subsystem(
             'fuselage_mass',
-            DBFFuselageMass(),
+            fus,
             promotes_inputs=['*'],
             promotes_outputs=[Aircraft.Fuselage.MASS],
         )
+
         self.add_subsystem(
-            'mass_group', 
-            MassSummation(), 
-            promotes_inputs=['*'], 
+            'mass_group',
+            MassSummation(),
+            promotes_inputs=['*'],
             promotes_outputs=['*']
         )
