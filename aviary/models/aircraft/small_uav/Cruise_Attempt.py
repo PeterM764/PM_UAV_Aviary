@@ -148,7 +148,7 @@ for _resp in (
 
 
 
-prob.add_driver('IPOPT', use_coloring=False, max_iter=50)
+prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
 prob.driver.opt_settings['tol'] = 1e-6
