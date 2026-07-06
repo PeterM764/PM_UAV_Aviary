@@ -77,10 +77,10 @@ class TestRCBuilder(unittest.TestCase):
 
         prob.run_model()
 
-        battery_power = prob.get_val('rc_electric.base.battery.power', units='W')
-        esc_power = prob.get_val('rc_electric.base.esc.power', units='W')
-        motor_power = prob.get_val('rc_electric.base.motor.power', units='W')
-        prop_power = prob.get_val('rc_electric.base.prop_power', units='W')
+        battery_power = prob.get_val('rc_electric.battery.power', units='W')
+        esc_power = prob.get_val('rc_electric.esc.power', units='W')
+        motor_power = prob.get_val('rc_electric.motor.power', units='W')
+        prop_power = prob.get_val('rc_electric.prop_power', units='W')
         power_residual = battery_power + esc_power + motor_power - prop_power
 
         # The regression this guards is the propeller-surrogate NaN cliff (see
