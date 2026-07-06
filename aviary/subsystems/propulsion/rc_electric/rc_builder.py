@@ -204,25 +204,9 @@ class RCBuilder(EngineModel):
                 'upper': 180.0,
                 'ref': 1.0e2,
             },}
-        return{
-            Dynamic.Vehicle.Propulsion.CURRENT: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
-            Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
-        
-        }
+        # Solver mode computes current/current_max internally in RCPropMission.
+        # Declaring them as Dymos controls creates duplicate connections.
+        return {}
         
        
     def get_mass_names(self, aviary_inputs=None, user_options=None, subsystem_options=None, phase_info=None):

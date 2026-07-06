@@ -23,7 +23,7 @@ class MeanPowerComp(om.ExplicitComponent):
 
 # Builders
 # defaults to feedforward power balance; change to power_balance_mode='solver' for solver-based power balance
-rc_prop = RCBuilder()
+rc_prop = RCBuilder(power_balance_mode='solver')
 
 phase_info = deepcopy(phase_info)
 
@@ -72,8 +72,8 @@ phase_info['cruise']['user_options'].update({
     'mass_ref': (4.0, 'kg'),
 
     
-    # ODE, so a throttle-balance Newton would be exactly singular.)
-    'throttle_enforcement': 'control',
+    # Keep throttle setup consistent with selected power-balance mode.
+    'throttle_enforcement': 'bounded' if rc_prop.power_balance_mode == 'solver' else 'control',
     'throttle_bounds': ((0.2, 0.9), 'unitless'),
 
     #Time 
@@ -130,17 +130,6 @@ prob.add_phases()
 prob.add_post_mission_systems()
 prob.link_phases()
 
-# Tighten the existing thrust-balance constraint scaling for this mission case
-for _thrust_con in (
-    'traj.cruise.rhs_all.thrust_residual',
-    'traj.phases.cruise.rhs_all.throttle_balance.thrust_residual',
-):
-    try:
-        prob.model.set_constraint_options(_thrust_con, ref=10.0)
-        break
-    except Exception:
-        continue
-
 for _resp in (
     'mission:constraints:mass_residual',
 ):
@@ -148,17 +137,18 @@ for _resp in (
 
 
 
-prob.add_driver('IPOPT', use_coloring=False, max_iter=50)
+prob.add_driver('IPOPT', use_coloring=False, max_iter=30)
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
 prob.driver.opt_settings['tol'] = 1e-6
-prob.driver.opt_settings['acceptable_tol'] = 1e-6
-prob.driver.opt_settings['acceptable_iter'] = 0
-prob.driver.opt_settings['constr_viol_tol'] = 1e-7
-prob.driver.opt_settings['acceptable_constr_viol_tol'] = 1e-6
+prob.driver.opt_settings['acceptable_tol'] = 5e-6
+prob.driver.opt_settings['acceptable_iter'] = 3
+prob.driver.opt_settings['constr_viol_tol'] = 1e-6
+prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-6
 prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
 prob.add_design_variables()
+
 
 # Aviary adds gross-mass DVs with transport-scale defaults (lbm, upper=None).
 # Replace them with UAV-scale kg bounds so the optimizer cannot drift to
@@ -213,12 +203,13 @@ prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 prob.set_val('aircraft:engine:motor:mass', 0.45, units='kg')   # mid of [0.25, 0.65] -> KV ~370
 prob.set_val('aircraft:engine:motor:idle_current', 2.0, units='A')
 
-#
-prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
-prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
-prob.set_val('traj.cruise.controls:current_flow_max', 65, units='A')
-prob.set_val('traj.cruise.controls:rpm_lookup', 95, units='rev/s')
-prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
+# Feedforward mode has explicit current/rpm controls; solver mode does not.
+if rc_prop.power_balance_mode == 'feedforward':
+    prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
+    prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
+    prob.set_val('traj.cruise.controls:current_flow_max', 50.0, units='A')
+    prob.set_val('traj.cruise.controls:rpm_lookup', 43.5, units='rev/s')
+    prob.set_val('traj.cruise.controls:rpm_lookup_max', 93.0, units='rev/s')
 
 # Run in two steps for continuation robustness.
 prob.run_aviary_problem(run_driver=False, suppress_solver_print=True, make_plots=False)
