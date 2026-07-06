@@ -35,6 +35,7 @@ phase_info['cruise']['subsystem_options']['aerodynamics'] = {
     'method': 'external',
 }
 
+
 phase_info['cruise']['user_options'].update({
     'num_segments': 5,
     'order': 3,
@@ -84,7 +85,7 @@ prob.load_inputs(
     'validation_cases/validation_data/test_models/small_scale_uav.csv',
     phase_info,
 )
-prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder()])
+prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder(), DBFMassBuilder()])
 prob.aviary_inputs.set_val(Aircraft.Engine.Propeller.PITCH, 12.0, units='inch')
 
 #taking out fuel
@@ -105,6 +106,7 @@ for _k in ('mission:design:gross_mass', 'aircraft:design:gross_mass', 'mission:g
 prob.check_and_preprocess_inputs()
 
 prob.add_pre_mission_systems()
+
 prob.add_phases()
 prob.add_post_mission_systems()
 prob.link_phases()
