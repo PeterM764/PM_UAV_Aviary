@@ -20,16 +20,17 @@ class RCAeroBuilder(SubsystemBuilder):
         )
 
     def mission_inputs(self, **kwargs):
-        return [
+        mission_inputs = [
             Dynamic.Mission.ALTITUDE,
             Dynamic.Mission.VELOCITY,
         ]
+        mission_inputs.extend(self.get_parameters(**kwargs).keys())
+        return mission_inputs
     
     def mission_outputs(self, **kwargs):
         return [
             Dynamic.Vehicle.DRAG,
             Dynamic.Vehicle.LIFT,
-            'OAS_aero.aero_point_0.CL',
             'alpha',
             'CD',
             'avg_CD',
@@ -37,9 +38,10 @@ class RCAeroBuilder(SubsystemBuilder):
             'CD_fus',
             'CD_vtail',
             'CD_gear',
-            'lifting_surfract_CD',
-        ]
-    
+            'lifting_surface_CD',
+            'avg_CL',
+    ]
+
     def get_parameters(self, aviary_inputs=None, **kwargs):
         params = {}
 
@@ -93,5 +95,5 @@ class RCAeroBuilder(SubsystemBuilder):
         }
         return params
 
-    def needs_mission_solver(self, aviary_inputs):
+    def needs_mission_solver(self, aviary_inputs=None, subsystem_options=None, **kwargs):
         return False

@@ -100,7 +100,7 @@ prob.add_driver(optimizer=optimizer, max_iter=max_iter)
 prob.add_design_variables()
 
 prob.model.add_design_var('aircraft:wing:span', lower=0.1, upper=2.0)
-prob.model.add_design_var('traj.cruise.rhs_all.alpha', lower=-5.0, upper=20.0, scaler=0.1)
+prob.model.add_design_var('traj.phases.cruise.rhs_all.alpha', lower=-5.0, upper=20.0, scaler=0.1)
 
 # prob.model.add_constraint('traj.phases.cruise.rhs_all.lifting_surface_CL', lower=0.01, upper=0.2)
 prob.model.add_objective('traj.phases.cruise.rhs_all.avg_CD', scaler=1)
@@ -121,7 +121,9 @@ prob.driver.opt_settings.update({
 
 
 prob.setup()
-prob.set_val('traj.cruise.rhs_all.alpha', np.array([10.0, 10.0, 10.0, 10.0]), units='deg')
+prob.final_setup()
+prob.model.list_vars()
+prob.set_val('traj.phases.cruise.rhs_all.alpha', np.array([10.0, 10.0, 10.0, 10.0]), units='deg')
 
 prob.set_initial_guesses()
 
@@ -145,5 +147,5 @@ print('Lifting surface CD:', prob.get_val('traj.phases.cruise.rhs_all.lifting_su
 
 print('Fuselage length:', prob.get_val('aircraft:fuselage:length'))
 print('Fuselage height:', prob.get_val('aircraft:fuselage:max_height'))
-print('Angle of attack:', prob.get_val('traj.cruise.rhs_all.alpha'))
+print('Angle of attack:', prob.get_val('traj.phases.cruise.rhs_all.alpha'))
 print('Wing span:', prob.get_val(Aircraft.Wing.SPAN))
