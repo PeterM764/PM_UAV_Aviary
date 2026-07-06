@@ -310,10 +310,10 @@ class RCPropMission(om.Group):
 
         if user_feedforward:
             # Keep electrical power mismatch near zero 
-            self.add_constraint('power_net', lower=-0.2, upper=0.2, ref=1e2, units='W')
+            self.add_constraint('power_net', lower=-0.05, upper=0.05, ref=1e2, units='W')
 
             # Force commanded cruise RPM to match motor-computed RPM.
-            self.add_constraint('rpm_balance.rpm_defect', lower=-0.25, upper=0.25, ref=1e2, units='rev/s')
+            self.add_constraint('rpm_balance.rpm_defect', lower=-0.1, upper=0.1, ref=1e2, units='rev/s')
 
             # Do the same RPM match for the max-power/full-throttle chain.
             self.add_constraint('rpm_balance_max.rpm_defect', lower=-1.0, upper=1.0, ref=1e2, units='rev/s')

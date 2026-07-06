@@ -1,10 +1,8 @@
 from copy import deepcopy
-from weakref import ref
 import numpy as np
 import openmdao.api as om
 import aviary.api as av
 from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
 from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 from aviary.variable_info.dbf_variables import Aircraft
@@ -23,7 +21,7 @@ class MeanPowerComp(om.ExplicitComponent):
 
 # Builders
 # defaults to feedforward power balance; change to power_balance_mode='solver' for solver-based power balance
-rc_prop = RCBuilder(power_balance_mode='solver')
+rc_prop = RCBuilder()
 
 phase_info = deepcopy(phase_info)
 
@@ -37,7 +35,6 @@ phase_info.pop('descent')
 
 phase_info['pre_mission']['include_takeoff'] = False
 phase_info['pre_mission']['optimize_mass'] = False
-phase_info['pre_mission']['external_subsystems'] = [DBFMassBuilder()]
 
 
 #Setup Cruise
@@ -114,6 +111,8 @@ prob.aviary_inputs.set_val('mission:taxi:fuel_mass_taxi_out', 0.0, units='lbm')
 prob.aviary_inputs.set_val('mission:taxi:fuel_mass_taxi_in', 0.0, units='lbm')
 prob.aviary_inputs.set_val('mission:takeoff:fuel_mass', 0.0, units='lbm')
 
+
+
 for _k in ('mission:design:gross_mass', 'aircraft:design:gross_mass', 'mission:gross_mass'):
     try:
         print("Loaded gross mass key:", _k)
@@ -126,6 +125,7 @@ for _k in ('mission:design:gross_mass', 'aircraft:design:gross_mass', 'mission:g
 prob.check_and_preprocess_inputs()
 
 prob.add_pre_mission_systems()
+
 prob.add_phases()
 prob.add_post_mission_systems()
 prob.link_phases()
@@ -141,21 +141,17 @@ prob.add_driver('IPOPT', use_coloring=False, max_iter=30)
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
 prob.driver.opt_settings['tol'] = 1e-6
-prob.driver.opt_settings['acceptable_tol'] = 5e-6
-prob.driver.opt_settings['acceptable_iter'] = 3
-prob.driver.opt_settings['constr_viol_tol'] = 1e-6
-prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-6
+prob.driver.opt_settings['acceptable_tol'] = 5e-7
+prob.driver.opt_settings['acceptable_iter'] = 0
+prob.driver.opt_settings['constr_viol_tol'] = 1e-7
+prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-7
 prob.driver.options["debug_print"] = ["desvars", "objs", "nl_cons"]
 
 prob.add_design_variables()
 
 
-# Aviary adds gross-mass DVs with transport-scale defaults (lbm, upper=None).
-# Replace them with UAV-scale kg bounds so the optimizer cannot drift to
-# unrealistically large mass in this electric cruise case.
-prob.model._static_design_vars.pop('aircraft:design:gross_mass', None)
-prob.model._static_design_vars.pop('mission:gross_mass', None)
-prob.model.add_design_var('aircraft:design:gross_mass', units='kg', lower=2.0, upper=10.0, ref=7.0)
+
+
 
 
 # Objective: MAXIMIZE endurance = battery energy / cruise electric power.
@@ -179,7 +175,8 @@ prob.model.connect(
     'mean_power_comp.p_cruise_kw',
 )
 prob.model.connect('mean_power_comp.p_avg_kw', 'endurance_comp.p_avg_kw')
-prob.model.add_objective('endurance_comp.endurance', ref=-1.0)
+# Objective: maximize endurance.
+prob.model.add_objective('endurance_comp.endurance', scaler=-1.0)
 
 prob.model.set_input_defaults('aircraft:battery:voltage', val=22.2, units='V')
 prob.model.set_input_defaults('aircraft:engine:motor:idle_current', val=2.2, units='A')
@@ -195,6 +192,7 @@ prob.set_solver_print(level=0)
 prob.set_initial_guesses()
 
 prob.set_val('aircraft:design:gross_mass', 7.0, units='kg')
+prob.set_val('mission:gross_mass', 7.0, units='kg')
 prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 
 # Start the motor-sizing design variables strictly INSIDE their bounds. The CSV
@@ -213,7 +211,7 @@ if rc_prop.power_balance_mode == 'feedforward':
 
 # Run in two steps for continuation robustness.
 prob.run_aviary_problem(run_driver=False, suppress_solver_print=True, make_plots=False)
-prob.run_aviary_problem(suppress_solver_print=True, make_plots=False)
+prob.run_aviary_problem(run_driver=True, suppress_solver_print=True, make_plots=False)
 
 print("\n===== MASS CHECK =====")
 
@@ -228,4 +226,8 @@ print("lbm:", prob.get_val('traj.cruise.states:mass', units='lbm'))
 print("\nSummary Gross Mass")
 print("kg :", prob.get_val('mission:gross_mass', units='kg'))
 print("lbm:", prob.get_val('mission:gross_mass', units='lbm'))
+
+print("\n===== ENDURANCE CHECK =====")
+print("Mean cruise electric power (kW):", prob.get_val('mean_power_comp.p_avg_kw', units='kW'))
+print("Estimated endurance (h):", prob.get_val('endurance_comp.endurance', units='h'))
 
