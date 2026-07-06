@@ -9,7 +9,6 @@ from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import 
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 from aviary.variable_info.dbf_variables import Aircraft
 
-
 class MeanPowerComp(om.ExplicitComponent):
     def setup(self):
         self.add_input('p_cruise_kw', shape_by_conn=True, units='kW')
@@ -19,29 +18,17 @@ class MeanPowerComp(om.ExplicitComponent):
     def compute(self, inputs, outputs):
         outputs['p_avg_kw'] = np.mean(inputs['p_cruise_kw'])
 
-
-
 # Builders
 # defaults to feedforward power balance; change to power_balance_mode='solver' for solver-based power balance
 rc_prop = RCBuilder()
 
 phase_info = deepcopy(phase_info)
 
-
-
 phase_info.pop('climb')
 phase_info.pop('descent')
 
-
-#Pre-Mission Mass Model
-
-phase_info['pre_mission']['include_takeoff'] = False
-phase_info['pre_mission']['optimize_mass'] = False
+#Pre-Mission Model
 phase_info['pre_mission']['external_subsystems'] = [DBFMassBuilder()]
-
-
-#Setup Cruise
-
 phase_info['cruise']['external_subsystems'] = [CustomAeroBuilder()]
 
 phase_info['cruise']['subsystem_options']['aerodynamics'] = {
@@ -70,7 +57,6 @@ phase_info['cruise']['user_options'].update({
 
     #Scaling
     'mass_ref': (4.0, 'kg'),
-
     
     # ODE, so a throttle-balance Newton would be exactly singular.)
     'throttle_enforcement': 'control',
@@ -79,24 +65,18 @@ phase_info['cruise']['user_options'].update({
     #Time 
     'time_initial': (0.0, 's'),
     'time_duration_bounds': ((20,90.0), 's'),
-
-
 })
 
 # Remove legacy options that are not accepted by the current cruise phase builder.
 phase_info['cruise']['user_options'].pop('electric_current_polynomial_order', None)
 phase_info['cruise']['user_options'].pop('electric_current_max_polynomial_order', None)
-
 phase_info['cruise']['initial_guesses'] = {
     'time': ([0.0, 54.7], 's'),   # 1 km at ~18.29 m/s (60 ft/s) ~= 54.7 s
     'distance': ([0.0, 1000.0], 'm'),
     'mach': ([0.0538, 0.0538], 'unitless'),
-
 }
 
-# -----------------------------
 # Aviary problem
-# -----------------------------
 prob = av.AviaryProblem(verbosity=0)
 prob.options['group_by_pre_opt_post'] = True
 
@@ -106,7 +86,6 @@ prob.load_inputs(
 )
 prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder()])
 prob.aviary_inputs.set_val(Aircraft.Engine.Propeller.PITCH, 12.0, units='inch')
-
 
 #taking out fuel
 prob.aviary_inputs.set_val('aircraft:fuel:ignore_fuel_capacity_constraint', True, units='unitless')
@@ -146,8 +125,6 @@ for _resp in (
 ):
     prob.model._static_responses.pop(_resp, None)
 
-
-
 prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
@@ -166,7 +143,6 @@ prob.add_design_variables()
 prob.model._static_design_vars.pop('aircraft:design:gross_mass', None)
 prob.model._static_design_vars.pop('mission:gross_mass', None)
 prob.model.add_design_var('aircraft:design:gross_mass', units='kg', lower=2.0, upper=10.0, ref=7.0)
-
 
 # Objective: MAXIMIZE endurance = battery energy / cruise electric power.
 prob.model.add_subsystem(
@@ -188,6 +164,7 @@ prob.model.connect(
     'traj.cruise.timeseries.electric_power_in_total',
     'mean_power_comp.p_cruise_kw',
 )
+
 prob.model.connect('mean_power_comp.p_avg_kw', 'endurance_comp.p_avg_kw')
 prob.model.add_objective('endurance_comp.endurance', ref=-1.0)
 
@@ -195,12 +172,9 @@ prob.model.set_input_defaults('aircraft:battery:voltage', val=22.2, units='V')
 prob.model.set_input_defaults('aircraft:engine:motor:idle_current', val=2.2, units='A')
 prob.model.set_input_defaults('aircraft:engine:motor:max_cont_current', val=100.0, units='A')
 
-
 prob.setup()
 
 prob.set_solver_print(level=0)
-
-
 
 prob.set_initial_guesses()
 
@@ -213,7 +187,6 @@ prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 prob.set_val('aircraft:engine:motor:mass', 0.45, units='kg')   # mid of [0.25, 0.65] -> KV ~370
 prob.set_val('aircraft:engine:motor:idle_current', 2.0, units='A')
 
-#
 prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
 prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
 prob.set_val('traj.cruise.controls:current_flow_max', 65, units='A')
@@ -237,4 +210,3 @@ print("lbm:", prob.get_val('traj.cruise.states:mass', units='lbm'))
 print("\nSummary Gross Mass")
 print("kg :", prob.get_val('mission:gross_mass', units='kg'))
 print("lbm:", prob.get_val('mission:gross_mass', units='lbm'))
-
