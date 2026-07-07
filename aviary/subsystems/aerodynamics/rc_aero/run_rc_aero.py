@@ -100,10 +100,13 @@ prob.add_driver(optimizer=optimizer, max_iter=max_iter)
 prob.add_design_variables()
 
 prob.model.add_design_var('aircraft:wing:span', lower=0.1, upper=2.0)
-prob.model.add_design_var('traj.phases.cruise.rhs_all.alpha', lower=-5.0, upper=20.0, scaler=0.1)
+#prob.model.add_design_var('aircraft:wing:root_chord', lower=0.1, upper=1.0)
+#prob.model.add_design_var('aircraft:wing:incidence', lower=-5.0, upper=10.0)
+#prob.model.add_design_var('aircraft:wing:thickness_to_chord', lower=0.05, upper=0.20)
+#prob.model.add_design_var('aircraft:horizontal_tail:incidence', lower=-5.0, upper=10.0)
 
-# prob.model.add_constraint('traj.phases.cruise.rhs_all.lifting_surface_CL', lower=0.01, upper=0.2)
-prob.model.add_objective('traj.phases.cruise.rhs_all.avg_CD', scaler=1)
+#prob.model.add_constraint('traj.phases.cruise.rhs_all.lifting_surface_CL', lower=0.01, upper=0.2)
+prob.model.add_objective('traj.cruise.t_duration', index=-1)
 
 prob.driver.recording_options['record_desvars'] = False
 prob.driver.recording_options['record_responses'] = False
@@ -119,33 +122,26 @@ prob.driver.opt_settings.update({
     'alpha_for_y': 'primal'
 })
 
-
 prob.setup()
-prob.final_setup()
-prob.model.list_vars()
-prob.set_val('traj.phases.cruise.rhs_all.alpha', np.array([10.0, 10.0, 10.0, 10.0]), units='deg')
 
 prob.set_initial_guesses()
-
-# prob.run_model()
 
 prob.run_aviary_problem()
 
 with open("variables.txt", "w") as f:
     prob.model.list_vars(out_stream=f, print_arrays=True, units=True)
 
+print('Lift:', prob.get_val('traj.cruise.rhs_all.lift', units='lbf')) 
+print('Drag:', prob.get_val('traj.cruise.rhs_all.drag', units='lbf'))
+#print('CL:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CL'))
+#print('CD:', prob.get_val('traj.cruise.rhs_all.CD'))
 
-print('Lift:', prob.get_val('traj.phases.cruise.rhs_all.lift', units='lbf')) 
-print('Drag:', prob.get_val('traj.phases.cruise.rhs_all.drag', units='lbf'))
-print('CL:', prob.get_val('traj.phases.cruise.rhs_all.lifting_surface_CL'))
-print('CD:', prob.get_val('traj.phases.cruise.rhs_all.CD'))
-
-print('CD_fus:', prob.get_val('traj.phases.cruise.rhs_all.CD_fus'))
-print('CD_vtail:', prob.get_val('traj.phases.cruise.rhs_all.CD_vtail'))
-print('CD_gear:', prob.get_val('traj.phases.cruise.rhs_all.CD_gear'))
-print('Lifting surface CD:', prob.get_val('traj.phases.cruise.rhs_all.lifting_surface_CD'))
+#print('CD_fus:', prob.get_val('traj.cruise.rhs_all.CD_fus'))
+#print('CD_vtail:', prob.get_val('traj.cruise.rhs_all.CD_vtail'))
+#print('CD_gear:', prob.get_val('traj.cruise.rhs_all.CD_gear'))
+#print('Lifting surface CD:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CD'))
 
 print('Fuselage length:', prob.get_val('aircraft:fuselage:length'))
 print('Fuselage height:', prob.get_val('aircraft:fuselage:max_height'))
-print('Angle of attack:', prob.get_val('traj.phases.cruise.rhs_all.alpha'))
+#print('Angle of attack:', prob.get_val('traj.cruise.rhs_all.alpha'))
 print('Wing span:', prob.get_val(Aircraft.Wing.SPAN))

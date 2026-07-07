@@ -31,15 +31,6 @@ class RCAeroBuilder(SubsystemBuilder):
         return [
             Dynamic.Vehicle.DRAG,
             Dynamic.Vehicle.LIFT,
-            'alpha',
-            'CD',
-            'avg_CD',
-            'lifting_surface_CL',
-            'CD_fus',
-            'CD_vtail',
-            'CD_gear',
-            'lifting_surface_CD',
-            'avg_CL',
     ]
 
     def get_parameters(self, aviary_inputs=None, **kwargs):

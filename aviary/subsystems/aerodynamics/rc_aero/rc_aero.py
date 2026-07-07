@@ -286,5 +286,6 @@ class TotalAircraftAero(om.Group):
         )
         
         self.connect('OAS_aero.aero_point_0.wing.S_ref', 'aircraft:wing:area')
+        self.connect('aircraft:wing:root_chord', 'OAS_aero.aero_point_0.wing.c_root')
         
         self.options['auto_order'] = True
