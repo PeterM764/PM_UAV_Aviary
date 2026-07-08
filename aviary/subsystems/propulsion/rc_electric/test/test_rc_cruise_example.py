@@ -188,8 +188,7 @@ class TestRCCruiseAttempt(unittest.TestCase):
         prob.driver.opt_settings['tol'] = 1e-5
         prob.driver.opt_settings['acceptable_tol'] = 1e-4
         prob.driver.opt_settings['acceptable_iter'] = 10
-        # The ODE refs the thrust=drag residual at 1e6 lbf; on a ~1 lbf vehicle the
-        # default constraint tolerance would let IPOPT leave thrust != drag. Tighten it.
+       
         prob.driver.opt_settings['constr_viol_tol'] = 1e-7
         prob.driver.opt_settings['acceptable_constr_viol_tol'] = 1e-6
 
@@ -236,7 +235,7 @@ class TestRCCruiseAttempt(unittest.TestCase):
 
         prob.set_solver_print(level=0)
 
-        # Set initial guesses for key variables to help SLSQP converge to a solution.
+        
         prob.set_initial_guesses()
         prob.set_val('aircraft:design:gross_mass', 7.0, units='kg')
         prob.set_val('mission:gross_mass', 7.0, units='kg')
@@ -244,31 +243,27 @@ class TestRCCruiseAttempt(unittest.TestCase):
         prob.set_val('aircraft:engine:motor:idle_current', 2.0, units='A')
         prob.set_val('aircraft:battery:voltage', 25.2, units='V')
 
-        # Warm-start the SAND controls near a thrust-capable operating point. At 18.29 m/s
-        # the prop needs ~90 rev/s to make cruise thrust (below ~65 rev/s it is close to
-        # its zero-thrust advance ratio). All of these are optimizer controls now.
+       
         prob.set_val('traj.cruise.controls:throttle', 0.7, units='unitless')
         prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
         prob.set_val('traj.cruise.controls:current_flow_max', 60.0, units='A')
         prob.set_val('traj.cruise.controls:rpm_lookup', 90.0, units='rev/s')
         prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
 
-        # Step 1 (continuation): single-pass model run to settle coupled states.
+      
         prob.run_aviary_problem(run_driver=False, suppress_solver_print = True, make_plots=False)
 
-        # Step 2: optimization from that settled point.
+       
         prob.run_aviary_problem(suppress_solver_print = True, make_plots=False)
 
-        # Regression intent: this setup should run without NaN/Inf in the solved-throttle
-        # powertrain loop (the prior failure was a NaN Jacobian row on throttle).
+        
         endurance = prob.get_val('endurance_comp.endurance', units='h')[0]
         self.assertTrue(np.isfinite(endurance) and endurance > 0.0)
 
         gross_mass = prob.get_val('mission:gross_mass', units='kg')[0]
         self.assertTrue(np.isfinite(gross_mass) and 2.0 <= gross_mass <= 20.0)
 
-        # Invariants: motor mass stays within its [0.25, 0.65] kg DV bound, and the
-        # 1 km cruise distance target is met.
+       
         mm = prob.get_val('aircraft:engine:motor:mass', units='kg')[0]
         self.assertTrue(0.25 < mm < 0.65, f"Motor mass {mm} kg is outside expected bounds.")
 
@@ -281,7 +276,7 @@ class TestRCCruiseAttempt(unittest.TestCase):
 
     def test_cruise_attempt_script_smoke(self):
         repo_root = Path(__file__).resolve().parents[5]
-        script = repo_root / 'aviary' / 'models' / 'aircraft' / 'small_uav' / 'Cruise_Attempt.py'
+        script = repo_root / 'aviary' / 'models' / 'aircraft' / 'small_uav' / 'Cruise_Example.py'
 
         result = subprocess.run(
             [sys.executable, str(script)],

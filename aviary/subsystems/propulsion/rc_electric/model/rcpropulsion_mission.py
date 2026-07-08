@@ -342,6 +342,10 @@ class RCPropMission(om.Group):
 
             self.linear_solver = om.LinearBlockGS()
 
+        
+        self.add_constraint('prop.rpm_constraint', upper=0.0, ref=1e2, units='rev/s')
+        self.add_constraint('prop_max.rpm_constraint', upper=0.0, ref=1e2, units='rev/s')
+
         self.options['auto_order'] = True
 
         # Newton + DirectSolver alternative (kept for reference): converges the

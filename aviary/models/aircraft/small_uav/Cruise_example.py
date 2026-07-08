@@ -3,6 +3,8 @@ import numpy as np
 import openmdao.api as om
 import aviary.api as av
 from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
+from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft as DBFAircraft
 from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 from aviary.variable_info.dbf_variables import Aircraft
@@ -25,20 +27,7 @@ phase_info = deepcopy(phase_info)
 phase_info.pop('climb')
 phase_info.pop('descent')
 
-<<<<<<< HEAD
-
-#Pre-Mission Mass Model
-
-phase_info['pre_mission']['include_takeoff'] = False
-phase_info['pre_mission']['optimize_mass'] = False
-
-
-#Setup Cruise
-
-=======
 #Pre-Mission Model
-phase_info['pre_mission']['external_subsystems'] = [DBFMassBuilder()]
->>>>>>> 88bf9ea3b688f7fa74817832363a778e1c6f33dd
 phase_info['cruise']['external_subsystems'] = [CustomAeroBuilder()]
 
 phase_info['cruise']['subsystem_options']['aerodynamics'] = {
@@ -123,18 +112,8 @@ prob.add_phases()
 prob.add_post_mission_systems()
 prob.link_phases()
 
-for _resp in (
-    'mission:constraints:mass_residual',
-):
-    prob.model._static_responses.pop(_resp, None)
 
-<<<<<<< HEAD
-
-
-prob.add_driver('IPOPT', use_coloring=False, max_iter=30)
-=======
 prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
->>>>>>> 88bf9ea3b688f7fa74817832363a778e1c6f33dd
 prob.driver.opt_settings['print_level'] = 5
 prob.driver.opt_settings['mu_strategy'] = 'adaptive'
 prob.driver.opt_settings['tol'] = 1e-6
@@ -160,12 +139,12 @@ prob.model.add_subsystem(
     'endurance_comp',
     om.ExecComp(
         'endurance = energy / (1000.0 * p_avg_kw + 1.0e-3)',
-        endurance={'val': 1.0, 'units': 'h'},
+        endurance={'val': 1.0, 'units': 'h'},   
         energy={'val': 1.0, 'units': 'W*h'},
         p_avg_kw={'val': 1.0, 'units': 'kW'},
     ),
 )
-prob.model.connect('aircraft:battery:energy_capacity', 'endurance_comp.energy')
+prob.model.connect(Aircraft.Battery.ENERGY_CAPACITY, 'endurance_comp.energy')
 prob.model.connect(
     'traj.cruise.timeseries.electric_power_in_total',
     'mean_power_comp.p_cruise_kw',
@@ -175,9 +154,30 @@ prob.model.connect('mean_power_comp.p_avg_kw', 'endurance_comp.p_avg_kw')
 # Objective: maximize endurance.
 prob.model.add_objective('endurance_comp.endurance', scaler=-1.0)
 
-prob.model.set_input_defaults('aircraft:battery:voltage', val=22.2, units='V')
-prob.model.set_input_defaults('aircraft:engine:motor:idle_current', val=2.2, units='A')
-prob.model.set_input_defaults('aircraft:engine:motor:max_cont_current', val=100.0, units='A')
+prob.model.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
+prob.model.set_input_defaults(Aircraft.Engine.Motor.IDLE_CURRENT, val=2.2, units='A')
+prob.model.set_input_defaults(Aircraft.Engine.Motor.MAX_CONT_CURRENT, val=100.0, units='A')
+
+prob.model.add_constraint(Aircraft.Design.GROSS_MASS, lower=4.0, upper=20.0, units='kg')
+prob.model.add_constraint('mission:gross_mass', lower=4.0, upper=20.0, units='kg')
+
+# Constrain geometry directly in physical units to prevent optimizer runaway.
+prob.model.add_constraint(Aircraft.Fuselage.LENGTH, lower=0.5, upper=2.5, units='m')
+prob.model.add_constraint(DBFAircraft.Fuselage.AVG_HEIGHT, lower=0.1, upper=0.6, units='m')
+prob.model.add_constraint(DBFAircraft.Fuselage.AVG_WIDTH, lower=0.1, upper=0.6, units='m')
+
+prob.model.add_constraint(Aircraft.Wing.SPAN, lower=1.0, upper=5.0, units='m')
+prob.model.add_constraint(Aircraft.Wing.ROOT_CHORD, lower=0.1, upper=1.0, units='m')
+prob.model.add_constraint(Aircraft.Wing.WETTED_AREA, lower=0.1, upper=5.0, units='m**2')
+
+prob.model.add_constraint(Aircraft.HorizontalTail.SPAN, lower=0.2, upper=3.0, units='m')
+prob.model.add_constraint(Aircraft.HorizontalTail.ROOT_CHORD, lower=0.1, upper=1.5, units='m')
+prob.model.add_constraint(Aircraft.HorizontalTail.WETTED_AREA, lower=0.05, upper=2.0, units='m**2')
+
+prob.model.add_constraint(Aircraft.VerticalTail.SPAN, lower=0.2, upper=3.0, units='m')
+prob.model.add_constraint(Aircraft.VerticalTail.ROOT_CHORD, lower=0.1, upper=1.5, units='m')
+prob.model.add_constraint(Aircraft.VerticalTail.WETTED_AREA, lower=0.05, upper=2.0, units='m**2')
+
 
 prob.setup()
 
@@ -185,55 +185,30 @@ prob.set_solver_print(level=0)
 
 prob.set_initial_guesses()
 
-prob.set_val('aircraft:design:gross_mass', 7.0, units='kg')
+prob.set_val(Aircraft.Design.GROSS_MASS, 7.0, units='kg')
 prob.set_val('mission:gross_mass', 7.0, units='kg')
-prob.set_val('aircraft:battery:voltage', 25.2, units='V')
+prob.set_val(Aircraft.Battery.VOLTAGE, 25.2, units='V')
+
+# Set fuselage wetted area initial value (still optimized as a DV).
+prob.set_val(Aircraft.Fuselage.WETTED_AREA, 904.0, units='inch**2')
 
 # Start the motor-sizing design variables strictly INSIDE their bounds. The CSV
 # motor mass (0.131 kg, also seen as 0.637) is below the [0.68, 1.12] kg DV bound,
 # and an infeasible-to-bounds start makes IPOPT crash. 
-prob.set_val('aircraft:engine:motor:mass', 0.45, units='kg')   # mid of [0.25, 0.65] -> KV ~370
-prob.set_val('aircraft:engine:motor:idle_current', 2.0, units='A')
+prob.set_val(Aircraft.Engine.Motor.MASS, 0.45, units='kg')   # mid of [0.25, 0.65] -> KV ~370
+prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 2.0, units='A')
 
-<<<<<<< HEAD
-# Feedforward mode has explicit current/rpm controls; solver mode does not.
-if rc_prop.power_balance_mode == 'feedforward':
-    prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
-    prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
-    prob.set_val('traj.cruise.controls:current_flow_max', 50.0, units='A')
-    prob.set_val('traj.cruise.controls:rpm_lookup', 43.5, units='rev/s')
-    prob.set_val('traj.cruise.controls:rpm_lookup_max', 93.0, units='rev/s')
-=======
 prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
 prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
 prob.set_val('traj.cruise.controls:current_flow_max', 65, units='A')
 prob.set_val('traj.cruise.controls:rpm_lookup', 95, units='rev/s')
 prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
->>>>>>> 88bf9ea3b688f7fa74817832363a778e1c6f33dd
+
 
 # Run in two steps for continuation robustness.
 prob.run_aviary_problem(run_driver=False, suppress_solver_print=True, make_plots=False)
+
+
 prob.run_aviary_problem(run_driver=True, suppress_solver_print=True, make_plots=False)
 
-print("\n===== MASS CHECK =====")
 
-print("Design Gross Mass")
-print("kg :", prob.get_val('aircraft:design:gross_mass', units='kg'))
-print("lbm:", prob.get_val('aircraft:design:gross_mass', units='lbm'))
-
-print("\nTrajectory Mass")
-print("kg :", prob.get_val('traj.cruise.states:mass', units='kg'))
-print("lbm:", prob.get_val('traj.cruise.states:mass', units='lbm'))
-
-print("\nSummary Gross Mass")
-print("kg :", prob.get_val('mission:gross_mass', units='kg'))
-<<<<<<< HEAD
-print("lbm:", prob.get_val('mission:gross_mass', units='lbm'))
-
-print("\n===== ENDURANCE CHECK =====")
-print("Mean cruise electric power (kW):", prob.get_val('mean_power_comp.p_avg_kw', units='kW'))
-print("Estimated endurance (h):", prob.get_val('endurance_comp.endurance', units='h'))
-
-=======
-print("lbm:", prob.get_val('mission:gross_mass', units='lbm'))
->>>>>>> 88bf9ea3b688f7fa74817832363a778e1c6f33dd

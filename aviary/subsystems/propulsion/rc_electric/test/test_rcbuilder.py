@@ -22,10 +22,6 @@ from aviary.variable_info.variables import Mission, Settings
 
 class TestRCBuilder(unittest.TestCase):
     """Integrates RCBuilder into a full PropulsionMission over a 0->1 throttle sweep.
-
-    Body must live inside the test method (not at module level): testflo imports every
-    test module to discover tests, and on Windows re-imports it in each spawned worker,
-    so a module-level run_model() executes a full solve at import time in every process.
     """
 
     @use_tempdirs

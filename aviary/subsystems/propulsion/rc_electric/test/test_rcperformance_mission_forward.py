@@ -47,15 +47,33 @@ class TestRCPropMission(unittest.TestCase):
         motor_power = prob.get_val('motor.power', units='W')
         prop_power = prob.get_val(Dynamic.Vehicle.Propulsion.PROP_POWER, units='W')
         power_net = prob.get_val('power_net', units='W')
+        power_net_max = prob.get_val('power_net_max', units='W')
+        rpm = prob.get_val(Dynamic.Vehicle.Propulsion.RPM, units='rev/s')
+        rpm_constraint = prob.get_val('prop.rpm_constraint', units='rev/s')
+        current_flow = prob.get_val(Dynamic.Vehicle.Propulsion.CURRENT, units='A')
+        rpm_defect = prob.get_val('rpm_balance.rpm_defect', units='rev/s')
+        rpm_defect_max = prob.get_val('rpm_balance_max.rpm_defect', units='rev/s')
         expected = battery_power + esc_power + motor_power - prop_power
-        print(battery_power, esc_power, motor_power, prop_power)
-        assert_near_equal(power_net, expected, tolerance=1e-5)
+
+        assert_near_equal(current_flow, np.full(nn, 30.0), tolerance=1e-10)
+        assert_near_equal(battery_power, np.full(nn, 621.0), tolerance=1e-8)
+        assert_near_equal(esc_power, np.full(nn, -34.26417695), tolerance=5e-5)
+        assert_near_equal(motor_power, np.full(nn, -42.16465596), tolerance=5e-4)
+        assert_near_equal(prop_power, np.full(nn, 261.66740295), tolerance=5e-5)
+        assert_near_equal(power_net, np.full(nn, 282.90148978), tolerance=5e-4)
+        assert_near_equal(power_net_max, np.full(nn, -610.33508197), tolerance=5e-4)
+        assert_near_equal(rpm, np.full(nn, 102.80332942), tolerance=5e-4)
+        assert_near_equal(rpm_constraint, np.full(nn, -65.0), tolerance=5e-4)
+        assert_near_equal(rpm_defect, np.full(nn, -42.80332942), tolerance=5e-5)
+        assert_near_equal(rpm_defect_max, np.full(nn, 33.47756931), tolerance=5e-5)
+        assert_near_equal(power_net, expected, tolerance=1e-9)
+
         partial_data = prob.check_partials(
             out_stream=None,
             compact_print=True,
             show_only_incorrect=True,
             form='central',
-            method='',
+            method='fd',
             minimum_step=1e-12,
             abs_err_tol=5.0e-4,
             rel_err_tol=5.0e-5,

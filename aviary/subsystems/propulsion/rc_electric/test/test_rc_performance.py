@@ -44,11 +44,29 @@ class RCPerformanceTest(unittest.TestCase):
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')
         prob.set_val(Dynamic.Mission.VELOCITY, 20, units='ft/s')
         prob.run_model()
+
+
+        # prob.model.list_inputs(units=True, prom_name=True)
+        # prob.model.list_outputs(units=True, prom_name=True, residuals=True)
+
+        
         battery_power = prob.get_val('battery.power', units='W')
         esc_power = prob.get_val('esc.power', units='W')
         motor_power = prob.get_val('motor.power', units='W')
         prop_power = prob.get_val(Dynamic.Vehicle.Propulsion.PROP_POWER, units='W')
+        current_flow = prob.get_val(Dynamic.Vehicle.Propulsion.CURRENT, units='A')
+        rpm_motor = prob.get_val('rotations_per_minute', units='rpm')
+        rpm_constraint = prob.get_val('prop.rpm_constraint', units='rev/s')
         power_residual = battery_power + esc_power + motor_power - prop_power
+
+        assert_near_equal(current_flow, 54.72669143, tolerance=1e-6)
+        assert_near_equal(battery_power, 1065.18201197, tolerance=1e-6)
+        assert_near_equal(esc_power, -58.77227848, tolerance=1e-6)
+        assert_near_equal(motor_power, -107.63443504, tolerance=1e-6)
+        assert_near_equal(prop_power, 898.77529845, tolerance=1e-6)
+        assert_near_equal(rpm_motor, 5443.42656455, tolerance=1e-6)
+        assert_near_equal(rpm_constraint, -34.27622392, tolerance=1e-6)
+
         assert_near_equal(power_residual, 0, tolerance=tol)
         partial_data = prob.check_partials(
             out_stream=None,
@@ -98,7 +116,19 @@ class RCPerformanceTest(unittest.TestCase):
         esc_power = prob.get_val('esc.power', units='W')
         motor_power = prob.get_val('motor.power', units='W')
         prop_power = prob.get_val(Dynamic.Vehicle.Propulsion.PROP_POWER, units='W')
+        current_flow = prob.get_val(Dynamic.Vehicle.Propulsion.CURRENT, units='A')
+        rpm_motor = prob.get_val('rotations_per_minute', units='rpm')
+        rpm_constraint = prob.get_val('prop.rpm_constraint', units='rev/s')
         power_residual = battery_power + esc_power + motor_power - prop_power
+
+        assert_near_equal(current_flow, np.full(3, 54.72669143), tolerance=1e-6)
+        assert_near_equal(battery_power, np.full(3, 1065.18201197), tolerance=1e-6)
+        assert_near_equal(esc_power, np.full(3, -58.77227848), tolerance=1e-6)
+        assert_near_equal(motor_power, np.full(3, -107.63443504), tolerance=1e-6)
+        assert_near_equal(prop_power, np.full(3, 898.77529845), tolerance=1e-6)
+        assert_near_equal(rpm_motor, np.full(3, 5443.42656455), tolerance=1e-6)
+        assert_near_equal(rpm_constraint, np.full(3, -34.27622392), tolerance=1e-6)
+
         assert_near_equal(power_residual, np.zeros(3), tolerance=tol)
         partial_data = prob.check_partials(
             out_stream=None,
@@ -137,6 +167,7 @@ class RCPerformanceTest(unittest.TestCase):
         )
 
         prob.setup()
+        
         prob.set_val(Aircraft.Engine.Propeller.DIAMETER, 17, units='inch')
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 8, units='inch')
         prob.set_val(Dynamic.Mission.VELOCITY, [30, 20, 15], units='m/s')
@@ -182,7 +213,11 @@ class RCPerformanceTest(unittest.TestCase):
         prob.set_val(Aircraft.Engine.Propeller.DIAMETER, 20, units='inch')
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')
         prob.set_val(Dynamic.Mission.VELOCITY, 20, units='ft/s')
+
+
         prob.run_model()
+        prob.model.list_outputs(units=True, prom_name=True, residuals=True)
+
 
         prob.model.add_design_var(Aircraft.Battery.MASS)
         prob.model.add_design_var(Aircraft.Engine.Motor.IDLE_CURRENT)
@@ -190,6 +225,9 @@ class RCPerformanceTest(unittest.TestCase):
         prob.model.add_design_var(Aircraft.Engine.Propeller.DIAMETER)
         prob.model.add_design_var(Aircraft.Engine.Propeller.PITCH)
         prob.model.add_design_var(Dynamic.Mission.VELOCITY, units='m/s', lower=0, upper=35)
+
+
+
 
 if __name__ == '__main__':
     unittest.main()
