@@ -1,6 +1,6 @@
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
 from aviary.subsystems.subsystem_builder import SubsystemBuilder
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.mass_premission import MassPremission
 
 class DBFMassBuilder(SubsystemBuilder):
     

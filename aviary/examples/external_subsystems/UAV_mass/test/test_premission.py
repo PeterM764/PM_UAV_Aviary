@@ -3,8 +3,8 @@ import numpy as np
 import openmdao.api as om
 import os 
 
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.mass_premission import MassPremission
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
     def set_dbf_defaults(self, comp, AircraftDbf):
@@ -53,7 +53,7 @@ class TestMassPremission(unittest.TestCase):
 
     def setUp(self):
         base = os.path.dirname(os.path.dirname(__file__))
-        airfoil_dir = os.path.join(base, "option_info")
+        airfoil_dir = os.path.join(base, "utils")
         airfoil = os.path.abspath(os.path.join(airfoil_dir, "mh84-il.csv"))
 
         self.prob = om.Problem()

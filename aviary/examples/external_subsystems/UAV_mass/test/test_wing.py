@@ -3,9 +3,9 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_wing import DBFWingMass
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.wing import DBFWingMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestDBFWingMass(unittest.TestCase):
     #Creates a separate problem for tests for each wing design
@@ -23,7 +23,7 @@ class TestDBFWingMass(unittest.TestCase):
         dbf.options[Aircraft.Wing.Dbf.RIB_THICKNESS] = (rib_thicks, 'inch')
 
         #Airfoil path
-        airfoil = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv'))
+        airfoil = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv'))
 
         #Tests for the simple wing design
         if wing_type == "simple":

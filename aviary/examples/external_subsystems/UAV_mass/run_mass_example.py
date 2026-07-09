@@ -3,17 +3,17 @@ import os
 import openmdao.api as om
 
 # DBF mass components
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_fuselage import DBFFuselageMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import DBFVerticalTailMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import DBFHorizontalTailMass
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_wing import DBFWingMass
-from aviary.examples.external_subsystems.dbf_based_mass.mass_summation import MassSummation
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.fuselage import DBFFuselageMass
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.verticaltail import DBFVerticalTailMass
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.horizontaltail import DBFHorizontalTailMass
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.wing import DBFWingMass
+from aviary.examples.external_subsystems.UAV_mass.mass_summation import MassSummation
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
 
 def run_level3_dbf_example():
     
     base = os.path.dirname(__file__)
-    airfoils = os.path.join(base, "option_info")
+    airfoils = os.path.join(base, "utils")
 
     # Absolute paths to the airfoil CSVs
     mh84 = os.path.abspath(os.path.join(airfoils, "mh84-il.csv"))

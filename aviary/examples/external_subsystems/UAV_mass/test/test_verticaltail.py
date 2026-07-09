@@ -3,9 +3,9 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_verticaltail import DBFVerticalTailMass
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.verticaltail import DBFVerticalTailMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestDBFVerticalTailMass(unittest.TestCase):
     def setUp(self):
@@ -13,7 +13,7 @@ class TestDBFVerticalTailMass(unittest.TestCase):
         self.dbf = DBFVerticalTailMass()
 
         self.prob.model.add_subsystem(
-            'dbf_wing', self.dbf, promotes_inputs=['*'], promotes_outputs=['*']
+            'dbf_vtail', self.dbf, promotes_inputs=['*'], promotes_outputs=['*']
         )
 
         # Set required options
@@ -38,7 +38,7 @@ class TestDBFVerticalTailMass(unittest.TestCase):
         self.dbf.options[Aircraft.VerticalTail.Dbf.SHEETING_COVERAGE] = 0.4
         self.dbf.options[Aircraft.VerticalTail.Dbf.SHEETING_LIGHTENING_FACTOR] = 1.0
         airfoil = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv')
+            os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv')
         )        
         self.dbf.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = airfoil
         self.dbf.options[Aircraft.VerticalTail.Dbf.MISC_MASS] = (0.0, 'kg')

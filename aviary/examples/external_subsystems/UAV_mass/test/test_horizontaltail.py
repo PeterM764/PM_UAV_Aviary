@@ -3,11 +3,11 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_horizontaltail import (
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.horizontaltail import (
     DBFHorizontalTailMass,
 )
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestDBFHorizontalTailMass(unittest.TestCase):
     def setUp(self):
@@ -40,7 +40,7 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         self.dbf.options[Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE] = 0.4
         self.dbf.options[Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR] = 1.0
         airfoil = os.path.abspath(
-            os.path.join(os.path.dirname(__file__), '..', 'option_info', 'mh84-il.csv')
+            os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv')
         )        
         self.dbf.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = airfoil
         self.dbf.options[Aircraft.HorizontalTail.Dbf.MISC_MASS] = (0.0, 'kg')

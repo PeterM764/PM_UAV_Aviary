@@ -1,7 +1,7 @@
 import numpy as np
 import os
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
-from aviary.examples.external_subsystems.dbf_based_mass.option_info.materials_database import materials
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.utils.materials_database import materials
 
 '''
 These are the functions currently needed to load the airfoil 
