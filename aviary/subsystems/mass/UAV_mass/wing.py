@@ -14,34 +14,34 @@ from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_m
     ExtendedMetaData,
 )
 
-class DBFWingMass(om.JaxExplicitComponent):
+class WingMass(om.JaxExplicitComponent):
     def initialize(self):
         #simple wing options
-        add_aviary_option(self, Aircraft.Wing.Dbf.TYPE, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.FOAM_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.ROD_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.ROD_RADIUS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.ROD_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.TYPE, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.FOAM_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.ROD_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.ROD_RADIUS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.ROD_THICKNESS, units='m', meta_data=ExtendedMetaData)
 
         #medium wing options
-        add_aviary_option(self, Aircraft.Wing.Dbf.AIRFOIL_PATH, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.RIB_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.NUM_STRINGERS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.Dbf.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.AIRFOIL_PATH, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.RIB_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.NUM_STRINGERS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
 
         self._airfoil_loaded = False
 
@@ -53,17 +53,17 @@ class DBFWingMass(om.JaxExplicitComponent):
         add_aviary_output(self, Aircraft.Wing.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
     
     def compute_primal(self, span, root_chord, wetted_area):
-        load_airfoil_if_needed(self, Aircraft.Wing.Dbf)
+        load_airfoil_if_needed(self, Aircraft.Wing)
         chord = root_chord
-        type = self.options[Aircraft.Wing.Dbf.TYPE]
+        type = self.options[Aircraft.Wing.TYPE]
 
         if type == 'simple':
 
             #Simple wing design mass calculation
-            rod_thickness, units = self.options[Aircraft.Wing.Dbf.ROD_THICKNESS]
-            foam_density, units = self.options[Aircraft.Wing.Dbf.FOAM_DENSITY]
-            radius, units = self.options[Aircraft.Wing.Dbf.ROD_RADIUS]
-            rod_density, units = self.options[Aircraft.Wing.Dbf.ROD_DENSITY]
+            rod_thickness, units = self.options[Aircraft.Wing.ROD_THICKNESS]
+            foam_density, units = self.options[Aircraft.Wing.FOAM_DENSITY]
+            radius, units = self.options[Aircraft.Wing.ROD_RADIUS]
+            rod_density, units = self.options[Aircraft.Wing.ROD_DENSITY]
 
             airfoil_area = self.n_area * chord**2            
             foam_volume = airfoil_area * span
@@ -83,24 +83,24 @@ class DBFWingMass(om.JaxExplicitComponent):
         if type == 'medium':
 
             #medium wing design mass calculation
-            num_spars = self.options[Aircraft.Wing.Dbf.NUM_SPARS]
-            rib_lightening_factor = self.options[Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR]
-            rib_thickness, units = self.options[Aircraft.Wing.Dbf.RIB_THICKNESS]
-            rho_skin, units = self.options[Aircraft.Wing.Dbf.SKIN_DENSITY]
-            spar_outer_diameter, units = self.options[Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER]
-            rho_spar, units = self.options[Aircraft.Wing.Dbf.SPAR_DENSITY]
-            spar_wall_thickness, units = self.options[Aircraft.Wing.Dbf.SPAR_WALL_THICKNESS]
-            glue_factor = self.options[Aircraft.Wing.Dbf.GLUE_FACTOR]
-            stringer_thickness, units = self.options[Aircraft.Wing.Dbf.STRINGER_THICKNESS]
-            rho_stringer, units = self.options[Aircraft.Wing.Dbf.STRINGER_DENSITY]
-            sheeting_thickness, units = self.options[Aircraft.Wing.Dbf.SHEETING_THICKNESS]
-            sheeting_coverage = self.options[Aircraft.Wing.Dbf.SHEETING_COVERAGE]
-            rho_sheeting, units = self.options[Aircraft.Wing.Dbf.SHEETING_DENSITY]
-            sheeting_lightening_factor = self.options[Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR]
-            num_stringer = self.options[Aircraft.Wing.Dbf.NUM_STRINGERS]
+            num_spars = self.options[Aircraft.Wing.NUM_SPARS]
+            rib_lightening_factor = self.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR]
+            rib_thickness, units = self.options[Aircraft.Wing.RIB_THICKNESS]
+            rho_skin, units = self.options[Aircraft.Wing.SKIN_DENSITY]
+            spar_outer_diameter, units = self.options[Aircraft.Wing.SPAR_OUTER_DIAMETER]
+            rho_spar, units = self.options[Aircraft.Wing.SPAR_DENSITY]
+            spar_wall_thickness, units = self.options[Aircraft.Wing.SPAR_WALL_THICKNESS]
+            glue_factor = self.options[Aircraft.Wing.GLUE_FACTOR]
+            stringer_thickness, units = self.options[Aircraft.Wing.STRINGER_THICKNESS]
+            rho_stringer, units = self.options[Aircraft.Wing.STRINGER_DENSITY]
+            sheeting_thickness, units = self.options[Aircraft.Wing.SHEETING_THICKNESS]
+            sheeting_coverage = self.options[Aircraft.Wing.SHEETING_COVERAGE]
+            rho_sheeting, units = self.options[Aircraft.Wing.SHEETING_DENSITY]
+            sheeting_lightening_factor = self.options[Aircraft.Wing.SHEETING_LIGHTENING_FACTOR]
+            num_stringer = self.options[Aircraft.Wing.NUM_STRINGERS]
             #This is used to calculate rho_rib in other components but done differently here
-            #rib_materials = self.options[Aircraft.Wing.Dbf.RIB_MATERIALS]
-            misc_mass, units = self.options[Aircraft.Wing.Dbf.MISC_MASS]
+            #rib_materials = self.options[Aircraft.Wing.RIB_MATERIALS]
+            misc_mass, units = self.options[Aircraft.Wing.MISC_MASS]
 
             cs_area = self.n_area * (chord**2) * rib_lightening_factor
             rho_rib = self.rho_rib.reshape(-1)

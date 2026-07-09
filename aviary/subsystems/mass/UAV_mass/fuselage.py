@@ -10,27 +10,27 @@ from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_m
     ExtendedMetaData,
 )
 
-class DBFFuselageMass(om.JaxExplicitComponent):
+class FuselageMass(om.JaxExplicitComponent):
     def initialize(self):
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.FLOOR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.BULKHEAD_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.FLOOR_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.FLOOR_LENGTH, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.Dbf.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.FLOOR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.BULKHEAD_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.FLOOR_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.FLOOR_LENGTH, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.BULKHEAD_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
 
     def setup(self):
         add_aviary_input(self, Aircraft.Fuselage.LENGTH, units='m', meta_data=ExtendedMetaData, primal_name='length')
@@ -41,25 +41,25 @@ class DBFFuselageMass(om.JaxExplicitComponent):
         add_aviary_output(self, Aircraft.Fuselage.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
 
     def compute_primal(self, length, avg_height, wetted_area, avg_width):
-        rho_floor, units = self.options[Aircraft.Fuselage.Dbf.FLOOR_DENSITY]
-        num_spars = self.options[Aircraft.Fuselage.Dbf.NUM_SPARS]
-        spar_outer_diameter, units = self.options[Aircraft.Fuselage.Dbf.SPAR_OUTER_DIAMETER]
-        rho_spar, units = self.options[Aircraft.Fuselage.Dbf.SPAR_DENSITY]
-        spar_wall_thickness, units = self.options[Aircraft.Fuselage.Dbf.SPAR_WALL_THICKNESS]
-        bulkhead_thickness, units = self.options[Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS]
-        bulkhead_lightening_factor = self.options[Aircraft.Fuselage.Dbf.BULKHEAD_LIGHTENING_FACTOR]
-        rho_skin, units = self.options[Aircraft.Fuselage.Dbf.SKIN_DENSITY]
-        floor_thickness, units = self.options[Aircraft.Fuselage.Dbf.FLOOR_THICKNESS]
-        floor_length, units = self.options[Aircraft.Fuselage.Dbf.FLOOR_LENGTH]
-        glue_factor = self.options[Aircraft.Fuselage.Dbf.GLUE_FACTOR]
-        stringer_thickness, units = self.options[Aircraft.Fuselage.Dbf.STRINGER_THICKNESS]
-        rho_stringer, units = self.options[Aircraft.Fuselage.Dbf.STRINGER_DENSITY]
-        sheeting_thick, units = self.options[Aircraft.Fuselage.Dbf.SHEETING_THICKNESS]
-        sheeting_coverage = self.options[Aircraft.Fuselage.Dbf.SHEETING_COVERAGE]
-        rho_sheeting, units = self.options[Aircraft.Fuselage.Dbf.SHEETING_DENSITY]
-        sheeting_lightening_factor = self.options[Aircraft.Fuselage.Dbf.SHEETING_LIGHTENING_FACTOR]
-        bulkhead_materials = self.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS]
-        misc_mass, units = self.options[Aircraft.Fuselage.Dbf.MISC_MASS]
+        rho_floor, units = self.options[Aircraft.Fuselage.FLOOR_DENSITY]
+        num_spars = self.options[Aircraft.Fuselage.NUM_SPARS]
+        spar_outer_diameter, units = self.options[Aircraft.Fuselage.SPAR_OUTER_DIAMETER]
+        rho_spar, units = self.options[Aircraft.Fuselage.SPAR_DENSITY]
+        spar_wall_thickness, units = self.options[Aircraft.Fuselage.SPAR_WALL_THICKNESS]
+        bulkhead_thickness, units = self.options[Aircraft.Fuselage.BULKHEAD_THICKNESS]
+        bulkhead_lightening_factor = self.options[Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR]
+        rho_skin, units = self.options[Aircraft.Fuselage.SKIN_DENSITY]
+        floor_thickness, units = self.options[Aircraft.Fuselage.FLOOR_THICKNESS]
+        floor_length, units = self.options[Aircraft.Fuselage.FLOOR_LENGTH]
+        glue_factor = self.options[Aircraft.Fuselage.GLUE_FACTOR]
+        stringer_thickness, units = self.options[Aircraft.Fuselage.STRINGER_THICKNESS]
+        rho_stringer, units = self.options[Aircraft.Fuselage.STRINGER_DENSITY]
+        sheeting_thick, units = self.options[Aircraft.Fuselage.SHEETING_THICKNESS]
+        sheeting_coverage = self.options[Aircraft.Fuselage.SHEETING_COVERAGE]
+        rho_sheeting, units = self.options[Aircraft.Fuselage.SHEETING_DENSITY]
+        sheeting_lightening_factor = self.options[Aircraft.Fuselage.SHEETING_LIGHTENING_FACTOR]
+        bulkhead_materials = self.options[Aircraft.Fuselage.BULKHEAD_MATERIALS]
+        misc_mass, units = self.options[Aircraft.Fuselage.MISC_MASS]
 
         rho_rib = jnp.array([(materials.get_item(m)[0]) for m in bulkhead_materials])
         cs_area = avg_width * avg_height * bulkhead_lightening_factor

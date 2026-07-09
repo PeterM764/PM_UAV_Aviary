@@ -3,56 +3,56 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import DBFWingMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import WingMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
-class TestDBFWingMass(unittest.TestCase):
+class TestWingMass(unittest.TestCase):
     #Creates a separate problem for tests for each wing design
     def build_problem(self, wing_type):
         prob = om.Problem()
-        dbf = DBFWingMass()
-        prob.model.add_subsystem('dbf_wing', dbf, promotes_inputs=['*'], promotes_outputs=['*'])
+        wm = WingMass()
+        prob.model.add_subsystem('wing', wm, promotes_inputs=['*'], promotes_outputs=['*'])
 
         #Rib definitions
         ribs = np.array([0] * 15 + [1] * 5)
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.where(ribs != 0, 0.125, 0.125)
 
-        dbf.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
-        dbf.options[Aircraft.Wing.Dbf.RIB_THICKNESS] = (rib_thicks, 'inch')
+        wm.options[Aircraft.Wing.RIB_MATERIALS] = rib_materials
+        wm.options[Aircraft.Wing.RIB_THICKNESS] = (rib_thicks, 'inch')
 
         #Airfoil path
         airfoil = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv'))
 
         #Tests for the simple wing design
         if wing_type == "simple":
-            dbf.options[Aircraft.Wing.Dbf.TYPE] = 'simple'
-            dbf.options[Aircraft.Wing.Dbf.FOAM_DENSITY] = (2.0, 'lb/ft**3')
-            dbf.options[Aircraft.Wing.Dbf.ROD_DENSITY] = (0.056, 'lb/inch**3')
-            dbf.options[Aircraft.Wing.Dbf.ROD_RADIUS] = (0.00635, 'inch')
-            dbf.options[Aircraft.Wing.Dbf.ROD_THICKNESS] = (0.00127, 'inch')
-            dbf.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
+            wm.options[Aircraft.Wing.TYPE] = 'simple'
+            wm.options[Aircraft.Wing.FOAM_DENSITY] = (2.0, 'lb/ft**3')
+            wm.options[Aircraft.Wing.ROD_DENSITY] = (0.056, 'lb/inch**3')
+            wm.options[Aircraft.Wing.ROD_RADIUS] = (0.00635, 'inch')
+            wm.options[Aircraft.Wing.ROD_THICKNESS] = (0.00127, 'inch')
+            wm.options[Aircraft.Wing.AIRFOIL_PATH] = airfoil
 
         #Tests for the medium wing design
         elif wing_type == "medium":
-            dbf.options[Aircraft.Wing.Dbf.TYPE] = 'medium'
-            dbf.options[Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR] = 2/3
-            dbf.options[Aircraft.Wing.Dbf.NUM_SPARS] = 1.1
-            dbf.options[Aircraft.Wing.Dbf.SPAR_OUTER_DIAMETER] = (1, 'inch')       
-            dbf.options[Aircraft.Wing.Dbf.SPAR_WALL_THICKNESS] = (0.0625, 'inch')            
-            dbf.options[Aircraft.Wing.Dbf.SPAR_DENSITY] = (2, 'g/cm**3')          
-            dbf.options[Aircraft.Wing.Dbf.SKIN_DENSITY] = (20, 'g/m**3')          
-            dbf.options[Aircraft.Wing.Dbf.GLUE_FACTOR] = 0.15
-            dbf.options[Aircraft.Wing.Dbf.STRINGER_THICKNESS] = (0.375, 'inch')           
-            dbf.options[Aircraft.Wing.Dbf.STRINGER_DENSITY] = (160, 'kg/m**3')            
-            dbf.options[Aircraft.Wing.Dbf.NUM_STRINGERS] = 2.5
-            dbf.options[Aircraft.Wing.Dbf.SHEETING_THICKNESS] = (0.03125, 'inch')
-            dbf.options[Aircraft.Wing.Dbf.SHEETING_DENSITY] = (160, 'kg/m**3')            
-            dbf.options[Aircraft.Wing.Dbf.SHEETING_COVERAGE] = 0.4
-            dbf.options[Aircraft.Wing.Dbf.SHEETING_LIGHTENING_FACTOR] = 1.0
-            dbf.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
-            dbf.options[Aircraft.Wing.Dbf.MISC_MASS] = (0.0, 'kg')
+            wm.options[Aircraft.Wing.TYPE] = 'medium'
+            wm.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR] = 2/3
+            wm.options[Aircraft.Wing.NUM_SPARS] = 1.1
+            wm.options[Aircraft.Wing.SPAR_OUTER_DIAMETER] = (1, 'inch')       
+            wm.options[Aircraft.Wing.SPAR_WALL_THICKNESS] = (0.0625, 'inch')            
+            wm.options[Aircraft.Wing.SPAR_DENSITY] = (2, 'g/cm**3')          
+            wm.options[Aircraft.Wing.SKIN_DENSITY] = (20, 'g/m**3')          
+            wm.options[Aircraft.Wing.GLUE_FACTOR] = 0.15
+            wm.options[Aircraft.Wing.STRINGER_THICKNESS] = (0.375, 'inch')           
+            wm.options[Aircraft.Wing.STRINGER_DENSITY] = (160, 'kg/m**3')            
+            wm.options[Aircraft.Wing.NUM_STRINGERS] = 2.5
+            wm.options[Aircraft.Wing.SHEETING_THICKNESS] = (0.03125, 'inch')
+            wm.options[Aircraft.Wing.SHEETING_DENSITY] = (160, 'kg/m**3')            
+            wm.options[Aircraft.Wing.SHEETING_COVERAGE] = 0.4
+            wm.options[Aircraft.Wing.SHEETING_LIGHTENING_FACTOR] = 1.0
+            wm.options[Aircraft.Wing.AIRFOIL_PATH] = airfoil
+            wm.options[Aircraft.Wing.MISC_MASS] = (0.0, 'kg')
 
         # Inputs
         prob.setup(force_alloc_complex=True)

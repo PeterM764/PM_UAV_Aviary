@@ -3,17 +3,17 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.verticaltail import DBFVerticalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.verticaltail import VerticalTailMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
-class TestDBFVerticalTailMass(unittest.TestCase):
+class TestVerticalTailMass(unittest.TestCase):
     def setUp(self):
         self.prob = om.Problem()
-        self.dbf = DBFVerticalTailMass()
+        vm = VerticalTailMass()
 
         self.prob.model.add_subsystem(
-            'dbf_vtail', self.dbf, promotes_inputs=['*'], promotes_outputs=['*']
+            'vtail', vm, promotes_inputs=['*'], promotes_outputs=['*']
         )
 
         # Set required options
@@ -21,27 +21,27 @@ class TestDBFVerticalTailMass(unittest.TestCase):
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.where(ribs != 0, 0.125, 0.125)
 
-        self.dbf.options[Aircraft.VerticalTail.Dbf.STRINGER_THICKNESS] = (0.375, 'inch')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials
-        self.dbf.options[Aircraft.VerticalTail.Dbf.RIB_THICKNESS] = (rib_thicks, 'inch')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.RIB_LIGHTENING_FACTOR] = 2/3
-        self.dbf.options[Aircraft.VerticalTail.Dbf.NUM_SPARS] = 1.1
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SPAR_OUTER_DIAMETER] = (1,'inch')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SPAR_DENSITY] = (2.0, 'g/cm**3')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SKIN_DENSITY] = (20.0, 'g/m**3')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.GLUE_FACTOR] = 0.15
-        self.dbf.options[Aircraft.VerticalTail.Dbf.STRINGER_DENSITY] = (160, 'kg/m**3')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.NUM_STRINGERS] = 2.5
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SHEETING_THICKNESS] = (0.03125, 'inch')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SHEETING_DENSITY] = (160.0, 'kg/m**3')
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SHEETING_COVERAGE] = 0.4
-        self.dbf.options[Aircraft.VerticalTail.Dbf.SHEETING_LIGHTENING_FACTOR] = 1.0
+        vm.options[Aircraft.VerticalTail.STRINGER_THICKNESS] = (0.375, 'inch')
+        vm.options[Aircraft.VerticalTail.RIB_MATERIALS] = rib_materials
+        vm.options[Aircraft.VerticalTail.RIB_THICKNESS] = (rib_thicks, 'inch')
+        vm.options[Aircraft.VerticalTail.RIB_LIGHTENING_FACTOR] = 2/3
+        vm.options[Aircraft.VerticalTail.NUM_SPARS] = 1.1
+        vm.options[Aircraft.VerticalTail.SPAR_OUTER_DIAMETER] = (1,'inch')
+        vm.options[Aircraft.VerticalTail.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
+        vm.options[Aircraft.VerticalTail.SPAR_DENSITY] = (2.0, 'g/cm**3')
+        vm.options[Aircraft.VerticalTail.SKIN_DENSITY] = (20.0, 'g/m**3')
+        vm.options[Aircraft.VerticalTail.GLUE_FACTOR] = 0.15
+        vm.options[Aircraft.VerticalTail.STRINGER_DENSITY] = (160, 'kg/m**3')
+        vm.options[Aircraft.VerticalTail.NUM_STRINGERS] = 2.5
+        vm.options[Aircraft.VerticalTail.SHEETING_THICKNESS] = (0.03125, 'inch')
+        vm.options[Aircraft.VerticalTail.SHEETING_DENSITY] = (160.0, 'kg/m**3')
+        vm.options[Aircraft.VerticalTail.SHEETING_COVERAGE] = 0.4
+        vm.options[Aircraft.VerticalTail.SHEETING_LIGHTENING_FACTOR] = 1.0
         airfoil = os.path.abspath(
             os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv')
         )        
-        self.dbf.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = airfoil
-        self.dbf.options[Aircraft.VerticalTail.Dbf.MISC_MASS] = (0.0, 'kg')
+        vm.options[Aircraft.VerticalTail.AIRFOIL_PATH] = airfoil
+        vm.options[Aircraft.VerticalTail.MISC_MASS] = (0.0, 'kg')
 
         self.prob.setup(force_alloc_complex=True)
 

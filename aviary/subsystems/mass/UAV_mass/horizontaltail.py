@@ -12,26 +12,26 @@ from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_m
     ExtendedMetaData,
 )
 
-class DBFHorizontalTailMass(om.JaxExplicitComponent):
+class HorizontalTailMass(om.JaxExplicitComponent):
     def initialize(self):
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.RIB_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.NUM_STRINGERS, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.AIRFOIL_PATH, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.RIB_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.NUM_STRINGERS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
       
         self._airfoil_loaded = False
 
@@ -43,25 +43,25 @@ class DBFHorizontalTailMass(om.JaxExplicitComponent):
         add_aviary_output(self, Aircraft.HorizontalTail.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
 
     def compute_primal(self, span, root_chord, wetted_area):
-        num_spars = self.options[Aircraft.HorizontalTail.Dbf.NUM_SPARS]
-        rib_lightening_factor = self.options[Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR]
-        rib_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.RIB_THICKNESS]
-        rho_skin, units = self.options[Aircraft.HorizontalTail.Dbf.SKIN_DENSITY]
-        spar_outer_diameter, units = self.options[Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER]
-        rho_spar, units = self.options[Aircraft.HorizontalTail.Dbf.SPAR_DENSITY]
-        spar_wall_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS]
-        glue_factor = self.options[Aircraft.HorizontalTail.Dbf.GLUE_FACTOR]
-        stringer_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS]
-        rho_stringer, units = self.options[Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY]
-        sheeting_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS]
-        sheeting_coverage = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE]
-        rho_sheeting, units = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY]
-        sheeting_lightening_factor = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR]
-        num_stringer = self.options[Aircraft.HorizontalTail.Dbf.NUM_STRINGERS]
-        rib_materials = self.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS]
-        misc_mass, units = self.options[Aircraft.HorizontalTail.Dbf.MISC_MASS]
+        num_spars = self.options[Aircraft.HorizontalTail.NUM_SPARS]
+        rib_lightening_factor = self.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR]
+        rib_thickness, units = self.options[Aircraft.HorizontalTail.RIB_THICKNESS]
+        rho_skin, units = self.options[Aircraft.HorizontalTail.SKIN_DENSITY]
+        spar_outer_diameter, units = self.options[Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER]
+        rho_spar, units = self.options[Aircraft.HorizontalTail.SPAR_DENSITY]
+        spar_wall_thickness, units = self.options[Aircraft.HorizontalTail.SPAR_WALL_THICKNESS]
+        glue_factor = self.options[Aircraft.HorizontalTail.GLUE_FACTOR]
+        stringer_thickness, units = self.options[Aircraft.HorizontalTail.STRINGER_THICKNESS]
+        rho_stringer, units = self.options[Aircraft.HorizontalTail.STRINGER_DENSITY]
+        sheeting_thickness, units = self.options[Aircraft.HorizontalTail.SHEETING_THICKNESS]
+        sheeting_coverage = self.options[Aircraft.HorizontalTail.SHEETING_COVERAGE]
+        rho_sheeting, units = self.options[Aircraft.HorizontalTail.SHEETING_DENSITY]
+        sheeting_lightening_factor = self.options[Aircraft.HorizontalTail.SHEETING_LIGHTENING_FACTOR]
+        num_stringer = self.options[Aircraft.HorizontalTail.NUM_STRINGERS]
+        rib_materials = self.options[Aircraft.HorizontalTail.RIB_MATERIALS]
+        misc_mass, units = self.options[Aircraft.HorizontalTail.MISC_MASS]
 
-        load_airfoil_if_needed(self, Aircraft.HorizontalTail.Dbf)
+        load_airfoil_if_needed(self, Aircraft.HorizontalTail)
         chord = root_chord
 
         cs_area = self.n_area * (chord**2) * rib_lightening_factor

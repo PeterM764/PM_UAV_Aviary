@@ -2,42 +2,42 @@ import unittest
 import numpy as np
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.fuselage import DBFFuselageMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.fuselage import FuselageMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
-class TestDBFFuselageMass(unittest.TestCase):
+class TestFuselageMass(unittest.TestCase):
     def setUp(self):
         self.prob = om.Problem()
-        self.dbf = DBFFuselageMass()
+        fm = FuselageMass()
 
         self.prob.model.add_subsystem(
-            'dbf_fuselage', self.dbf, promotes_inputs=['*'], promotes_outputs=['*']
+            'fuselage', fm, promotes_inputs=['*'], promotes_outputs=['*']
         )
 
         ribs = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2])
         bulkhead_materials = np.where(ribs != 0, 'Ply', 'Balsa').tolist()
         rib_thicks = np.where(ribs == 2, 0.25, 0.125)
 
-        self.dbf.options[Aircraft.Fuselage.Dbf.STRINGER_THICKNESS] = (0.375, 'inch')
-        self.dbf.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = bulkhead_materials
-        self.dbf.options[Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS] = (rib_thicks, 'inch')
-        self.dbf.options[Aircraft.Fuselage.Dbf.BULKHEAD_LIGHTENING_FACTOR] = 0.18
-        self.dbf.options[Aircraft.Fuselage.Dbf.NUM_SPARS] = 0.5
-        self.dbf.options[Aircraft.Fuselage.Dbf.SPAR_OUTER_DIAMETER] = (1,'inch')
-        self.dbf.options[Aircraft.Fuselage.Dbf.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
-        self.dbf.options[Aircraft.Fuselage.Dbf.SPAR_DENSITY] = (2.0, 'g/cm**3')
-        self.dbf.options[Aircraft.Fuselage.Dbf.SKIN_DENSITY] = (20.0, 'g/m**3')
-        self.dbf.options[Aircraft.Fuselage.Dbf.GLUE_FACTOR] = 0.08
-        self.dbf.options[Aircraft.Fuselage.Dbf.STRINGER_DENSITY] = (160, 'kg/m**3')
-        self.dbf.options[Aircraft.Fuselage.Dbf.SHEETING_THICKNESS] = (0.03125, 'inch')
-        self.dbf.options[Aircraft.Fuselage.Dbf.SHEETING_DENSITY] = (160.0, 'kg/m**3')
-        self.dbf.options[Aircraft.Fuselage.Dbf.SHEETING_COVERAGE] = 1.0
-        self.dbf.options[Aircraft.Fuselage.Dbf.SHEETING_LIGHTENING_FACTOR] = 0.3
-        self.dbf.options[Aircraft.Fuselage.Dbf.FLOOR_LENGTH] = (2.0, 'ft')
-        self.dbf.options[Aircraft.Fuselage.Dbf.FLOOR_DENSITY] = (340.0, 'kg/m**3')
-        self.dbf.options[Aircraft.Fuselage.Dbf.FLOOR_THICKNESS] = (0.125, 'inch')
-        self.dbf.options[Aircraft.Fuselage.Dbf.MISC_MASS] = (0.0, 'kg')
+        fm.options[Aircraft.Fuselage.STRINGER_THICKNESS] = (0.375, 'inch')
+        fm.options[Aircraft.Fuselage.BULKHEAD_MATERIALS] = bulkhead_materials
+        fm.options[Aircraft.Fuselage.BULKHEAD_THICKNESS] = (rib_thicks, 'inch')
+        fm.options[Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR] = 0.18
+        fm.options[Aircraft.Fuselage.NUM_SPARS] = 0.5
+        fm.options[Aircraft.Fuselage.SPAR_OUTER_DIAMETER] = (1,'inch')
+        fm.options[Aircraft.Fuselage.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
+        fm.options[Aircraft.Fuselage.SPAR_DENSITY] = (2.0, 'g/cm**3')
+        fm.options[Aircraft.Fuselage.SKIN_DENSITY] = (20.0, 'g/m**3')
+        fm.options[Aircraft.Fuselage.GLUE_FACTOR] = 0.08
+        fm.options[Aircraft.Fuselage.STRINGER_DENSITY] = (160, 'kg/m**3')
+        fm.options[Aircraft.Fuselage.SHEETING_THICKNESS] = (0.03125, 'inch')
+        fm.options[Aircraft.Fuselage.SHEETING_DENSITY] = (160.0, 'kg/m**3')
+        fm.options[Aircraft.Fuselage.SHEETING_COVERAGE] = 1.0
+        fm.options[Aircraft.Fuselage.SHEETING_LIGHTENING_FACTOR] = 0.3
+        fm.options[Aircraft.Fuselage.FLOOR_LENGTH] = (2.0, 'ft')
+        fm.options[Aircraft.Fuselage.FLOOR_DENSITY] = (340.0, 'kg/m**3')
+        fm.options[Aircraft.Fuselage.FLOOR_THICKNESS] = (0.125, 'inch')
+        fm.options[Aircraft.Fuselage.MISC_MASS] = (0.0, 'kg')
 
         self.prob.setup(force_alloc_complex=True)
 

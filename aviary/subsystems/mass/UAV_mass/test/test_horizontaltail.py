@@ -4,18 +4,18 @@ import os
 import openmdao.api as om
 
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.horizontaltail import (
-    DBFHorizontalTailMass,
+    HorizontalTailMass,
 )
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
-class TestDBFHorizontalTailMass(unittest.TestCase):
+class TestHorizontalTailMass(unittest.TestCase):
     def setUp(self):
         self.prob = om.Problem()
-        self.dbf = DBFHorizontalTailMass()
+        hm = HorizontalTailMass()
 
         self.prob.model.add_subsystem(
-            'dbf_horizontal_tail', self.dbf, promotes_inputs=['*'], promotes_outputs=['*']
+            'horizontal_tail', hm, promotes_inputs=['*'], promotes_outputs=['*']
         )
 
         # Set required options
@@ -23,27 +23,27 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.where(ribs != 0, 0.125, 0.125)
         
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS] = (0.375, 'inch')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.RIB_THICKNESS] = (rib_thicks, 'inch')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR] = 2/3
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.NUM_SPARS] = 1.1
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER] = (1,'inch')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SPAR_DENSITY] = (2.0, 'g/cm**3')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SKIN_DENSITY] = (20.0, 'g/m**3')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.GLUE_FACTOR] = 0.15
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY] = (160, 'kg/m**3')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.NUM_STRINGERS] = 2.5
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS] = (0.03125, 'inch')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY] = (160.0, 'kg/m**3')
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE] = 0.4
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR] = 1.0
+        hm.options[Aircraft.HorizontalTail.STRINGER_THICKNESS] = (0.375, 'inch')
+        hm.options[Aircraft.HorizontalTail.RIB_MATERIALS] = rib_materials
+        hm.options[Aircraft.HorizontalTail.RIB_THICKNESS] = (rib_thicks, 'inch')
+        hm.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR] = 2/3
+        hm.options[Aircraft.HorizontalTail.NUM_SPARS] = 1.1
+        hm.options[Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER] = (1,'inch')
+        hm.options[Aircraft.HorizontalTail.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
+        hm.options[Aircraft.HorizontalTail.SPAR_DENSITY] = (2.0, 'g/cm**3')
+        hm.options[Aircraft.HorizontalTail.SKIN_DENSITY] = (20.0, 'g/m**3')
+        hm.options[Aircraft.HorizontalTail.GLUE_FACTOR] = 0.15
+        hm.options[Aircraft.HorizontalTail.STRINGER_DENSITY] = (160, 'kg/m**3')
+        hm.options[Aircraft.HorizontalTail.NUM_STRINGERS] = 2.5
+        hm.options[Aircraft.HorizontalTail.SHEETING_THICKNESS] = (0.03125, 'inch')
+        hm.options[Aircraft.HorizontalTail.SHEETING_DENSITY] = (160.0, 'kg/m**3')
+        hm.options[Aircraft.HorizontalTail.SHEETING_COVERAGE] = 0.4
+        hm.options[Aircraft.HorizontalTail.SHEETING_LIGHTENING_FACTOR] = 1.0
         airfoil = os.path.abspath(
             os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv')
         )        
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = airfoil
-        self.dbf.options[Aircraft.HorizontalTail.Dbf.MISC_MASS] = (0.0, 'kg')
+        hm.options[Aircraft.HorizontalTail.AIRFOIL_PATH] = airfoil
+        hm.options[Aircraft.HorizontalTail.MISC_MASS] = (0.0, 'kg')
 
         self.prob.setup(force_alloc_complex=True)
 

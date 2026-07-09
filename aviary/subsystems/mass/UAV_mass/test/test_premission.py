@@ -7,49 +7,49 @@ from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.mass_premission import MassPr
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
-    def set_dbf_defaults(self, comp, AircraftDbf):
+    def set_defaults(self, comp, Aircraft):
         # Spars
-        comp.options[AircraftDbf.NUM_SPARS] = 0.5
-        comp.options[AircraftDbf.SPAR_OUTER_DIAMETER] = (1, "inch")
-        comp.options[AircraftDbf.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
-        comp.options[AircraftDbf.SPAR_DENSITY] = (2.0, 'g/cm**3')
+        comp.options[Aircraft.NUM_SPARS] = 0.5
+        comp.options[Aircraft.SPAR_OUTER_DIAMETER] = (1, "inch")
+        comp.options[Aircraft.SPAR_WALL_THICKNESS] = (0.0625, 'inch')
+        comp.options[Aircraft.SPAR_DENSITY] = (2.0, 'g/cm**3')
 
         # Options that only exist for certain mass components
-        if hasattr(AircraftDbf, "NUM_STRINGERS"):
-            comp.options[AircraftDbf.NUM_STRINGERS] = 4.0
-        if hasattr(AircraftDbf, "FLOOR_THICKNESS"):
-            comp.options[AircraftDbf.FLOOR_THICKNESS] = (0.125, 'inch')
-        if hasattr(AircraftDbf, "FLOOR_DENSITY"):
-            comp.options[AircraftDbf.FLOOR_DENSITY] = (340.0, 'kg/m**3')
-        if hasattr(AircraftDbf, "FLOOR_LENGTH"):
-            comp.options[AircraftDbf.FLOOR_LENGTH] = (2.0, 'ft')
-        if hasattr(AircraftDbf, "STRINGER_THICKNESS"):
-            comp.options[AircraftDbf.STRINGER_THICKNESS] = (0.375, 'inch')
-        if hasattr(AircraftDbf, "STRINGER_DENSITY"):
-            comp.options[AircraftDbf.STRINGER_DENSITY] = (160, 'kg/m**3')
-        if hasattr(AircraftDbf, "BULKHEAD_LIGHTENING_FACTOR"):
-            comp.options[AircraftDbf.BULKHEAD_LIGHTENING_FACTOR] = 0.18
-        if hasattr(AircraftDbf, "FOAM_DENSITY"):
-            comp.options[AircraftDbf.FOAM_DENSITY] = (2.0, 'lb/ft**3')
-        if hasattr(AircraftDbf, "ROD_DENSITY"):
-            comp.options[AircraftDbf.ROD_DENSITY] = (0.056, 'lb/inch**3')
-        if hasattr(AircraftDbf, "ROD_RADIUS"):
-            comp.options[AircraftDbf.ROD_RADIUS] = (0.000529,'ft')
-        if hasattr(AircraftDbf, "ROD_THICKNESS"):
-            comp.options[AircraftDbf.ROD_THICKNESS] = (0.000106,'ft')
+        if hasattr(Aircraft, "NUM_STRINGERS"):
+            comp.options[Aircraft.NUM_STRINGERS] = 4.0
+        if hasattr(Aircraft, "FLOOR_THICKNESS"):
+            comp.options[Aircraft.FLOOR_THICKNESS] = (0.125, 'inch')
+        if hasattr(Aircraft, "FLOOR_DENSITY"):
+            comp.options[Aircraft.FLOOR_DENSITY] = (340.0, 'kg/m**3')
+        if hasattr(Aircraft, "FLOOR_LENGTH"):
+            comp.options[Aircraft.FLOOR_LENGTH] = (2.0, 'ft')
+        if hasattr(Aircraft, "STRINGER_THICKNESS"):
+            comp.options[Aircraft.STRINGER_THICKNESS] = (0.375, 'inch')
+        if hasattr(Aircraft, "STRINGER_DENSITY"):
+            comp.options[Aircraft.STRINGER_DENSITY] = (160, 'kg/m**3')
+        if hasattr(Aircraft, "BULKHEAD_LIGHTENING_FACTOR"):
+            comp.options[Aircraft.BULKHEAD_LIGHTENING_FACTOR] = 0.18
+        if hasattr(Aircraft, "FOAM_DENSITY"):
+            comp.options[Aircraft.FOAM_DENSITY] = (2.0, 'lb/ft**3')
+        if hasattr(Aircraft, "ROD_DENSITY"):
+            comp.options[Aircraft.ROD_DENSITY] = (0.056, 'lb/inch**3')
+        if hasattr(Aircraft, "ROD_RADIUS"):
+            comp.options[Aircraft.ROD_RADIUS] = (0.000529,'ft')
+        if hasattr(Aircraft, "ROD_THICKNESS"):
+            comp.options[Aircraft.ROD_THICKNESS] = (0.000106,'ft')
 
         # Sheeting
-        comp.options[AircraftDbf.SHEETING_THICKNESS] = (0.03125, 'inch')
-        comp.options[AircraftDbf.SHEETING_DENSITY] = (160.0, 'kg/m**3')
-        comp.options[AircraftDbf.SHEETING_COVERAGE] = 1.0
-        comp.options[AircraftDbf.SHEETING_LIGHTENING_FACTOR] = 0.3
+        comp.options[Aircraft.SHEETING_THICKNESS] = (0.03125, 'inch')
+        comp.options[Aircraft.SHEETING_DENSITY] = (160.0, 'kg/m**3')
+        comp.options[Aircraft.SHEETING_COVERAGE] = 1.0
+        comp.options[Aircraft.SHEETING_LIGHTENING_FACTOR] = 0.3
 
         # Skin + glue
-        comp.options[AircraftDbf.SKIN_DENSITY] = (20.0, 'g/m**3')
-        comp.options[AircraftDbf.GLUE_FACTOR] = 0.08
+        comp.options[Aircraft.SKIN_DENSITY] = (20.0, 'g/m**3')
+        comp.options[Aircraft.GLUE_FACTOR] = 0.08
 
         # Misc
-        comp.options[AircraftDbf.MISC_MASS] = (0.0, 'kg')
+        comp.options[Aircraft.MISC_MASS] = (0.0, 'kg')
 
     def setUp(self):
         base = os.path.dirname(os.path.dirname(__file__))
@@ -70,31 +70,31 @@ class TestMassPremission(unittest.TestCase):
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
         rib_thicks = np.ones(20) * 0.125
         
-        #Setting DBF defaults
-        self.set_dbf_defaults(wing, Aircraft.Wing.Dbf)
-        self.set_dbf_defaults(htail, Aircraft.HorizontalTail.Dbf)
-        self.set_dbf_defaults(vtail, Aircraft.VerticalTail.Dbf)
-        self.set_dbf_defaults(fuse, Aircraft.Fuselage.Dbf)
+        #Setting UAV defaults
+        self.set_defaults(wing, Aircraft.Wing)
+        self.set_defaults(htail, Aircraft.HorizontalTail)
+        self.set_defaults(vtail, Aircraft.VerticalTail)
+        self.set_defaults(fuse, Aircraft.Fuselage)
 
         #Setting necessary options
-        wing.options[Aircraft.Wing.Dbf.RIB_MATERIALS] = rib_materials
-        wing.options[Aircraft.Wing.Dbf.RIB_THICKNESS] = (rib_thicks, "inch")
-        wing.options[Aircraft.Wing.Dbf.RIB_LIGHTENING_FACTOR] = 2/3
-        wing.options[Aircraft.Wing.Dbf.AIRFOIL_PATH] = airfoil
-        wing.options[Aircraft.Wing.Dbf.TYPE] = 'medium'
+        wing.options[Aircraft.Wing.RIB_MATERIALS] = rib_materials
+        wing.options[Aircraft.Wing.RIB_THICKNESS] = (rib_thicks, "inch")
+        wing.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR] = 2/3
+        wing.options[Aircraft.Wing.AIRFOIL_PATH] = airfoil
+        wing.options[Aircraft.Wing.TYPE] = 'medium'
 
-        htail.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS] = rib_materials
-        htail.options[Aircraft.HorizontalTail.Dbf.RIB_THICKNESS] = (rib_thicks, "inch")
-        htail.options[Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR] = 2/3
-        htail.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH] = airfoil
+        htail.options[Aircraft.HorizontalTail.RIB_MATERIALS] = rib_materials
+        htail.options[Aircraft.HorizontalTail.RIB_THICKNESS] = (rib_thicks, "inch")
+        htail.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR] = 2/3
+        htail.options[Aircraft.HorizontalTail.AIRFOIL_PATH] = airfoil
 
-        vtail.options[Aircraft.VerticalTail.Dbf.RIB_MATERIALS] = rib_materials
-        vtail.options[Aircraft.VerticalTail.Dbf.RIB_THICKNESS] = (rib_thicks, "inch")
-        vtail.options[Aircraft.VerticalTail.Dbf.RIB_LIGHTENING_FACTOR] = 2/3
-        vtail.options[Aircraft.VerticalTail.Dbf.AIRFOIL_PATH] = airfoil
+        vtail.options[Aircraft.VerticalTail.RIB_MATERIALS] = rib_materials
+        vtail.options[Aircraft.VerticalTail.RIB_THICKNESS] = (rib_thicks, "inch")
+        vtail.options[Aircraft.VerticalTail.RIB_LIGHTENING_FACTOR] = 2/3
+        vtail.options[Aircraft.VerticalTail.AIRFOIL_PATH] = airfoil
         
-        fuse.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = rib_materials
-        fuse.options[Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS] = (rib_thicks, "inch")
+        fuse.options[Aircraft.Fuselage.BULKHEAD_MATERIALS] = rib_materials
+        fuse.options[Aircraft.Fuselage.BULKHEAD_THICKNESS] = (rib_thicks, "inch")
 
         #Setting geometry values:
         self.prob.set_val(Aircraft.Wing.SPAN, 4.667, units="ft")

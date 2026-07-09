@@ -2,10 +2,10 @@ from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables 
 from aviary.subsystems.subsystem_builder import SubsystemBuilder
 from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.mass_premission import MassPremission
 
-class DBFMassBuilder(SubsystemBuilder):
+class MassBuilder(SubsystemBuilder):
     
     """
-    Builder for DBF mass models (wing, htail, vtail, fuselage, ...)
+    Builder for UAV mass models (wing, htail, vtail, fuselage, ...)
     """
 
     def build_pre_mission(self, aviary_inputs, subsystem_options=None):
