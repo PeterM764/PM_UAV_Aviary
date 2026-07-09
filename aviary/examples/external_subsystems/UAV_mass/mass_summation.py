@@ -3,8 +3,8 @@ import jax.numpy as jnp
 
 from aviary.variable_info.variables import Aircraft
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variable_metadata import (
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variable_metadata import (
     ExtendedMetaData,
 )
 
