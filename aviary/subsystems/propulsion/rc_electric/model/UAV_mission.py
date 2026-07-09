@@ -1,7 +1,7 @@
 import numpy as np
 import openmdao.api as om
 
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import \
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import \
     Battery, ElectronicSpeedController, Motor, PropCoefficients, Propeller, PowerImplicit, Vectorization, PowerResiduals
 from aviary.utils.aviary_values import AviaryValues
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
@@ -81,6 +81,7 @@ class RCPropMission(om.Group):
                 ],
             promotes_outputs=[
                 Dynamic.Vehicle.Propulsion.RPM,
+                ('current_constraint', 'current_constraint_nominal'),
                 ]
         )
 
@@ -191,18 +192,29 @@ class RCPropMission(om.Group):
             promotes_inputs=[
                 Aircraft.Battery.VOLTAGE,
                 Aircraft.Battery.RESISTANCE,
-                (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                #(Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
             ]
         )
 
+        self.connect('battery_max.voltage_out', 'esc_max.voltage_in')
+
+        self.connect('battery_max.power', 'power_net_max.power_batt')
+        self.connect('esc_max.power', 'power_net_max.power_esc')
+       
+        
         self.add_subsystem(
             'esc_max',
             ElectronicSpeedController(num_nodes=nn),
             promotes_inputs=[
                 (Dynamic.Vehicle.Propulsion.THROTTLE, 'full_throttle'),
-                (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
             ]
         )
+
+        self.connect('esc_max.voltage_out', 'motor_max.voltage_in')
+        self.connect('esc_max.current_out', 'motor_max.current')
 
         self.add_subsystem(
             'motor_max',
@@ -212,7 +224,8 @@ class RCPropMission(om.Group):
                 Aircraft.Engine.Motor.MAX_CONT_CURRENT,
                 Aircraft.Engine.Motor.RESISTANCE,
                 Aircraft.Engine.Motor.KV,
-                (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
                 ],
             promotes_outputs=[
                 (Dynamic.Vehicle.Propulsion.RPM, Dynamic.Vehicle.Propulsion.RPM_MAX),
@@ -274,25 +287,21 @@ class RCPropMission(om.Group):
                     ('power_net','power_net_max'),
                 ]
             )
-        else:
-            self.add_subsystem(
-                'power_net_max',
-                PowerImplicit(num_nodes=nn),
-                promotes_inputs=[
-                    (Dynamic.Vehicle.Propulsion.PROP_POWER, Dynamic.Vehicle.Propulsion.PROP_POWER_MAX),
-                ],
-                promotes_outputs=[
-                    (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                ]
-            )
+            self.connect('battery_max.power', 'power_net_max.power_batt')
+            self.connect('esc_max.power', 'power_net_max.power_esc')
+            self.connect('motor_max.power', 'power_net_max.power_motor')
+
+       
+
+
+
 
         self.connect('battery.voltage_out', 'esc.voltage_in')
         self.connect('esc.voltage_out', 'motor.voltage_in')
         self.connect('esc.current_out', 'motor.current')
 
-        self.connect('battery_max.voltage_out', 'esc_max.voltage_in')
-        self.connect('esc_max.voltage_out', 'motor_max.voltage_in')
-        self.connect('esc_max.current_out', 'motor_max.current')
+       
+        
         #TODO Alex from phase builder base import add_control
 
        
@@ -300,9 +309,7 @@ class RCPropMission(om.Group):
         self.connect('esc.power', 'power_net.power_esc')
         self.connect('motor.power', 'power_net.power_motor')
 
-        self.connect('battery_max.power', 'power_net_max.power_batt')
-        self.connect('esc_max.power', 'power_net_max.power_esc')
-        self.connect('motor_max.power', 'power_net_max.power_motor')
+        
 
 
 
@@ -311,6 +318,9 @@ class RCPropMission(om.Group):
         if user_feedforward:
             # Keep electrical power mismatch near zero 
             self.add_constraint('power_net', lower=-0.05, upper=0.05, ref=1e2, units='W')
+
+            # Enforce motor continuous-current limit on nominal branch.
+            self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
 
             # Force commanded cruise RPM to match motor-computed RPM.
             self.add_constraint('rpm_balance.rpm_defect', lower=-0.1, upper=0.1, ref=1e2, units='rev/s')
@@ -341,6 +351,9 @@ class RCPropMission(om.Group):
             self.nonlinear_solver.options["err_on_non_converge"] = False
 
             self.linear_solver = om.LinearBlockGS()
+
+            # Enforce motor continuous-current limit on nominal branch in solver mode.
+            self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
 
         
         self.add_constraint('prop.rpm_constraint', upper=0.0, ref=1e2, units='rev/s')

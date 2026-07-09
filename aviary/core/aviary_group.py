@@ -1361,6 +1361,7 @@ class AviaryGroup(om.Group):
         for subsystem in all_subsystems:
             dv_dict = subsystem.get_design_vars(aviary_inputs=self.aviary_inputs)
             for dv_name, dv_dict in dv_dict.items():
+                dv_dict = {key: value for key, value in dv_dict.items() if key != 'val'}
                 self.add_design_var(dv_name, **dv_dict)
 
         if self.mission_method is SOLVED_2DOF:  # TODO: to be removed soon

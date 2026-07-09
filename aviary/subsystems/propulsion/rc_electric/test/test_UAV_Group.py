@@ -5,7 +5,7 @@ import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 
 from aviary.subsystems.atmosphere.atmosphere import Atmosphere
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import RCPropGroup, Vectorization, PropCoefficients
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import RCPropGroup, Vectorization, PropCoefficients
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.variable_info.variables import Settings
 

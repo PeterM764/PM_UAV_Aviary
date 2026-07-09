@@ -1,18 +1,18 @@
 import unittest
 import aviary.api as av
-from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
+from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
 import numpy as np
 import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Battery
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Motor
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Propeller
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import ElectronicSpeedController
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Vectorization
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import PropCoefficients
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import PowerResiduals
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import PowerImplicit
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import Battery
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import Motor
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import Propeller
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import ElectronicSpeedController
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import Vectorization
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import PropCoefficients
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import PowerResiduals
+from aviary.subsystems.propulsion.rc_electric.model.UAV_performance import PowerImplicit
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 
 class TestBattery(unittest.TestCase):
@@ -120,6 +120,8 @@ class TestPropeller(unittest.TestCase):
         prop_power = prob.get_val(Dynamic.Vehicle.Propulsion.PROP_POWER, units='W')
         rpm_constraint = prob.get_val('rpm_constraint', units='rev/s')
         expected_thrust = np.full(nn, 8158.136)
+
+
         assert_near_equal(thrust, expected_thrust, tolerance=1e-5)
         assert_near_equal(prop_power, np.full(nn, 2072190.544), tolerance=1e-3)
         assert_near_equal(rpm_constraint, np.full(nn, 875.0), tolerance=1e-8)
@@ -155,6 +157,8 @@ class TestESC(unittest.TestCase):
         efficiency = prob.get_val('efficiency', units='unitless')
         voltage_out = prob.get_val('voltage_out', units='V')
         power = prob.get_val('power', units='W')
+
+        
         assert_near_equal(current_out, np.full(nn, 10.0), tolerance=1e-5)
         assert_near_equal(efficiency, np.full(nn, 0.9448241882511333), tolerance=1e-6)
         assert_near_equal(voltage_out, np.full(nn, 16.78007758254013), tolerance=1e-6)

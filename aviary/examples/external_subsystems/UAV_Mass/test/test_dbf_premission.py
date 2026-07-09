@@ -3,8 +3,8 @@ import numpy as np
 import openmdao.api as om
 import os 
 
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_premission import MassPremission
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.UAV_Mass.dbf_mass_premission import MassPremission
+from aviary.examples.external_subsystems.UAV_Mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
     def set_dbf_defaults(self, comp, AircraftDbf):

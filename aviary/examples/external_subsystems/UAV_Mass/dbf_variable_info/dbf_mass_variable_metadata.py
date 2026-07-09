@@ -4,7 +4,7 @@ Metadata for DBF variables defined in dbf_mass_variables.py
 from copy import deepcopy
 
 import aviary.api as av
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
+from aviary.examples.external_subsystems.UAV_Mass.dbf_variable_info.dbf_mass_variables import Aircraft
 
 ExtendedMetaData = deepcopy(av.CoreMetaData)
 

@@ -6,7 +6,7 @@ import openmdao.api as om
 from openmdao.utils.testing_utils import use_tempdirs
 from packaging import version
 
-from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
+from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
 from aviary.subsystems.propulsion.propulsion_mission import PropulsionMission, PropulsionSum
 from aviary.subsystems.propulsion.utils import build_engine_deck
 from aviary.utils.aviary_values import AviaryValues

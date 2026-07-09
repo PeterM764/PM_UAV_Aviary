@@ -1,12 +1,11 @@
-from copy import deepcopy
 import numpy as np
 import openmdao.api as om
 import aviary.api as av
-from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft as DBFAircraft
-from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
-from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
+from aviary.models.aircraft.small_uav.phases.UAV_energy_phase import get_cruise_phase_info
+from aviary.examples.external_subsystems.UAV_Mass.dbf_mass_builder import DBFMassBuilder
+from aviary.examples.external_subsystems.UAV_Mass.dbf_variable_info.dbf_mass_variables import Aircraft as DBFAircraft
+from aviary.examples.external_subsystems.UAV_Aero.custom_aero_builder import CustomAeroBuilder
+from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
 from aviary.variable_info.dbf_variables import Aircraft
 
 class MeanPowerComp(om.ExplicitComponent):
@@ -22,59 +21,12 @@ class MeanPowerComp(om.ExplicitComponent):
 # defaults to feedforward power balance; change to power_balance_mode='solver' for solver-based power balance
 rc_prop = RCBuilder()
 
-phase_info = deepcopy(phase_info)
+phase_info = get_cruise_phase_info(
+    throttle_enforcement='bounded' if rc_prop.power_balance_mode == 'solver' else 'control',
+    throttle_bounds=((0.2, 0.9), 'unitless'),
+    external_subsystems=[CustomAeroBuilder()],
+)
 
-phase_info.pop('climb')
-phase_info.pop('descent')
-
-#Pre-Mission Model
-phase_info['cruise']['external_subsystems'] = [CustomAeroBuilder()]
-
-phase_info['cruise']['subsystem_options']['aerodynamics'] = {
-    'method': 'external',
-}
-
-
-phase_info['cruise']['user_options'].update({
-    'num_segments': 5,
-    'order': 3,
-
-    #Fixed Speed
-    # Cruise at ~60 ft/s (18.29 m/s, mach ~0.0538). Operating point is throttle ~0.54,
-    'mach_optimize': False,
-    'mach_initial': (0.0538, 'unitless'),
-    'mach_final': (0.0538, 'unitless'),
-
-    # Level Cruise
-    'altitude_optimize': False,
-    'altitude_initial': (200.0, 'ft'),
-    'altitude_final': (200.0, 'ft'),
-
-    #Distance_Target
-    'distance_initial': (0.0, 'm'),
-    'distance_ref': (1000.0, 'm'),
-    'target_distance': (1000.0, 'm'),
-
-    #Scaling
-    'mass_ref': (4.0, 'kg'),
-    
-    # Keep throttle setup consistent with selected power-balance mode.
-    'throttle_enforcement': 'bounded' if rc_prop.power_balance_mode == 'solver' else 'control',
-    'throttle_bounds': ((0.2, 0.9), 'unitless'),
-
-    #Time 
-    'time_initial': (0.0, 's'),
-    'time_duration_bounds': ((20,90.0), 's'),
-})
-
-# Remove legacy options that are not accepted by the current cruise phase builder.
-phase_info['cruise']['user_options'].pop('electric_current_polynomial_order', None)
-phase_info['cruise']['user_options'].pop('electric_current_max_polynomial_order', None)
-phase_info['cruise']['initial_guesses'] = {
-    'time': ([0.0, 54.7], 's'),   # 1 km at ~18.29 m/s (60 ft/s) ~= 54.7 s
-    'distance': ([0.0, 1000.0], 'm'),
-    'mach': ([0.0538, 0.0538], 'unitless'),
-}
 
 # Aviary problem
 prob = av.AviaryProblem(verbosity=0)
@@ -200,7 +152,7 @@ prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 2.0, units='A')
 
 prob.set_val('traj.cruise.controls:throttle', 0.6, units='unitless')
 prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
-prob.set_val('traj.cruise.controls:current_flow_max', 65, units='A')
+prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 65.0, units='A')
 prob.set_val('traj.cruise.controls:rpm_lookup', 95, units='rev/s')
 prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
 
@@ -210,5 +162,3 @@ prob.run_aviary_problem(run_driver=False, suppress_solver_print=True, make_plots
 
 
 prob.run_aviary_problem(run_driver=True, suppress_solver_print=True, make_plots=False)
-
-
