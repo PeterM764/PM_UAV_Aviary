@@ -3,11 +3,11 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.horizontaltail import (
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.horizontaltail import (
     DBFHorizontalTailMass,
 )
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestDBFHorizontalTailMass(unittest.TestCase):
     def setUp(self):
@@ -48,9 +48,9 @@ class TestDBFHorizontalTailMass(unittest.TestCase):
         self.prob.setup(force_alloc_complex=True)
 
         # Inputs to the component (defined via add_aviary_input)
-        self.prob.set_val(Aircraft.HorizontalTail.ROOT_CHORD, val=20, units='inch')
-        self.prob.set_val(Aircraft.HorizontalTail.SPAN, val=4.667, units='ft')
-        self.prob.set_val(Aircraft.HorizontalTail.WETTED_AREA, val=0.85, units='m**2')
+        self.prob.set_val(Aircraft.HorizontalTail.ROOT_CHORD, 20, units='inch')
+        self.prob.set_val(Aircraft.HorizontalTail.SPAN, 4.667, units='ft')
+        self.prob.set_val(Aircraft.HorizontalTail.WETTED_AREA, 0.85, units='m**2')
 
     def test_mass_output(self):
         self.prob.run_model()

@@ -3,9 +3,9 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.wing import DBFWingMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import DBFWingMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestDBFWingMass(unittest.TestCase):
     #Creates a separate problem for tests for each wing design
@@ -56,9 +56,9 @@ class TestDBFWingMass(unittest.TestCase):
 
         # Inputs
         prob.setup(force_alloc_complex=True)
-        prob.set_val(Aircraft.Wing.ROOT_CHORD, val=20, units='inch')
-        prob.set_val(Aircraft.Wing.SPAN, val=4.667, units='ft')
-        prob.set_val(Aircraft.Wing.WETTED_AREA, val=0.85, units='m**2')
+        prob.set_val(Aircraft.Wing.ROOT_CHORD, 20, units='inch')
+        prob.set_val(Aircraft.Wing.SPAN, 4.667, units='ft')
+        prob.set_val(Aircraft.Wing.WETTED_AREA, 0.85, units='m**2')
 
         return prob
 

@@ -3,12 +3,12 @@ import os
 import openmdao.api as om
 
 # DBF mass components
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.fuselage import DBFFuselageMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.verticaltail import DBFVerticalTailMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.horizontaltail import DBFHorizontalTailMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.wing import DBFWingMass
-from aviary.examples.external_subsystems.UAV_mass.mass_summation import MassSummation
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.fuselage import DBFFuselageMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.verticaltail import DBFVerticalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.horizontaltail import DBFHorizontalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import DBFWingMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.mass_summation import MassSummation
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 def run_level3_dbf_example():
     
@@ -28,25 +28,25 @@ def run_level3_dbf_example():
     bulkhead_materials = np.where(ribs != 0, 'Ply', 'Balsa').tolist()
     rib_thicks = np.where(ribs == 2, 0.25, 0.125)
     fuselage.options[Aircraft.Fuselage.Dbf.BULKHEAD_MATERIALS] = bulkhead_materials
-    fuselage.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, val=rib_thicks, units='inch')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.NUM_SPARS, val=0.5, units='unitless')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_LIGHTENING_FACTOR, val=0.18, units='unitless')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_COVERAGE, val=1, units='unitless')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_DENSITY, val=160, units='kg/m**3')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_LIGHTENING_FACTOR, val=0.3, units='unitless')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_THICKNESS, val=0.03125, units='inch')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.GLUE_FACTOR, val=0.08, units='unitless')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.STRINGER_DENSITY, val=160, units='kg/m**3')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.STRINGER_THICKNESS, val=0.375, units='inch')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.FLOOR_LENGTH, val=2, units='ft')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.FLOOR_DENSITY, val=340, units='kg/m**3')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.FLOOR_THICKNESS, val=0.125, units='inch')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SKIN_DENSITY, val=20, units='g/m**2')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SPAR_DENSITY, val=2, units='g/cm**3')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SPAR_OUTER_DIAMETER, val=1, units='inch')
-    fuselage.set_option(Aircraft.Fuselage.Dbf.SPAR_WALL_THICKNESS, val=0.0625, units='inch')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_THICKNESS, units='inch')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.NUM_SPARS, units='unitless')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.BULKHEAD_LIGHTENING_FACTOR, units='unitless')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_COVERAGE, units='unitless')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_DENSITY, units='kg/m**3')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_LIGHTENING_FACTOR, units='unitless')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SHEETING_THICKNESS, units='inch')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.GLUE_FACTOR, units='unitless')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.STRINGER_DENSITY, units='kg/m**3')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.STRINGER_THICKNESS, units='inch')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.FLOOR_LENGTH, units='ft')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.FLOOR_DENSITY, units='kg/m**3')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.FLOOR_THICKNESS, units='inch')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SKIN_DENSITY, units='g/m**2')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SPAR_DENSITY, units='g/cm**3')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SPAR_OUTER_DIAMETER, units='inch')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.SPAR_WALL_THICKNESS, units='inch')
     # Add the missing MISC_MASS option
-    fuselage.set_option(Aircraft.Fuselage.Dbf.MISC_MASS, val=0.0, units='kg')
+    fuselage.set_option(Aircraft.Fuselage.Dbf.MISC_MASS, units='kg')
     model.add_subsystem('fuselage', fuselage, promotes_inputs=['*'], promotes_outputs=['*'])
 
     # Configure vertical tail
@@ -130,20 +130,20 @@ def run_level3_dbf_example():
     # Setup + Run
     prob.setup()
 
-    prob.set_val(Aircraft.Fuselage.LENGTH, 4, units='ft')
-    prob.set_val(Aircraft.Fuselage.AVG_HEIGHT, 5, units='inch')
-    prob.set_val(Aircraft.Fuselage.AVG_WIDTH, 4, units='inch')
-    prob.set_val(Aircraft.Fuselage.WETTED_AREA, 904, units='inch**2')
+    prob.set_val(Aircraft.Fuselage.LENGTH, 4.0, units='ft')
+    prob.set_val(Aircraft.Fuselage.AVG_HEIGHT, 5.0, units='inch')
+    prob.set_val(Aircraft.Fuselage.AVG_WIDTH, 4.0, units='inch')
+    prob.set_val(Aircraft.Fuselage.WETTED_AREA, 904.0, units='inch**2')
 
     prob.set_val(Aircraft.VerticalTail.ROOT_CHORD, 8.75, units='inch')
-    prob.set_val(Aircraft.VerticalTail.SPAN, 1, units='ft')
+    prob.set_val(Aircraft.VerticalTail.SPAN, 1.0, units='ft')
     prob.set_val(Aircraft.VerticalTail.WETTED_AREA, 0.139, units='m**2')
 
     prob.set_val(Aircraft.HorizontalTail.ROOT_CHORD, 8.75, units='inch')
-    prob.set_val(Aircraft.HorizontalTail.SPAN, 28, units='inch')
+    prob.set_val(Aircraft.HorizontalTail.SPAN, 28.0, units='inch')
     prob.set_val(Aircraft.HorizontalTail.WETTED_AREA, 0.352, units='m**2')
 
-    prob.set_val(Aircraft.Wing.ROOT_CHORD, 20, units='inch')
+    prob.set_val(Aircraft.Wing.ROOT_CHORD, 20.0, units='inch')
     prob.set_val(Aircraft.Wing.SPAN, 4.667, units='ft')
     prob.set_val(Aircraft.Wing.WETTED_AREA, 0.85, units='m**2')
 

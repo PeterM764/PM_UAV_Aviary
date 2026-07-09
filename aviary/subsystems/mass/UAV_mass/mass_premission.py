@@ -1,11 +1,11 @@
 import openmdao.api as om
 import aviary.api as av
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.wing import DBFWingMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.fuselage import DBFFuselageMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.horizontaltail import DBFHorizontalTailMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.verticaltail import DBFVerticalTailMass
-from aviary.examples.external_subsystems.UAV_mass.mass_summation import MassSummation
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import DBFWingMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.fuselage import DBFFuselageMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.horizontaltail import DBFHorizontalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.verticaltail import DBFVerticalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.mass_summation import MassSummation
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class MassPremission(om.Group):
     def initialize(self):
