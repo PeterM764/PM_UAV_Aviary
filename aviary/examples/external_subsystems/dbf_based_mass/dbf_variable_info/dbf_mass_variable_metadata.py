@@ -199,7 +199,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.Dbf.SKIN_DENSITY,
-    units='lbm/inch**2',
+    units='lbm/inch**3',
     desc='Surface density of fuselage skin',
     default_value=0.02,
     meta_data = ExtendedMetaData,
@@ -402,7 +402,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.HorizontalTail.Dbf.SKIN_DENSITY,
-    units='lbm/inch**2',
+    units='lbm/inch**3',
     desc='Surface density of wing skin',
     default_value=0.02,
     meta_data = ExtendedMetaData,
@@ -603,7 +603,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.VerticalTail.Dbf.SKIN_DENSITY,
-    units='lbm/inch**2',
+    units='lbm/inch**3',
     desc='Surface density of wing skin',
     default_value=0.02,
     meta_data = ExtendedMetaData,
@@ -842,7 +842,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Wing.Dbf.SKIN_DENSITY,
-    units='lbm/inch**2',
+    units='lbm/inch**3',
     desc='Surface density of wing skin',
     default_value=0.02,
     meta_data = ExtendedMetaData,

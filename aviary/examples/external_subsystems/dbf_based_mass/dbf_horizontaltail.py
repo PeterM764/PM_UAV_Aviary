@@ -3,10 +3,9 @@ import os
 import jax.numpy as jnp
 import openmdao.api as om
 
-from openmdao.utils.units import convert_units
 from aviary.examples.external_subsystems.dbf_based_mass.option_info.materials_database import materials
-from aviary.utils.utils import wrapped_convert_units
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
+from aviary.examples.external_subsystems.dbf_based_mass.utils.load_airfoil import load_airfoil_if_needed
 
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variables import Aircraft
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_mass_variable_metadata import (
@@ -15,24 +14,25 @@ from aviary.examples.external_subsystems.dbf_based_mass.dbf_variable_info.dbf_ma
 
 class DBFHorizontalTailMass(om.JaxExplicitComponent):
     def initialize(self):
-        self.options.declare(Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH, types=str, allow_none=False)
-        self.options.declare(Aircraft.HorizontalTail.Dbf.RIB_MATERIALS, types=(list,))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.NUM_SPARS, 'unitless'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER, 'm'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SPAR_DENSITY, 'kg/m**3'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS, 'm'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, 'm'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, 'unitless'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SKIN_DENSITY, 'kg/m**2'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.GLUE_FACTOR, 'unitless'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY, 'kg/m**3'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS, 'm'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS, 'm'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY, 'kg/m**3'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE, 'unitless'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR, 'unitless'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.NUM_STRINGERS, 'unitless'))
-        self.options.declare(**make_units_option(Aircraft.HorizontalTail.Dbf.MISC_MASS, 'kg'))
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.RIB_MATERIALS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.NUM_SPARS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SPAR_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS, units='m', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.NUM_STRINGERS, units='unitless', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.Dbf.MISC_MASS, units='kg', meta_data=ExtendedMetaData)
+      
         self._airfoil_loaded = False
 
     def setup(self):
@@ -43,25 +43,26 @@ class DBFHorizontalTailMass(om.JaxExplicitComponent):
         add_aviary_output(self, Aircraft.HorizontalTail.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
 
     def compute_primal(self, span, root_chord, wetted_area):
-        self._load_airfoil_if_needed()
-        chord = root_chord
         num_spars = self.options[Aircraft.HorizontalTail.Dbf.NUM_SPARS]
         rib_lightening_factor = self.options[Aircraft.HorizontalTail.Dbf.RIB_LIGHTENING_FACTOR]
-        rib_thickness = self.options[Aircraft.HorizontalTail.Dbf.RIB_THICKNESS]
-        rho_skin = self.options[Aircraft.HorizontalTail.Dbf.SKIN_DENSITY]
-        spar_outer_diameter = self.options[Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER]
-        rho_spar = self.options[Aircraft.HorizontalTail.Dbf.SPAR_DENSITY]
-        spar_wall_thickness = self.options[Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS]
+        rib_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.RIB_THICKNESS]
+        rho_skin, units = self.options[Aircraft.HorizontalTail.Dbf.SKIN_DENSITY]
+        spar_outer_diameter, units = self.options[Aircraft.HorizontalTail.Dbf.SPAR_OUTER_DIAMETER]
+        rho_spar, units = self.options[Aircraft.HorizontalTail.Dbf.SPAR_DENSITY]
+        spar_wall_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.SPAR_WALL_THICKNESS]
         glue_factor = self.options[Aircraft.HorizontalTail.Dbf.GLUE_FACTOR]
-        stringer_thickness = self.options[Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS]
-        rho_stringer = self.options[Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY]
-        sheeting_thickness = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS]
+        stringer_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.STRINGER_THICKNESS]
+        rho_stringer, units = self.options[Aircraft.HorizontalTail.Dbf.STRINGER_DENSITY]
+        sheeting_thickness, units = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_THICKNESS]
         sheeting_coverage = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_COVERAGE]
-        rho_sheeting = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY]
+        rho_sheeting, units = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_DENSITY]
         sheeting_lightening_factor = self.options[Aircraft.HorizontalTail.Dbf.SHEETING_LIGHTENING_FACTOR]
         num_stringer = self.options[Aircraft.HorizontalTail.Dbf.NUM_STRINGERS]
-        rib_materials = self.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS]  # stays string key
-        misc_mass = self.options[Aircraft.HorizontalTail.Dbf.MISC_MASS]
+        rib_materials = self.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS]
+        misc_mass, units = self.options[Aircraft.HorizontalTail.Dbf.MISC_MASS]
+
+        load_airfoil_if_needed(self, Aircraft.HorizontalTail.Dbf)
+        chord = root_chord
 
         cs_area = self.n_area * (chord**2) * rib_lightening_factor
         rho_rib = jnp.array([(materials.get_item(m)[0]) for m in rib_materials])
@@ -88,106 +89,3 @@ class DBFHorizontalTailMass(om.JaxExplicitComponent):
         total_mass = (1 + glue_factor) * structural_mass + misc_mass
 
         return total_mass
-    
-    def set_option(self, key, val=None, units=None):
-        """
-        Store the option value in SI units.
-        """
-        if units is not None:
-            val = self._convert(val, units)
-
-        self.options[key] = val
-
-    def load_airfoil_csv(self, file_path, delimiter=',', header=False):
-        if not os.path.exists(file_path):
-            raise FileNotFoundError(f"Airfoil CSV file '{file_path}' not found.")
-
-        skip = 1 if header else 0
-        data = np.loadtxt(file_path, delimiter=delimiter, skiprows=skip)
-
-        if data.shape[1] < 2:
-            raise ValueError('CSV must contain at least two columns for x and y coordinates.')
-
-        x = data[:, 0]
-        y = data[:, 1]
-
-        x_min = np.min(x)
-        x_max = np.max(x)
-        chord_length = x_max - x_min
-
-        if chord_length <= 0:
-            raise ValueError('Invalid airfoil: chord length must be > 0.')
-
-        x_normalized = (x - x_min) / chord_length
-        y_normalized = y / chord_length
-
-        return x_normalized, y_normalized
-
-    def _convert(self, val, units):
-        """
-        Convert a value with units into SI units.
-        """
-        if units is None:
-            return val
-
-        si_units = {
-            'inch': 'm',
-            'in': 'm',
-            'ft': 'm',
-            'g/cm**3': 'kg/m**3',
-            'g/m**2': 'kg/m**2',
-            'unitless': None,
-        }
-
-        target = si_units.get(units, units)
-
-        if target is None:
-            return val
-
-        return convert_units(val, units, target)
-    
-    def _load_airfoil_if_needed(self):
-
-        if getattr(self, "_airfoil_loaded", False):
-            return
-
-        path = self.options[Aircraft.HorizontalTail.Dbf.AIRFOIL_PATH]
-        path = os.path.abspath(path)
-
-        x, y = self.load_airfoil_csv(path, header=True)
-        self.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
-
-        rib_materials = self.options[Aircraft.HorizontalTail.Dbf.RIB_MATERIALS]
-        self.rho_rib = np.array([materials.get_item(m)[0] for m in rib_materials])
-
-        rib_thickness = self.options[Aircraft.HorizontalTail.Dbf.RIB_THICKNESS]
-        if len(rib_materials) != len(rib_thickness):
-            raise ValueError("Mismatch in rib materials/thicknesses")
-
-        self._airfoil_loaded = True
-    
-def make_units_option(var_key, units=None, default_val=None, desc=None, meta_data=ExtendedMetaData):
-    meta = meta_data[var_key]
-    default_units = meta['units']
-
-    if units is None:
-        units = default_units
-    if desc is None:
-        desc = meta['desc']
-    if default_val is None:
-        default_val = meta['default_value']
-
-    # Capture units locally so it's always available
-    def set_func(meta_unused, val):
-        # val might be tuple or raw value
-        if isinstance(val, tuple):
-            return wrapped_convert_units(val, units)
-        else:
-            return wrapped_convert_units((val, units), units)
-
-    return {
-        'name': var_key,
-        'default': default_val,
-        'set_function': set_func,
-        'desc': desc,
-    }
