@@ -79,8 +79,31 @@ class CruiseExample:
         # add_design_var won't overwrite. Drop the existing entries, then re-add at UAV scale.
         del prob.model._static_design_vars[Aircraft.Design.GROSS_MASS]
         del prob.model._static_design_vars['mission:gross_mass']
-        prob.model.add_design_var(Aircraft.Design.GROSS_MASS, units='kg', lower=2.0, upper=20.0, ref=7.0)
+        # prob.model.add_design_var(Aircraft.Design.GROSS_MASS, units='kg', lower=2.0, upper=20.0, ref=7.0)
         prob.model.add_design_var('mission:gross_mass', units='kg', lower=2.0, upper=20.0, ref=7.0)
+
+        # Explicit mass geometry design variables (UAV-scale bounds/refs).
+        prob.model.add_design_var(DBFAircraft.Wing.SPAN, units='m', lower=0.4, upper=4.0, ref=2.0)
+        prob.model.add_design_var(DBFAircraft.Wing.ROOT_CHORD, units='m', lower=0.08, upper=1.2, ref=0.4)
+        prob.model.add_design_var(DBFAircraft.Wing.WETTED_AREA, units='m**2', lower=0.2, upper=4.0, ref=1.0)
+
+        prob.model.add_design_var(DBFAircraft.HorizontalTail.SPAN, units='m', lower=0.3, upper=2.5, ref=1.0)
+        prob.model.add_design_var(DBFAircraft.HorizontalTail.ROOT_CHORD, units='m', lower=0.08, upper=0.8, ref=0.3)
+        prob.model.add_design_var(DBFAircraft.HorizontalTail.WETTED_AREA, units='m**2', lower=0.05, upper=2.0, ref=0.5)
+
+        prob.model.add_design_var(DBFAircraft.VerticalTail.SPAN, units='m', lower=0.3, upper=2.5, ref=1.0)
+        prob.model.add_design_var(DBFAircraft.VerticalTail.ROOT_CHORD, units='m', lower=0.08, upper=0.8, ref=0.3)
+        prob.model.add_design_var(DBFAircraft.VerticalTail.WETTED_AREA, units='m**2', lower=0.05, upper=2.0, ref=0.5)
+
+        prob.model.add_design_var(DBFAircraft.Fuselage.LENGTH, units='m', lower=0.8, upper=4.0, ref=2.0)
+        prob.model.add_design_var(DBFAircraft.Fuselage.AVG_HEIGHT, units='m', lower=0.04, upper=0.5, ref=0.15)
+        prob.model.add_design_var(DBFAircraft.Fuselage.AVG_WIDTH, units='m', lower=0.04, upper=0.5, ref=0.15)
+        prob.model.add_design_var(DBFAircraft.Fuselage.WETTED_AREA, units='m**2', lower=0.1, upper=3.0, ref=0.6)
+
+        # Keep a few direct geometry bounds as explicit constraints for robustness.
+        prob.model.add_constraint(DBFAircraft.Fuselage.WETTED_AREA, lower=0.1, upper=3.0, units='m**2')
+        prob.model.add_constraint(DBFAircraft.Wing.ROOT_CHORD, lower=0.08, upper=1.2, units='m')
+        prob.model.add_constraint(DBFAircraft.Wing.SPAN, lower=0.4, upper=4.0, units='m')
 
         prob.model.add_subsystem('mean_power_comp', MeanPowerComp())
         prob.model.add_subsystem(
@@ -96,6 +119,7 @@ class CruiseExample:
         prob.model.connect('traj.cruise.timeseries.electric_power_in_total', 'mean_power_comp.p_cruise_kw')
         prob.model.connect('mean_power_comp.p_avg_kw', 'endurance_comp.p_avg_kw')
         prob.model.add_objective('endurance_comp.endurance', ref=-1.0)
+
 
         prob.model.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
         prob.model.set_input_defaults(Aircraft.Engine.Motor.IDLE_CURRENT, val=2.2, units='A')
@@ -117,6 +141,8 @@ class CruiseExample:
             prob.set_val('traj.cruise.controls:current_flow_max', 60.0, units='A')
             prob.set_val('traj.cruise.controls:rpm_lookup', 90.0, units='rev/s')
             prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
+            prob.set_val('traj.cruise.states:mass', 4.4, units='kg')
+            
 
         return prob
 
@@ -266,7 +292,16 @@ class TestRCCruiseAttempt(unittest.TestCase):
         motor_mass = prob.get_val('aircraft:engine:motor:mass', units='kg')[0]
         current_flow = None
         if rc_prop.power_balance_mode == 'solver':
-            current_flow = prob.get_val(Dynamic.Vehicle.Propulsion.CURRENT, units='A')
+            for name in (
+                Dynamic.Vehicle.Propulsion.CURRENT,
+                'traj.cruise.controls:current_flow',
+                'traj.cruise.rhs_all.rc_electric.esc.current_out',
+            ):
+                try:
+                    current_flow = prob.get_val(name, units='A')
+                    break
+                except KeyError:
+                    continue
         electric_power = prob.get_val('traj.cruise.timeseries.electric_power_in_total', units='W')
         distance_resid = prob.get_val('cruise_distance_constraint.distance_resid', units='nmi')[0]
 

@@ -58,9 +58,9 @@ class TestRCPropMission(unittest.TestCase):
 
         assert_near_equal(current_flow, np.full(nn, 54.72669143), tolerance=1e-6)
         assert_near_equal(rpm, np.full(nn, 90.72377608), tolerance=1e-6)
-        assert_near_equal(rpm_max, np.full(nn, 103.34359614), tolerance=1e-6)
+        assert_near_equal(rpm_max, np.full(nn, 123.98997508), tolerance=1e-6)
         assert_near_equal(rpm_constraint, np.full(nn, -34.27622392), tolerance=1e-6)
-        assert_near_equal(rpm_constraint_max, np.full(nn, -21.65640386), tolerance=1e-6)
+        assert_near_equal(rpm_constraint_max, np.full(nn, -1.01002492), tolerance=1e-6)
         assert_near_equal(battery_power, np.full(nn, 1065.18201197), tolerance=1e-6)
         assert_near_equal(esc_power, np.full(nn, -58.77227848), tolerance=1e-6)
         assert_near_equal(motor_power, np.full(nn, -107.63443504), tolerance=1e-6)

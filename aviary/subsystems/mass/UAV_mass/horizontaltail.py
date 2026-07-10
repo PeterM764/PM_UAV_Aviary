@@ -46,6 +46,7 @@ class HorizontalTailMass(om.JaxExplicitComponent):
         num_spars = self.options[Aircraft.HorizontalTail.NUM_SPARS]
         rib_lightening_factor = self.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR]
         rib_thickness, units = self.options[Aircraft.HorizontalTail.RIB_THICKNESS]
+        rib_thickness = jnp.asarray(rib_thickness)
         rho_skin, units = self.options[Aircraft.HorizontalTail.AREAL_SKIN_DENSITY]
         spar_outer_diameter, units = self.options[Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER]
         rho_spar, units = self.options[Aircraft.HorizontalTail.SPAR_DENSITY]

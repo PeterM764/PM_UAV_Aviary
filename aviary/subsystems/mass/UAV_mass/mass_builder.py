@@ -1,8 +1,11 @@
 from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 from aviary.subsystems.subsystem_builder import SubsystemBuilder
 from aviary.subsystems.mass.UAV_mass.mass_premission import MassPremission
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_metadata import ExtendedMetaData
+
 
 class MassBuilder(SubsystemBuilder):
+    _default_metadata = ExtendedMetaData
     
     """
     Builder for UAV mass models (wing, htail, vtail, fuselage, ...)

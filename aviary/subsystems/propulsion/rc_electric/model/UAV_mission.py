@@ -193,7 +193,7 @@ class RCPropMission(om.Group):
                 Aircraft.Battery.VOLTAGE,
                 Aircraft.Battery.RESISTANCE,
                 #(Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
+                Dynamic.Vehicle.Propulsion.CURRENT,
             ]
         )
 
@@ -206,7 +206,7 @@ class RCPropMission(om.Group):
             promotes_inputs=[
                 (Dynamic.Vehicle.Propulsion.THROTTLE, 'full_throttle'),
                 # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
+                Dynamic.Vehicle.Propulsion.CURRENT
             ]
         )
 
@@ -221,7 +221,7 @@ class RCPropMission(om.Group):
                 Aircraft.Engine.Motor.RESISTANCE,
                 Aircraft.Engine.Motor.KV,
                 # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
+                Dynamic.Vehicle.Propulsion.CURRENT,
                 ],
             promotes_outputs=[
                 (Dynamic.Vehicle.Propulsion.RPM, Dynamic.Vehicle.Propulsion.RPM_MAX),
@@ -295,6 +295,7 @@ class RCPropMission(om.Group):
        
         # 
 
+        self.connect('battery_max.voltage_out', 'esc_max.voltage_in')
         self.connect('esc_max.voltage_out', 'motor_max.voltage_in')
         self.connect('esc_max.current_out', 'motor_max.current')
 

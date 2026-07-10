@@ -38,7 +38,7 @@ class TestRCPropMission(unittest.TestCase):
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')
         prob.set_val(Dynamic.Mission.VELOCITY, 20, units='ft/s')
         prob.set_val(Dynamic.Vehicle.Propulsion.CURRENT, np.full(nn, 30), units='A')
-        prob.set_val(Dynamic.Vehicle.Propulsion.CURRENT_MAX, np.full(nn, 120), units='A')
+        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
 
         prob.run_model()
 
@@ -58,14 +58,14 @@ class TestRCPropMission(unittest.TestCase):
         assert_near_equal(current_flow, np.full(nn, 30.0), tolerance=1e-10)
         assert_near_equal(battery_power, np.full(nn, 621.0), tolerance=1e-8)
         assert_near_equal(esc_power, np.full(nn, -34.26417695), tolerance=5e-5)
-        assert_near_equal(motor_power, np.full(nn, -42.16465596), tolerance=5e-4)
-        assert_near_equal(prop_power, np.full(nn, 261.66740295), tolerance=5e-5)
-        assert_near_equal(power_net, np.full(nn, 282.90148978), tolerance=5e-4)
-        assert_near_equal(power_net_max, np.full(nn, -610.33508197), tolerance=5e-4)
-        assert_near_equal(rpm, np.full(nn, 102.80332942), tolerance=5e-4)
+        assert_near_equal(motor_power, np.full(nn, -42.16452264), tolerance=5e-4)
+        assert_near_equal(prop_power, np.full(nn, 261.66742626), tolerance=5e-5)
+        assert_near_equal(power_net, np.full(nn, 282.90387416), tolerance=5e-4)
+        assert_near_equal(power_net_max, np.full(nn, -1508.08103799), tolerance=5e-4)
+        assert_near_equal(rpm, np.full(nn, 102.80402030), tolerance=5e-4)
         assert_near_equal(rpm_constraint, np.full(nn, -65.0), tolerance=5e-4)
-        assert_near_equal(rpm_defect, np.full(nn, -42.80332942), tolerance=5e-5)
-        assert_near_equal(rpm_defect_max, np.full(nn, 33.47756931), tolerance=5e-5)
+        assert_near_equal(rpm_defect, np.full(nn, -42.80402030), tolerance=5e-5)
+        assert_near_equal(rpm_defect_max, np.full(nn, -18.18329261), tolerance=5e-5)
         assert_near_equal(power_net, expected, tolerance=1e-9)
 
         partial_data = prob.check_partials(

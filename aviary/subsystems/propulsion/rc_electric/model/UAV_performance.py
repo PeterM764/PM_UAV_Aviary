@@ -24,7 +24,7 @@ class Battery(om.ExplicitComponent):
         #TODO: add Battery options
         add_aviary_input(self, Aircraft.Battery.VOLTAGE, units = "V")
         add_aviary_input(self, Aircraft.Battery.RESISTANCE, units='ohm')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
         add_aviary_input(self, Aircraft.Battery.MASS,  units= 'kg')
         # self.add_input('current', val=np.zeros(nn), units='A')
 
@@ -78,8 +78,8 @@ class ElectronicSpeedController(om.ExplicitComponent):
         nn = self.options['num_nodes']
 
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.THROTTLE, val=np.zeros(nn), units='unitless')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.THROTTLE, shape=(nn,), units='unitless')
 
         self.add_output('efficiency', val=np.zeros(nn), units='unitless')
         self.add_output('voltage_out', val=np.zeros(nn), units = 'V')
@@ -139,15 +139,15 @@ class Motor(om.ExplicitComponent):
 
         add_aviary_input(self, Aircraft.Engine.Motor.MASS, units= 'kg')
         add_aviary_input(self, Aircraft.Engine.Motor.IDLE_CURRENT,  units='A')
-        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, val = np.zeros(nn), units='A')
+        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, units='A')
         add_aviary_input(self, Aircraft.Engine.Motor.RESISTANCE, units='ohm')
         add_aviary_input(self, Aircraft.Engine.Motor.KV, units='rpm/V')
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
         self.add_input('current', val=np.zeros(nn), units = 'A')
 
         ################ TODO Alex #####################
-        add_aviary_output(self, Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn),  units='rpm')
+        add_aviary_output(self, Dynamic.Vehicle.Propulsion.RPM, shape=(nn,), units='rpm')
 
         # (no bound here: RPM is derated via load_factor instead; an output upper= is inert on an explicit comp anyway)
         ################ TODO Alex #####################
@@ -189,6 +189,7 @@ class Motor(om.ExplicitComponent):
         self.declare_partials(
             'current_constraint', 
             Aircraft.Engine.Motor.MAX_CONT_CURRENT,
+            rows=ar, cols=np.zeros(nn, dtype=int)
         )
 
     def compute(self, inputs, outputs):
@@ -201,6 +202,7 @@ class Motor(om.ExplicitComponent):
         outputs['current_constraint'] = inputs[Dynamic.Vehicle.Propulsion.CURRENT] - inputs[Aircraft.Engine.Motor.MAX_CONT_CURRENT] 
 
     def compute_partials(self, inputs, partials):
+        nn = self.options['num_nodes']
         R = inputs[Aircraft.Engine.Motor.RESISTANCE]
         lf = self.options['load_factor']
 
@@ -219,8 +221,8 @@ class Motor(om.ExplicitComponent):
         partials['power', Aircraft.Engine.Motor.RESISTANCE] = -inputs['current']**2 - inputs[Aircraft.Engine.Motor.IDLE_CURRENT] * dvoltage_prop_dresistance
         partials['power', Aircraft.Engine.Motor.IDLE_CURRENT] = -voltage_prop
         
-        partials['current_constraint', Aircraft.Engine.Motor.MAX_CONT_CURRENT] = -1
-        partials['current_constraint', Dynamic.Vehicle.Propulsion.CURRENT] = 1
+        partials['current_constraint', Aircraft.Engine.Motor.MAX_CONT_CURRENT] = -np.ones(nn)
+        partials['current_constraint', Dynamic.Vehicle.Propulsion.CURRENT] = np.ones(nn)
 
 
 #TODO: reading in of data should be changed later:
@@ -315,16 +317,16 @@ class Propeller(om.ExplicitComponent):
     def setup(self): 
         nn = self.options['num_nodes']
         num_eng = self.options[Aircraft.Engine.NUM_ENGINES]
-        add_aviary_input(self, Dynamic.Atmosphere.DENSITY, val=np.zeros(nn), units = 'kg/m**3')
+        add_aviary_input(self, Dynamic.Atmosphere.DENSITY, shape=(nn,), units='kg/m**3')
         add_aviary_input(self, Aircraft.Engine.Propeller.DIAMETER, units = 'm')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn), units = 'rev/s')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.RPM, shape=(nn,), units='rev/s')
         self.add_input("ct", val=np.zeros(nn), units='unitless')
         self.add_input("cp", val=np.zeros(nn), units='unitless')
         
         
 
-        add_aviary_output(self, Dynamic.Vehicle.Propulsion.THRUST, val=np.zeros(nn), units='N')
-        add_aviary_output(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
+        add_aviary_output(self, Dynamic.Vehicle.Propulsion.THRUST, shape=(nn,), units='N')
+        add_aviary_output(self, Dynamic.Vehicle.Propulsion.PROP_POWER, shape=(nn,), units='W')
         self.add_output('rpm_constraint', val=np.zeros(nn), units='rev/s')
         ar =np.arange(nn)
 
@@ -408,7 +410,7 @@ class PowerResiduals(om.ExplicitComponent):
         self.add_input('power_batt', val=np.zeros(nn), units='W')
         self.add_input('power_esc', val=np.zeros(nn), units='W')
         self.add_input('power_motor', val=np.zeros(nn), units='W')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, shape=(nn,), units='W')
 
         self.add_output('power_net', val=np.ones(nn), ref=1e3, units='W')
 
@@ -427,7 +429,7 @@ class PowerImplicit(om.ImplicitComponent):
         self.add_input('power_batt', val=np.zeros(nn), units='W')
         self.add_input('power_esc', val=np.zeros(nn), units='W')
         self.add_input('power_motor', val=np.zeros(nn), units='W')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, shape=(nn,), units='W')
 
         self.add_output(Dynamic.Vehicle.Propulsion.CURRENT, lower=np.zeros(nn), val=np.ones(nn)*30, units='A')
 

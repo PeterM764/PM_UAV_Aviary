@@ -48,8 +48,7 @@ phase_info = {
             'mach_initial': (0.0538, 'unitless'),
             'mach_final': (0.0538, 'unitless'),
             # 'mach_ref': (0.05, 'unitless'),
-            'mass_ref': (1, 'kg'),
-            'distance_initial': (0, 'ft'),
+            'mass_ref': (4.0, 'kg'),
             'distance_ref': (1.0e2, 'ft'),
             # 'alt_ref': (100, 'ft'),
             # 'mach_final': (0.05, 'unitless'),
@@ -62,8 +61,6 @@ phase_info = {
             'distance_ref': (1000.0, 'm'),
             'target_distance': (1000.0, 'm'),
             'throttle_enforcement': 'control',
-
-            'mass_ref': (4.0, 'kg'),
             'electric_current_polynomial_order': 3,
             'electric_current_max_polynomial_order': 3,
             # 'throttle_polynomial_order': 1,
@@ -71,7 +68,6 @@ phase_info = {
             #Time 
             'time_initial': (0.0, 's'),
             'time_duration_bounds': ((20,90.0), 's'),
-            'target_distance': (200, 'ft'),
         },
         'initial_guesses': {
             'distance': ([0, 200], 'ft'),

@@ -1509,9 +1509,9 @@ class AviaryGroup(om.Group):
                 self.add_design_var(
                     Aircraft.Design.GROSS_MASS,
                     units='lbm',
-                    lower=10,
-                    upper=900.0e3,
-                    ref=175.0e3,
+                    lower=2,
+                    upper=100,
+                    ref=8,
                 )
 
         elif self.mission_method in (
@@ -1524,17 +1524,17 @@ class AviaryGroup(om.Group):
             if problem_type is ProblemType.SIZING:
                 self.add_design_var(
                     Aircraft.Design.GROSS_MASS,
-                    lower=10.0,
-                    upper=None,
+                    lower=2,
+                    upper=100,
                     units='lbm',
-                    ref=175e3,
+                    ref=8,
                 )
                 self.add_design_var(
                     Mission.GROSS_MASS,
-                    lower=10.0,
-                    upper=None,
+                    lower=2,
+                    upper=100,
                     units='lbm',
-                    ref=175e3,
+                    ref=8,
                 )
 
                 self.add_subsystem(
@@ -1579,10 +1579,10 @@ class AviaryGroup(om.Group):
             elif problem_type is ProblemType.MULTI_MISSION:
                 self.add_design_var(
                     Mission.GROSS_MASS,
-                    lower=10.0,
-                    upper=900e3,
+                    lower=2,
+                    upper=100,
                     units='lbm',
-                    ref=175e3,
+                    ref=8,
                 )
 
                 # TODO: RANGE_RESIDUAL constraint should be added based on what the

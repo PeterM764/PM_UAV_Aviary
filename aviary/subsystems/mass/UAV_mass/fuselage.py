@@ -47,6 +47,7 @@ class FuselageMass(om.JaxExplicitComponent):
         rho_spar, units = self.options[Aircraft.Fuselage.SPAR_DENSITY]
         spar_wall_thickness, units = self.options[Aircraft.Fuselage.SPAR_WALL_THICKNESS]
         bulkhead_thickness, units = self.options[Aircraft.Fuselage.BULKHEAD_THICKNESS]
+        bulkhead_thickness = jnp.asarray(bulkhead_thickness)
         bulkhead_lightening_factor = self.options[Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR]
         rho_skin, units = self.options[Aircraft.Fuselage.AREAL_SKIN_DENSITY]
         floor_thickness, units = self.options[Aircraft.Fuselage.FLOOR_THICKNESS]
