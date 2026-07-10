@@ -197,7 +197,7 @@ class RCPropMission(om.Group):
             ]
         )
 
-        self.connect('battery_max.voltage_out', 'esc_max.voltage_in')
+            
        
         
         self.add_subsystem(
@@ -210,8 +210,7 @@ class RCPropMission(om.Group):
             ]
         )
 
-        self.connect('esc_max.voltage_out', 'motor_max.voltage_in')
-        self.connect('esc_max.current_out', 'motor_max.current')
+        
 
         self.add_subsystem(
             'motor_max',
@@ -283,14 +282,21 @@ class RCPropMission(om.Group):
                 promotes_outputs=[
                     ('power_net','power_net_max'),
                 ]
+        
+        
             )
+            self.connect('battery_max.power', 'power_net_max.power_batt')
+            self.connect('esc_max.power', 'power_net_max.power_esc')
+            self.connect('motor_max.power', 'power_net_max.power_motor')
+
+        
            
 
        
-        self.connect('battery_max.power', 'power_net_max.power_batt')
-        self.connect('esc_max.power', 'power_net_max.power_esc')
-        self.connect('motor_max.power', 'power_net_max.power_motor')
+        # 
 
+        self.connect('esc_max.voltage_out', 'motor_max.voltage_in')
+        self.connect('esc_max.current_out', 'motor_max.current')
 
 
         self.connect('battery.voltage_out', 'esc.voltage_in')
