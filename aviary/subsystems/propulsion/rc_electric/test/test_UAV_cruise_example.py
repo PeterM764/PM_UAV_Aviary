@@ -5,9 +5,9 @@ import numpy as np
 import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 
-from aviary.examples.external_subsystems.UAV_Aero.custom_aero_builder import CustomAeroBuilder
-from aviary.examples.external_subsystems.UAV_Mass.dbf_mass_builder import DBFMassBuilder
-from aviary.examples.external_subsystems.UAV_Mass.dbf_variable_info.dbf_mass_variables import Aircraft as DBFAircraft
+from aviary.subsystems.aerodynamics.UAV_Aero.custom_aero_builder import CustomAeroBuilder
+from aviary.subsystems.mass.UAV_mass.mass_builder import MassBuilder as DBFMassBuilder
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft as DBFAircraft
 from aviary.models.aircraft.small_uav.phases.UAV_energy_phase import get_cruise_phase_info
 from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
 from aviary.subsystems.propulsion.rc_electric.model.UAV_mission import RCPropMission
