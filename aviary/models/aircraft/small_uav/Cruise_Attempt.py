@@ -4,8 +4,8 @@ import numpy as np
 import openmdao.api as om
 import aviary.api as av
 from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
-from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
+from aviary.subsystems.mass.UAV_mass.mass_builder import MassBuilder
+from aviary.subsystems.aerodynamics.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 from aviary.variable_info.dbf_variables import Aircraft
 
@@ -28,7 +28,7 @@ phase_info.pop('climb')
 phase_info.pop('descent')
 
 #Pre-Mission Model
-phase_info['pre_mission']['external_subsystems'] = [DBFMassBuilder()]
+phase_info['pre_mission']['external_subsystems'] = [MassBuilder()]
 phase_info['cruise']['external_subsystems'] = [CustomAeroBuilder()]
 
 phase_info['cruise']['subsystem_options']['aerodynamics'] = {
@@ -85,7 +85,7 @@ prob.load_inputs(
     'validation_cases/validation_data/test_models/small_scale_uav.csv',
     phase_info,
 )
-prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder(), DBFMassBuilder()])
+prob.load_external_subsystems(external_subsystems=[rc_prop, CustomAeroBuilder(), MassBuilder()])
 prob.aviary_inputs.set_val(Aircraft.Engine.Propeller.PITCH, 12.0, units='inch')
 
 #taking out fuel

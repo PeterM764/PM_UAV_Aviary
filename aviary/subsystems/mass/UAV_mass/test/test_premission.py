@@ -3,8 +3,8 @@ import numpy as np
 import openmdao.api as om
 import os 
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.mass_premission import MassPremission
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
+from aviary.subsystems.mass.UAV_mass.mass_premission import MassPremission
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestMassPremission(unittest.TestCase):
     def set_defaults(self, comp, Aircraft):

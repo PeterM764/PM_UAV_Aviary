@@ -3,9 +3,9 @@ import numpy as np
 import os
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import WingMass
+from aviary.subsystems.mass.UAV_mass.wing import WingMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class TestWingMass(unittest.TestCase):
     #Creates a separate problem for tests for each wing design
