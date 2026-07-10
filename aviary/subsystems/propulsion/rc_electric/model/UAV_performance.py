@@ -139,7 +139,7 @@ class Motor(om.ExplicitComponent):
 
         add_aviary_input(self, Aircraft.Engine.Motor.MASS, units= 'kg')
         add_aviary_input(self, Aircraft.Engine.Motor.IDLE_CURRENT,  units='A')
-        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, val = 1.0, units='A')
+        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, val = np.zeros(nn), units='A')
         add_aviary_input(self, Aircraft.Engine.Motor.RESISTANCE, units='ohm')
         add_aviary_input(self, Aircraft.Engine.Motor.KV, units='rpm/V')
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
