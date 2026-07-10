@@ -1,10 +1,9 @@
 import openmdao.api as om
-import jax.numpy as jnp
 
 from aviary.variable_info.variables import Aircraft
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variable_metadata import (
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_metadata import (
     ExtendedMetaData,
 )
 
@@ -26,10 +25,10 @@ class MassSummation(om.Group):
         
 class StructureMass(om.JaxExplicitComponent):
     def setup(self):
-        add_aviary_input(self, Aircraft.Wing.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData, primal_name='wmass')
-        add_aviary_input(self, Aircraft.Fuselage.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData, primal_name='fmass')
-        add_aviary_input(self, Aircraft.HorizontalTail.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData, primal_name='hmass')
-        add_aviary_input(self, Aircraft.VerticalTail.MASS, val=0.0, units='kg', meta_data=ExtendedMetaData, primal_name='vmass')
+        add_aviary_input(self, Aircraft.Wing.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='wmass')
+        add_aviary_input(self, Aircraft.Fuselage.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='fmass')
+        add_aviary_input(self, Aircraft.HorizontalTail.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='hmass')
+        add_aviary_input(self, Aircraft.VerticalTail.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='vmass')
         # More masses can be added, i.e., tail, spars, flaps, etc. as needed
         add_aviary_output(self, Aircraft.Design.STRUCTURE_MASS, units='kg', meta_data=ExtendedMetaData, primal_name='total_mass')
 

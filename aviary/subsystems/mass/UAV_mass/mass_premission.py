@@ -1,11 +1,11 @@
 import openmdao.api as om
 import aviary.api as av
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.wing import DBFWingMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.fuselage import DBFFuselageMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.horizontaltail import DBFHorizontalTailMass
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.verticaltail import DBFVerticalTailMass
-from aviary.examples.external_subsystems.UAV_mass.mass_summation import MassSummation
-from PM_UAV_Aviary.aviary.examples.external_subsystems.UAV_mass.variable_info.mass_variables import Aircraft
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.wing import WingMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.fuselage import FuselageMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.horizontaltail import HorizontalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.verticaltail import VerticalTailMass
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.mass_summation import MassSummation
+from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 class MassPremission(om.Group):
     def initialize(self):
@@ -15,25 +15,25 @@ class MassPremission(om.Group):
     def setup(self):
         self.add_subsystem(
             'wing_mass', 
-            DBFWingMass(), 
+            WingMass(), 
             promotes_inputs=['*'], 
             promotes_outputs=[Aircraft.Wing.MASS],
         )
         self.add_subsystem(
             'horizontal_tail_mass',
-            DBFHorizontalTailMass(),
+            HorizontalTailMass(),
             promotes_inputs=['*'],
             promotes_outputs=[Aircraft.HorizontalTail.MASS],
         )
         self.add_subsystem(
             'vertical_tail_mass',
-            DBFVerticalTailMass(),
+            VerticalTailMass(),
             promotes_inputs=['*'],
             promotes_outputs=[Aircraft.VerticalTail.MASS],
         )
         self.add_subsystem(
             'fuselage_mass',
-            DBFFuselageMass(),
+            FuselageMass(),
             promotes_inputs=['*'],
             promotes_outputs=[Aircraft.Fuselage.MASS],
         )
