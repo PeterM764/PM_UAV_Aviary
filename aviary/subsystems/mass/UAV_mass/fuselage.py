@@ -19,7 +19,7 @@ class FuselageMass(om.JaxExplicitComponent):
         add_aviary_option(self, Aircraft.Fuselage.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Fuselage.BULKHEAD_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Fuselage.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Fuselage.AREAL_SKIN_DENSITY, units='kg/m**2', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Fuselage.FLOOR_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Fuselage.FLOOR_LENGTH, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Fuselage.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
@@ -48,7 +48,7 @@ class FuselageMass(om.JaxExplicitComponent):
         spar_wall_thickness, units = self.options[Aircraft.Fuselage.SPAR_WALL_THICKNESS]
         bulkhead_thickness, units = self.options[Aircraft.Fuselage.BULKHEAD_THICKNESS]
         bulkhead_lightening_factor = self.options[Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR]
-        rho_skin, units = self.options[Aircraft.Fuselage.SKIN_DENSITY]
+        rho_skin, units = self.options[Aircraft.Fuselage.AREAL_SKIN_DENSITY]
         floor_thickness, units = self.options[Aircraft.Fuselage.FLOOR_THICKNESS]
         floor_length, units = self.options[Aircraft.Fuselage.FLOOR_LENGTH]
         glue_factor = self.options[Aircraft.Fuselage.GLUE_FACTOR]

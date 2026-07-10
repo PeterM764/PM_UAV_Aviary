@@ -17,7 +17,7 @@ class TestWingMass(unittest.TestCase):
         #Rib definitions
         ribs = np.array([0] * 15 + [1] * 5)
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
-        rib_thicks = np.where(ribs != 0, 0.125, 0.125)
+        rib_thicks = np.array([0.0032] * 20)
 
         wm.options[Aircraft.Wing.RIB_MATERIALS] = rib_materials
         wm.options[Aircraft.Wing.RIB_THICKNESS] = (rib_thicks, 'inch')
@@ -28,26 +28,26 @@ class TestWingMass(unittest.TestCase):
         #Tests for the simple wing design
         if wing_type == "simple":
             wm.options[Aircraft.Wing.TYPE] = 'simple'
-            wm.options[Aircraft.Wing.FOAM_DENSITY] = (2.0, 'lb/ft**3')
-            wm.options[Aircraft.Wing.ROD_DENSITY] = (0.056, 'lb/inch**3')
-            wm.options[Aircraft.Wing.ROD_RADIUS] = (0.00635, 'inch')
-            wm.options[Aircraft.Wing.ROD_THICKNESS] = (0.00127, 'inch')
+            wm.options[Aircraft.Wing.FOAM_DENSITY] = (32.0, 'kg/m**3')
+            wm.options[Aircraft.Wing.ROD_DENSITY] = (1500.0, 'kg/m**3')
+            wm.options[Aircraft.Wing.ROD_RADIUS] = (0.003, 'm')
+            wm.options[Aircraft.Wing.ROD_THICKNESS] = (0.0005, 'm')
             wm.options[Aircraft.Wing.AIRFOIL_PATH] = airfoil
 
         #Tests for the medium wing design
         elif wing_type == "medium":
             wm.options[Aircraft.Wing.TYPE] = 'medium'
             wm.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR] = 2/3
-            wm.options[Aircraft.Wing.NUM_SPARS] = 1.1
-            wm.options[Aircraft.Wing.SPAR_OUTER_DIAMETER] = (1, 'inch')       
-            wm.options[Aircraft.Wing.SPAR_WALL_THICKNESS] = (0.0625, 'inch')            
-            wm.options[Aircraft.Wing.SPAR_DENSITY] = (2, 'g/cm**3')          
-            wm.options[Aircraft.Wing.SKIN_DENSITY] = (20, 'g/m**3')          
+            wm.options[Aircraft.Wing.NUM_SPARS] = 1.0
+            wm.options[Aircraft.Wing.SPAR_OUTER_DIAMETER] = (0.015, 'm')       
+            wm.options[Aircraft.Wing.SPAR_WALL_THICKNESS] = (0.003, 'm')            
+            wm.options[Aircraft.Wing.SPAR_DENSITY] = (1500.0, 'kg/m**3')          
+            wm.options[Aircraft.Wing.AREAL_SKIN_DENSITY] = (0.08, 'kg/m**2')          
             wm.options[Aircraft.Wing.GLUE_FACTOR] = 0.15
-            wm.options[Aircraft.Wing.STRINGER_THICKNESS] = (0.375, 'inch')           
-            wm.options[Aircraft.Wing.STRINGER_DENSITY] = (160, 'kg/m**3')            
-            wm.options[Aircraft.Wing.NUM_STRINGERS] = 2.5
-            wm.options[Aircraft.Wing.SHEETING_THICKNESS] = (0.03125, 'inch')
+            wm.options[Aircraft.Wing.STRINGER_THICKNESS] = (0.0032, 'm')           
+            wm.options[Aircraft.Wing.STRINGER_DENSITY] = (160.0, 'kg/m**3')            
+            wm.options[Aircraft.Wing.NUM_STRINGERS] = 2.0
+            wm.options[Aircraft.Wing.SHEETING_THICKNESS] = (0.0016, 'm')
             wm.options[Aircraft.Wing.SHEETING_DENSITY] = (160, 'kg/m**3')            
             wm.options[Aircraft.Wing.SHEETING_COVERAGE] = 0.4
             wm.options[Aircraft.Wing.SHEETING_LIGHTENING_FACTOR] = 1.0
@@ -56,8 +56,8 @@ class TestWingMass(unittest.TestCase):
 
         # Inputs
         prob.setup(force_alloc_complex=True)
-        prob.set_val(Aircraft.Wing.ROOT_CHORD, 20, units='inch')
-        prob.set_val(Aircraft.Wing.SPAN, 4.667, units='ft')
+        prob.set_val(Aircraft.Wing.ROOT_CHORD, 0.508, units='m')
+        prob.set_val(Aircraft.Wing.SPAN, 1.4225, units='m')
         prob.set_val(Aircraft.Wing.WETTED_AREA, 0.85, units='m**2')
 
         return prob
@@ -68,7 +68,7 @@ class TestWingMass(unittest.TestCase):
         prob.run_model()
 
         actual = prob.get_val(Aircraft.Wing.MASS, units='kg')
-        expected = 0.89953798
+        expected = 0.97041034
         assert_near_equal(actual, expected, tolerance=1e-6)
 
     #Medium wing test
@@ -77,7 +77,7 @@ class TestWingMass(unittest.TestCase):
         prob.run_model()
 
         actual = prob.get_val(Aircraft.Wing.MASS, units='kg')
-        expected = 0.7985493
+        expected = 0.46738585
 
         assert_near_equal(actual, expected, tolerance=1e-6)
 

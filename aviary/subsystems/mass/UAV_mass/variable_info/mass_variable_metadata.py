@@ -33,26 +33,35 @@ ExtendedMetaData = deepcopy(av.CoreMetaData)
 # ========================================================
 
 av.add_meta_data(
+    Aircraft.Fuselage.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of fuselage skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
+
+av.add_meta_data(
     Aircraft.Fuselage.AVG_HEIGHT,
-    units='inch',
-    desc='Height of fuselage (assumed rectangular prism shape)',
-    default_value=12,
+    units='m',
+    desc='UAV Height of fuselage (assumed rectangular prism shape)',
+    default_value=0.3,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.AVG_WIDTH,
-    units='inch',
+    units='m',
     desc='Width of fuselage (assumed rectangular prism shape)',
-    default_value=12,
+    default_value=0.3,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.BULKHEAD_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     types=float,
     desc='Material density of the rib',
     default_value=[0.0],
@@ -83,7 +92,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.BULKHEAD_THICKNESS,
-    units='inch',
+    units='m',
     types=float,
     desc='Thickness of a single rib',
     default_value=[0.0],
@@ -94,7 +103,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.FLOOR_DENSITY,
-    units='lbm/inch**3',
+    units='kg/m**3',
     desc='Density of fuselage floor',
     default_value=0.02,
     meta_data = ExtendedMetaData,
@@ -103,18 +112,18 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.FLOOR_LENGTH,
-    units='ft',
+    units='m',
     desc='length of fuselage floor',
-    default_value=2.0,
+    default_value=0.7,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.FLOOR_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of fuselage floor',
-    default_value=0.0125,
+    default_value=0.003,
     meta_data = ExtendedMetaData,
     option=True,
 )
@@ -166,7 +175,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.SHEETING_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the sheeting',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -184,52 +193,43 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.SHEETING_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of sheeting',
-    default_value=0.03125,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
-    Aircraft.Fuselage.SKIN_DENSITY,
-    units='lbm/inch**3',
-    desc='Surface density of fuselage skin',
-    default_value=0.02,
+    default_value=0.003,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.SPAR_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the spar',
-    default_value=0.015,
+    default_value=1500,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.SPAR_OUTER_DIAMETER,
-    units='inch',
+    units='m',
     desc='Diameter/thickness of a single spar (assumed cylindrical)',
-    default_value=0.25,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.SPAR_WALL_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of spar wall',
-    default_value=0.0625,
+    default_value=0.002,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Fuselage.STRINGER_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the stringer',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -238,9 +238,9 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Fuselage.STRINGER_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of stringers',
-    default_value=0.0625,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
@@ -253,11 +253,14 @@ av.add_meta_data(
 # |_|  |_|  \___/  |_|    |_| /___|  \___/  |_| |_|  \__|  \__,_| |_|    |_|     \__,_| |_| |_|
 # =============================================================================================
 
-#   ___    _       __ 
-#  |   \  | |__   / _|
-#  | |) | | '_ \ |  _|
-#  |___/  |_.__/ |_|  
-# ====================
+av.add_meta_data(
+    Aircraft.HorizontalTail.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of horizontal tail skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
 
 av.add_meta_data(
     Aircraft.HorizontalTail.AIRFOIL_PATH,
@@ -316,7 +319,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.HorizontalTail.RIB_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     types=float,
     desc='Material density of the rib',
     default_value=[0.0],
@@ -347,7 +350,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.HorizontalTail.RIB_THICKNESS,
-    units='inch',
+    units='m',
     types=float,
     desc='Thickness of a single rib',
     default_value=[0.0],
@@ -369,7 +372,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.HorizontalTail.SHEETING_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the sheeting',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -387,52 +390,43 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.HorizontalTail.SHEETING_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of sheeting',
-    default_value=0.03125,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
-    Aircraft.HorizontalTail.SKIN_DENSITY,
-    units='lbm/inch**3',
-    desc='Surface density of wing skin',
-    default_value=0.02,
+    default_value=0.003,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.HorizontalTail.SPAR_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the spar',
-    default_value=0.015,
+    default_value=1500,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER,
-    units='inch',
+    units='m',
     desc='Diameter/thickness of a single spar (assumed cylindrical)',
-    default_value=0.25,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.HorizontalTail.SPAR_WALL_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of spar wall',
-    default_value=0.0625,
+    default_value=0.002,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.HorizontalTail.STRINGER_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the stringer',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -441,9 +435,9 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.HorizontalTail.STRINGER_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of stringers',
-    default_value=0.0625,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
@@ -456,11 +450,14 @@ av.add_meta_data(
 #     \/      \___| |_|     \__| |_|  \___|  \__,_| |_|    |_|     \__,_| |_| |_|
 # ===============================================================================
 
-#   ___    _       __ 
-#  |   \  | |__   / _|
-#  | |) | | '_ \ |  _|
-#  |___/  |_.__/ |_|  
-# ====================
+av.add_meta_data(
+    Aircraft.VerticalTail.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of vertical tail skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
 
 av.add_meta_data(
     Aircraft.VerticalTail.AIRFOIL_PATH,
@@ -519,7 +516,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.VerticalTail.RIB_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     types=float,
     desc='Material density of the rib',
     default_value=[0.0],
@@ -550,7 +547,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.VerticalTail.RIB_THICKNESS,
-    units='inch',
+    units='m',
     types=float,
     desc='Thickness of a single rib',
     default_value=[0.0],
@@ -570,7 +567,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.VerticalTail.SHEETING_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the sheeting',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -588,52 +585,43 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.VerticalTail.SHEETING_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of sheeting',
-    default_value=0.03125,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
-    Aircraft.VerticalTail.SKIN_DENSITY,
-    units='lbm/inch**3',
-    desc='Surface density of wing skin',
-    default_value=0.02,
+    default_value=0.003,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.VerticalTail.SPAR_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the spar',
-    default_value=0.015,
+    default_value=1500,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.VerticalTail.SPAR_OUTER_DIAMETER,
-    units='inch',
+    units='m',
     desc='Diameter/thickness of a single spar (assumed cylindrical)',
-    default_value=0.25,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.VerticalTail.SPAR_WALL_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of spar wall',
-    default_value=0.0625,
+    default_value=0.002,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.VerticalTail.STRINGER_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the stringer',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -642,9 +630,9 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.VerticalTail.STRINGER_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of stringers',
-    default_value=0.0625,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
@@ -659,11 +647,14 @@ av.add_meta_data(
 #                             |___/
 # ==================================
 
-#   ___    _       __ 
-#  |   \  | |__   / _|
-#  | |) | | '_ \ |  _|
-#  |___/  |_.__/ |_|  
-# ====================
+av.add_meta_data(
+    Aircraft.Wing.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of wing skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
 
 av.add_meta_data(
     Aircraft.Wing.AIRFOIL_PATH,
@@ -722,7 +713,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Wing.RIB_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     types=float,
     desc='Material density of the rib',
     default_value=[0.0],
@@ -753,7 +744,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Wing.RIB_THICKNESS,
-    units='inch',
+    units='m',
     types=float,
     desc='Thickness of a single rib',
     default_value=[0.0],
@@ -800,7 +791,7 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Wing.SHEETING_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the sheeting',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -818,52 +809,43 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Wing.SHEETING_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of sheeting',
-    default_value=0.03125,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
-    Aircraft.Wing.SKIN_DENSITY,
-    units='lbm/inch**3',
-    desc='Surface density of wing skin',
-    default_value=0.02,
+    default_value=0.003,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Wing.SPAR_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the spar',
-    default_value=0.015,
+    default_value=1500,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Wing.SPAR_OUTER_DIAMETER,
-    units='inch',
+    units='m',
     desc='Diameter/thickness of a single spar (assumed cylindrical)',
-    default_value=0.25,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Wing.SPAR_WALL_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of spar wall',
-    default_value=0.0625,
+    default_value=0.002,
     meta_data = ExtendedMetaData,
     option=True,
 )
 
 av.add_meta_data(
     Aircraft.Wing.STRINGER_DENSITY,
-    units='lbm/ft**3',
+    units='kg/m**3',
     desc='Material density of the stringer',
     default_value=250,
     meta_data = ExtendedMetaData,
@@ -872,9 +854,9 @@ av.add_meta_data(
 
 av.add_meta_data(
     Aircraft.Wing.STRINGER_THICKNESS,
-    units='inch',
+    units='m',
     desc='Thickness of stringers',
-    default_value=0.0625,
+    default_value=0.005,
     meta_data = ExtendedMetaData,
     option=True,
 )
