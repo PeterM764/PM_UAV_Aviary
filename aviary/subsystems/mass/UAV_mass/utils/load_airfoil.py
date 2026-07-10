@@ -1,7 +1,7 @@
 import numpy as np
 import os
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.utils.materials_database import materials
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
+from aviary.subsystems.mass.UAV_mass.utils.materials_database import materials
 
 '''
 These are the functions currently needed to load the airfoil 
