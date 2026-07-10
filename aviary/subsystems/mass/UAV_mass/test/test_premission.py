@@ -45,7 +45,7 @@ class TestMassPremission(unittest.TestCase):
         comp.options[Aircraft.SHEETING_LIGHTENING_FACTOR] = 0.3
 
         # Skin + glue
-        comp.options[Aircraft.SKIN_DENSITY] = (0.02, 'kg/m**3')
+        comp.options[Aircraft.AREAL_SKIN_DENSITY] = (0.08, 'kg/m**2')
         comp.options[Aircraft.GLUE_FACTOR] = 0.08
 
         # Misc
@@ -134,7 +134,7 @@ class TestMassPremission(unittest.TestCase):
 
     def test_mass_summation(self):
         total = self.prob.get_val(Aircraft.Design.STRUCTURE_MASS)
-        expected = 2.5538596
+        expected = 2.7568780
 
         self.assertAlmostEqual(total[0], expected, places=6)
         print('Expected: ', expected)

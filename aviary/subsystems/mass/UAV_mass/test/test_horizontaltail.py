@@ -21,9 +21,9 @@ class TestHorizontalTailMass(unittest.TestCase):
         # Set required options
         ribs = np.array([0] * 15 + [1] * 5)
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
-        rib_thicks = np.where(ribs != 0, 0.004, 0.004)
+        rib_thicks = np.array([0.0032] * 20)
         
-        hm.options[Aircraft.HorizontalTail.STRINGER_THICKNESS] = (0.007, 'm')
+        hm.options[Aircraft.HorizontalTail.STRINGER_THICKNESS] = (0.0032, 'm')
         hm.options[Aircraft.HorizontalTail.RIB_MATERIALS] = rib_materials
         hm.options[Aircraft.HorizontalTail.RIB_THICKNESS] = (rib_thicks, 'm')
         hm.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR] = 2/3
@@ -31,11 +31,11 @@ class TestHorizontalTailMass(unittest.TestCase):
         hm.options[Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER] = (0.015,'m')
         hm.options[Aircraft.HorizontalTail.SPAR_WALL_THICKNESS] = (0.003, 'm')
         hm.options[Aircraft.HorizontalTail.SPAR_DENSITY] = (1500.0, 'kg/m**3')
-        hm.options[Aircraft.HorizontalTail.SKIN_DENSITY] = (250.0, 'kg/m**3')
+        hm.options[Aircraft.HorizontalTail.AREAL_SKIN_DENSITY] = (0.08, 'kg/m**2')
         hm.options[Aircraft.HorizontalTail.GLUE_FACTOR] = 0.15
         hm.options[Aircraft.HorizontalTail.STRINGER_DENSITY] = (160.0, 'kg/m**3')
         hm.options[Aircraft.HorizontalTail.NUM_STRINGERS] = 2.0
-        hm.options[Aircraft.HorizontalTail.SHEETING_THICKNESS] = (0.002, 'm')
+        hm.options[Aircraft.HorizontalTail.SHEETING_THICKNESS] = (0.0016, 'm')
         hm.options[Aircraft.HorizontalTail.SHEETING_DENSITY] = (160.0, 'kg/m**3')
         hm.options[Aircraft.HorizontalTail.SHEETING_COVERAGE] = 0.4
         hm.options[Aircraft.HorizontalTail.SHEETING_LIGHTENING_FACTOR] = 1.0
@@ -58,7 +58,7 @@ class TestHorizontalTailMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.HorizontalTail.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 245.1088886  # <<< Update to match any new output once they are verified
+        expected_mass = 0.70565484  # <<< Update to match any new output once they are verified
         tol = 1e-6
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)

@@ -22,7 +22,7 @@ class HorizontalTailMass(om.JaxExplicitComponent):
         add_aviary_option(self, Aircraft.HorizontalTail.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.HorizontalTail.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.HorizontalTail.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.HorizontalTail.AREAL_SKIN_DENSITY, units='kg/m**2', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.HorizontalTail.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.HorizontalTail.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.HorizontalTail.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
@@ -46,7 +46,7 @@ class HorizontalTailMass(om.JaxExplicitComponent):
         num_spars = self.options[Aircraft.HorizontalTail.NUM_SPARS]
         rib_lightening_factor = self.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR]
         rib_thickness, units = self.options[Aircraft.HorizontalTail.RIB_THICKNESS]
-        rho_skin, units = self.options[Aircraft.HorizontalTail.SKIN_DENSITY]
+        rho_skin, units = self.options[Aircraft.HorizontalTail.AREAL_SKIN_DENSITY]
         spar_outer_diameter, units = self.options[Aircraft.HorizontalTail.SPAR_OUTER_DIAMETER]
         rho_spar, units = self.options[Aircraft.HorizontalTail.SPAR_DENSITY]
         spar_wall_thickness, units = self.options[Aircraft.HorizontalTail.SPAR_WALL_THICKNESS]

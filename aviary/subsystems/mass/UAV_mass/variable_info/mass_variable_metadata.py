@@ -33,6 +33,15 @@ ExtendedMetaData = deepcopy(av.CoreMetaData)
 # ========================================================
 
 av.add_meta_data(
+    Aircraft.Fuselage.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of fuselage skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
+
+av.add_meta_data(
     Aircraft.Fuselage.AVG_HEIGHT,
     units='m',
     desc='UAV Height of fuselage (assumed rectangular prism shape)',
@@ -192,15 +201,6 @@ av.add_meta_data(
 )
 
 av.add_meta_data(
-    Aircraft.Fuselage.SKIN_DENSITY,
-    units='kg/m**3',
-    desc='Surface density of fuselage skin',
-    default_value=554.0,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
     Aircraft.Fuselage.SPAR_DENSITY,
     units='kg/m**3',
     desc='Material density of the spar',
@@ -252,6 +252,15 @@ av.add_meta_data(
 # | |  | | | (_) | | |    | |  / /  | (_) | | | | | | |_  | (_| | | |    | |    | (_| | | | | |
 # |_|  |_|  \___/  |_|    |_| /___|  \___/  |_| |_|  \__|  \__,_| |_|    |_|     \__,_| |_| |_|
 # =============================================================================================
+
+av.add_meta_data(
+    Aircraft.HorizontalTail.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of horizontal tail skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
 
 av.add_meta_data(
     Aircraft.HorizontalTail.AIRFOIL_PATH,
@@ -389,15 +398,6 @@ av.add_meta_data(
 )
 
 av.add_meta_data(
-    Aircraft.HorizontalTail.SKIN_DENSITY,
-    units='kg/m**3',
-    desc='Surface density of wing skin',
-    default_value=554,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
     Aircraft.HorizontalTail.SPAR_DENSITY,
     units='kg/m**3',
     desc='Material density of the spar',
@@ -449,6 +449,15 @@ av.add_meta_data(
 #    \  /    |  __/ | |    | |_  | | | (__  | (_| | | |    | |    | (_| | | | | |
 #     \/      \___| |_|     \__| |_|  \___|  \__,_| |_|    |_|     \__,_| |_| |_|
 # ===============================================================================
+
+av.add_meta_data(
+    Aircraft.VerticalTail.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of vertical tail skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
 
 av.add_meta_data(
     Aircraft.VerticalTail.AIRFOIL_PATH,
@@ -584,15 +593,6 @@ av.add_meta_data(
 )
 
 av.add_meta_data(
-    Aircraft.VerticalTail.SKIN_DENSITY,
-    units='kg/m**3',
-    desc='Surface density of wing skin',
-    default_value=554,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
     Aircraft.VerticalTail.SPAR_DENSITY,
     units='kg/m**3',
     desc='Material density of the spar',
@@ -646,6 +646,15 @@ av.add_meta_data(
 #                              __/ |
 #                             |___/
 # ==================================
+
+av.add_meta_data(
+    Aircraft.Wing.AREAL_SKIN_DENSITY,
+    units='kg/m**2',
+    desc='Areal density of wing skin',
+    default_value=0.08,
+    meta_data = ExtendedMetaData,
+    option=True,
+)
 
 av.add_meta_data(
     Aircraft.Wing.AIRFOIL_PATH,
@@ -803,15 +812,6 @@ av.add_meta_data(
     units='m',
     desc='Thickness of sheeting',
     default_value=0.003,
-    meta_data = ExtendedMetaData,
-    option=True,
-)
-
-av.add_meta_data(
-    Aircraft.Wing.SKIN_DENSITY,
-    units='kg/m**3',
-    desc='Surface density of wing skin',
-    default_value=554,
     meta_data = ExtendedMetaData,
     option=True,
 )

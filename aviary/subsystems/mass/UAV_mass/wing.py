@@ -32,7 +32,7 @@ class WingMass(om.JaxExplicitComponent):
         add_aviary_option(self, Aircraft.Wing.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Wing.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Wing.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.Wing.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.Wing.AREAL_SKIN_DENSITY, units='kg/m**2', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Wing.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Wing.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.Wing.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
@@ -86,7 +86,7 @@ class WingMass(om.JaxExplicitComponent):
             num_spars = self.options[Aircraft.Wing.NUM_SPARS]
             rib_lightening_factor = self.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR]
             rib_thickness, units = self.options[Aircraft.Wing.RIB_THICKNESS]
-            rho_skin, units = self.options[Aircraft.Wing.SKIN_DENSITY]
+            rho_skin, units = self.options[Aircraft.Wing.AREAL_SKIN_DENSITY]
             spar_outer_diameter, units = self.options[Aircraft.Wing.SPAR_OUTER_DIAMETER]
             rho_spar, units = self.options[Aircraft.Wing.SPAR_DENSITY]
             spar_wall_thickness, units = self.options[Aircraft.Wing.SPAR_WALL_THICKNESS]

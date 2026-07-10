@@ -17,7 +17,7 @@ class TestWingMass(unittest.TestCase):
         #Rib definitions
         ribs = np.array([0] * 15 + [1] * 5)
         rib_materials = ['Balsa'] * 15 + ['Ply'] * 5
-        rib_thicks = np.where(ribs != 0, 0.004, 0.004)
+        rib_thicks = np.array([0.0032] * 20)
 
         wm.options[Aircraft.Wing.RIB_MATERIALS] = rib_materials
         wm.options[Aircraft.Wing.RIB_THICKNESS] = (rib_thicks, 'inch')
@@ -42,12 +42,12 @@ class TestWingMass(unittest.TestCase):
             wm.options[Aircraft.Wing.SPAR_OUTER_DIAMETER] = (0.015, 'm')       
             wm.options[Aircraft.Wing.SPAR_WALL_THICKNESS] = (0.003, 'm')            
             wm.options[Aircraft.Wing.SPAR_DENSITY] = (1500.0, 'kg/m**3')          
-            wm.options[Aircraft.Wing.SKIN_DENSITY] = (250.0, 'kg/m**3')          
+            wm.options[Aircraft.Wing.AREAL_SKIN_DENSITY] = (0.08, 'kg/m**2')          
             wm.options[Aircraft.Wing.GLUE_FACTOR] = 0.15
-            wm.options[Aircraft.Wing.STRINGER_THICKNESS] = (0.007, 'm')           
+            wm.options[Aircraft.Wing.STRINGER_THICKNESS] = (0.0032, 'm')           
             wm.options[Aircraft.Wing.STRINGER_DENSITY] = (160.0, 'kg/m**3')            
             wm.options[Aircraft.Wing.NUM_STRINGERS] = 2.0
-            wm.options[Aircraft.Wing.SHEETING_THICKNESS] = (0.002, 'm')
+            wm.options[Aircraft.Wing.SHEETING_THICKNESS] = (0.0016, 'm')
             wm.options[Aircraft.Wing.SHEETING_DENSITY] = (160, 'kg/m**3')            
             wm.options[Aircraft.Wing.SHEETING_COVERAGE] = 0.4
             wm.options[Aircraft.Wing.SHEETING_LIGHTENING_FACTOR] = 1.0
@@ -77,7 +77,7 @@ class TestWingMass(unittest.TestCase):
         prob.run_model()
 
         actual = prob.get_val(Aircraft.Wing.MASS, units='kg')
-        expected = 244.811052
+        expected = 0.46738585
 
         assert_near_equal(actual, expected, tolerance=1e-6)
 

@@ -17,26 +17,26 @@ class TestFuselageMass(unittest.TestCase):
 
         ribs = np.array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 2])
         bulkhead_materials = np.where(ribs != 0, 'Ply', 'Balsa').tolist()
-        rib_thicks = np.where(ribs == 2, 0.004, 0.002)
+        rib_thicks = np.where(ribs == 2, 0.0024, 0.0016)
 
-        fm.options[Aircraft.Fuselage.STRINGER_THICKNESS] = (0.005, 'm')
+        fm.options[Aircraft.Fuselage.STRINGER_THICKNESS] = (0.0032, 'm')
         fm.options[Aircraft.Fuselage.BULKHEAD_MATERIALS] = bulkhead_materials
         fm.options[Aircraft.Fuselage.BULKHEAD_THICKNESS] = (rib_thicks, 'm')
         fm.options[Aircraft.Fuselage.BULKHEAD_LIGHTENING_FACTOR] = 0.18
         fm.options[Aircraft.Fuselage.NUM_SPARS] = 1.0
-        fm.options[Aircraft.Fuselage.SPAR_OUTER_DIAMETER] = (0.016,'m')
-        fm.options[Aircraft.Fuselage.SPAR_WALL_THICKNESS] = (0.002, 'm')
+        fm.options[Aircraft.Fuselage.SPAR_OUTER_DIAMETER] = (0.008,'m')
+        fm.options[Aircraft.Fuselage.SPAR_WALL_THICKNESS] = (0.0005, 'm')
         fm.options[Aircraft.Fuselage.SPAR_DENSITY] = (1500.0, 'kg/m**3')
-        fm.options[Aircraft.Fuselage.SKIN_DENSITY] = (250.0, 'kg/m**3')
+        fm.options[Aircraft.Fuselage.AREAL_SKIN_DENSITY] = (0.08, 'kg/m**2')
         fm.options[Aircraft.Fuselage.GLUE_FACTOR] = 0.08
         fm.options[Aircraft.Fuselage.STRINGER_DENSITY] = (160.0, 'kg/m**3')
-        fm.options[Aircraft.Fuselage.SHEETING_THICKNESS] = (0.003, 'm')
+        fm.options[Aircraft.Fuselage.SHEETING_THICKNESS] = (0.002, 'm')
         fm.options[Aircraft.Fuselage.SHEETING_DENSITY] = (160.0, 'kg/m**3')
-        fm.options[Aircraft.Fuselage.SHEETING_COVERAGE] = 1.0
+        fm.options[Aircraft.Fuselage.SHEETING_COVERAGE] = 0.7
         fm.options[Aircraft.Fuselage.SHEETING_LIGHTENING_FACTOR] = 0.3
         fm.options[Aircraft.Fuselage.FLOOR_LENGTH] = (1.0, 'm')
         fm.options[Aircraft.Fuselage.FLOOR_DENSITY] = (340.0, 'kg/m**3')
-        fm.options[Aircraft.Fuselage.FLOOR_THICKNESS] = (0.005, 'm')
+        fm.options[Aircraft.Fuselage.FLOOR_THICKNESS] = (0.004, 'm')
         fm.options[Aircraft.Fuselage.MISC_MASS] = (0.0, 'kg')
 
         self.prob.setup(force_alloc_complex=True)
@@ -53,7 +53,7 @@ class TestFuselageMass(unittest.TestCase):
         actual_mass = self.prob.get_val(Aircraft.Fuselage.MASS, units='kg')
         print('Computed Mass:', actual_mass)
 
-        expected_mass = 157.8154352
+        expected_mass = 0.20813777
         tol = 1e-6
 
         assert_near_equal(actual_mass, expected_mass, tolerance=tol)

@@ -22,7 +22,7 @@ class VerticalTailMass(om.JaxExplicitComponent):
         add_aviary_option(self, Aircraft.VerticalTail.SPAR_WALL_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.VerticalTail.RIB_THICKNESS, units='m', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.VerticalTail.RIB_LIGHTENING_FACTOR, units='unitless', meta_data=ExtendedMetaData)
-        add_aviary_option(self, Aircraft.VerticalTail.SKIN_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
+        add_aviary_option(self, Aircraft.VerticalTail.AREAL_SKIN_DENSITY, units='kg/m**2', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.VerticalTail.GLUE_FACTOR, units='unitless', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.VerticalTail.STRINGER_DENSITY, units='kg/m**3', meta_data=ExtendedMetaData)
         add_aviary_option(self, Aircraft.VerticalTail.STRINGER_THICKNESS, units='m', meta_data=ExtendedMetaData)
@@ -46,7 +46,7 @@ class VerticalTailMass(om.JaxExplicitComponent):
         num_spars = self.options[Aircraft.VerticalTail.NUM_SPARS]
         rib_lightening_factor = self.options[Aircraft.VerticalTail.RIB_LIGHTENING_FACTOR]
         rib_thickness, units = self.options[Aircraft.VerticalTail.RIB_THICKNESS]
-        rho_skin, units = self.options[Aircraft.VerticalTail.SKIN_DENSITY]
+        rho_skin, units = self.options[Aircraft.VerticalTail.AREAL_SKIN_DENSITY]
         spar_outer_diameter, units = self.options[Aircraft.VerticalTail.SPAR_OUTER_DIAMETER]
         rho_spar, units = self.options[Aircraft.VerticalTail.SPAR_DENSITY]
         spar_wall_thickness, units = self.options[Aircraft.VerticalTail.SPAR_WALL_THICKNESS]
