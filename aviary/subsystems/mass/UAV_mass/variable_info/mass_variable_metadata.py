@@ -2,8 +2,8 @@
 Metadata for UAV variables defined in mass_variables.py
 """
 from copy import deepcopy
-
 import aviary.api as av
+from aviary.subsystems.mass.UAV_mass.variable_info.enums import WingType
 from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
 
 ExtendedMetaData = deepcopy(av.CoreMetaData)
@@ -884,9 +884,9 @@ av.add_meta_data(
 av.add_meta_data(
     Aircraft.Wing.TYPE,
     meta_data = ExtendedMetaData,
-    units='unitless',
-    desc='Specifies "simple" or "medium" wing design',
-    default_value='simple',
-    option=True,
-    types=str,
+    units = 'unitless',
+    desc = 'Specifies "simple" or "medium" wing design',
+    default_value = WingType.SIMPLE,
+    option = True,
+    types = WingType,
 )

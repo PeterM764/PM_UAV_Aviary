@@ -7,7 +7,6 @@ from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 
 from aviary.subsystems.aerodynamics.UAV_Aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.mass.UAV_mass.mass_builder import MassBuilder as DBFMassBuilder
-from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft as DBFAircraft
 from aviary.models.aircraft.small_uav.phases.UAV_energy_phase import get_cruise_phase_info
 from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
 from aviary.subsystems.propulsion.rc_electric.model.UAV_mission import RCPropMission
@@ -73,7 +72,7 @@ class CruiseExample:
         prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-7
         prob.driver.options['debug_print'] = ['desvars', 'objs', 'nl_cons', 'ln_cons']
 
-        prob.add_design_variables()
+        
 
         # Aviary already added these with transport scale (ref=175e3 lbm, upper=None), and
         # add_design_var won't overwrite. Drop the existing entries, then re-add at UAV scale.

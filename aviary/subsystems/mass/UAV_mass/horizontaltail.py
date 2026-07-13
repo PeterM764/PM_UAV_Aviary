@@ -41,7 +41,7 @@ class HorizontalTailMass(om.JaxExplicitComponent):
         add_aviary_input(self, Aircraft.HorizontalTail.WETTED_AREA, units='m**2', meta_data=ExtendedMetaData, primal_name='wetted_area')
 
         add_aviary_output(self, Aircraft.HorizontalTail.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
-
+        
     def compute_primal(self, span, root_chord, wetted_area):
         num_spars = self.options[Aircraft.HorizontalTail.NUM_SPARS]
         rib_lightening_factor = self.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR]

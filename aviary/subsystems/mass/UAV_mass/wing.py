@@ -5,6 +5,7 @@ import os
 import openmdao.api as om
 import jax.numpy as jnp
 
+from aviary.subsystems.mass.UAV_mass.variable_info.enums import WingType
 from aviary.subsystems.mass.UAV_mass.utils.materials_database import materials
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
 from aviary.subsystems.mass.UAV_mass.utils.load_airfoil import load_airfoil_if_needed
@@ -57,7 +58,7 @@ class WingMass(om.JaxExplicitComponent):
         chord = root_chord
         type = self.options[Aircraft.Wing.TYPE]
 
-        if type == 'simple':
+        if type == WingType.SIMPLE:
 
             #Simple wing design mass calculation
             rod_thickness, units = self.options[Aircraft.Wing.ROD_THICKNESS]
@@ -80,7 +81,7 @@ class WingMass(om.JaxExplicitComponent):
 
             return total_mass
         
-        if type == 'medium':
+        if type == WingType.MEDIUM:
 
             #medium wing design mass calculation
             num_spars = self.options[Aircraft.Wing.NUM_SPARS]
@@ -128,7 +129,3 @@ class WingMass(om.JaxExplicitComponent):
             total_mass = (1 + glue_factor) * structural_mass + misc_mass
 
             return total_mass
-        
-        #raise error if invalid option is given
-        else:
-            raise ValueError("Invalid wing TYPE option: must be 'simple' or 'medium'")

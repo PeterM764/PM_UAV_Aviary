@@ -3,6 +3,7 @@ import numpy as np
 import os
 import openmdao.api as om
 
+from aviary.subsystems.mass.UAV_mass.variable_info.enums import WingType
 from aviary.subsystems.mass.UAV_mass.wing import WingMass
 from openmdao.utils.assert_utils import assert_near_equal, assert_check_partials
 from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
@@ -26,8 +27,8 @@ class TestWingMass(unittest.TestCase):
         airfoil = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'utils', 'mh84-il.csv'))
 
         #Tests for the simple wing design
-        if wing_type == "simple":
-            wm.options[Aircraft.Wing.TYPE] = 'simple'
+        if wing_type == WingType.SIMPLE:
+            wm.options[Aircraft.Wing.TYPE] = WingType.SIMPLE
             wm.options[Aircraft.Wing.FOAM_DENSITY] = (32.0, 'kg/m**3')
             wm.options[Aircraft.Wing.ROD_DENSITY] = (1500.0, 'kg/m**3')
             wm.options[Aircraft.Wing.ROD_RADIUS] = (0.003, 'm')
@@ -35,8 +36,8 @@ class TestWingMass(unittest.TestCase):
             wm.options[Aircraft.Wing.AIRFOIL_PATH] = airfoil
 
         #Tests for the medium wing design
-        elif wing_type == "medium":
-            wm.options[Aircraft.Wing.TYPE] = 'medium'
+        elif wing_type == WingType.MEDIUM:
+            wm.options[Aircraft.Wing.TYPE] = WingType.MEDIUM
             wm.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR] = 2/3
             wm.options[Aircraft.Wing.NUM_SPARS] = 1.0
             wm.options[Aircraft.Wing.SPAR_OUTER_DIAMETER] = (0.015, 'm')       
@@ -64,7 +65,7 @@ class TestWingMass(unittest.TestCase):
 
     #Simple wing test
     def test_simple_mass(self):
-        prob = self.build_problem("simple")
+        prob = self.build_problem(WingType.SIMPLE)
         prob.run_model()
 
         actual = prob.get_val(Aircraft.Wing.MASS, units='kg')
@@ -73,7 +74,7 @@ class TestWingMass(unittest.TestCase):
 
     #Medium wing test
     def test_medium_mass(self):
-        prob = self.build_problem("medium")
+        prob = self.build_problem(WingType.MEDIUM)
         prob.run_model()
 
         actual = prob.get_val(Aircraft.Wing.MASS, units='kg')
@@ -83,13 +84,13 @@ class TestWingMass(unittest.TestCase):
 
     #Partials test
     def test_partials_1(self):
-        prob = self.build_problem("medium")
+        prob = self.build_problem(WingType.MEDIUM)
         prob.run_model()
         partials = prob.check_partials(compact_print=False, method='cs')
         assert_check_partials(partials, atol=1e-6, rtol=1e-6)
 
     def test_partials_2(self):
-        prob = self.build_problem("simple")
+        prob = self.build_problem(WingType.SIMPLE)
         prob.run_model()
         partials = prob.check_partials(compact_print=False, method='cs')
         assert_check_partials(partials, atol=1e-6, rtol=1e-6)

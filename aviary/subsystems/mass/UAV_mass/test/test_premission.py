@@ -5,7 +5,7 @@ import os
 
 from aviary.subsystems.mass.UAV_mass.mass_premission import MassPremission
 from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
-
+from aviary.subsystems.mass.UAV_mass.variable_info.enums import WingType
 class TestMassPremission(unittest.TestCase):
     def set_defaults(self, comp, Aircraft):
         # Spars
@@ -81,7 +81,7 @@ class TestMassPremission(unittest.TestCase):
         wing.options[Aircraft.Wing.RIB_THICKNESS] = (rib_thicks, "m")
         wing.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR] = 2/3
         wing.options[Aircraft.Wing.AIRFOIL_PATH] = airfoil
-        wing.options[Aircraft.Wing.TYPE] = 'medium'
+        wing.options[Aircraft.Wing.TYPE] = WingType.MEDIUM
 
         htail.options[Aircraft.HorizontalTail.RIB_MATERIALS] = rib_materials
         htail.options[Aircraft.HorizontalTail.RIB_THICKNESS] = (rib_thicks, "m")
