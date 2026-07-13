@@ -4,7 +4,7 @@ import openmdao.api as om
 import aviary.api as av
 from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
-from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
+from aviary.subsystems.aerodynamics.custom_aero.custom_aero_builder import CustomAeroBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
 
 

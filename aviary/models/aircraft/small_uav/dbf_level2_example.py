@@ -10,7 +10,7 @@ from pathlib import Path
 from aviary.models.aircraft.small_uav.phases.dbf_example_energy_phase import phase_info
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
 from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
-from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder
+from aviary.subsystems.aerodynamics.custom_aero.custom_aero_builder import CustomAeroBuilder
 import inspect
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
 
