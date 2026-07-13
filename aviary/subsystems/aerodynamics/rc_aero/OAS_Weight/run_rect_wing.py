@@ -12,7 +12,7 @@ compared.
 import numpy as np
 
 import aviary.api as av
-from aviary.subsystems.aerodynamics.rc_aero.external_subsystems.OAS_mass.OAS_wing_mass_builder import OASWingMassBuilder
+from aviary.models.external_subsystems.open_aero_struct.OAS_wing_mass_builder import OASWingMassBuilder
 
 # This problem can take a while to run - use the most performant optimizer installed
 optimizer = 'SLSQP'
@@ -116,7 +116,7 @@ phase_info = {
 phase_info['pre_mission'] = {'include_takeoff': False, 'optimize_mass': True}
 phase_info['pre_mission']['external_subsystems'] = [wing_mass_builder]
 
-aircraft_definition_file = 'models/aircraft/test_aircraft/aircraft_for_bench_FwFm.csv'
+aircraft_definition_file = 'validation_cases/validation_data/test_models/aircraft_for_bench_FwFm.csv'
 make_plots = False
 
 # create and begin setting up Aviary problem

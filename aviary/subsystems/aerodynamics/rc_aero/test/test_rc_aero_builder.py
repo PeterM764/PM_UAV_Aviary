@@ -3,7 +3,6 @@ import unittest
 from aviary.subsystems.aerodynamics.rc_aero.rc_aero_builder import RCAeroBuilder
 from aviary.variable_info.variables import Aircraft, Dynamic
 
-
 class TestRCAeroBuilder(unittest.TestCase):
     def test_mission_interface_exposes_expected_outputs_and_parameters(self):
         builder = RCAeroBuilder()

@@ -52,7 +52,7 @@ phase_info['cruise']['external_subsystems'] = [aero_builder]
 phase_info['cruise']['subsystem_options']['core_aerodynamics'] = {'method': 'external'}
 phase_info['cruise']['user_options']['num_segments'] = 1
 
-max_iter = 30 
+max_iter = 50
 optimizer = 'IPOPT' 
 
 prob = av.AviaryProblem(verbosity=1)
@@ -69,6 +69,7 @@ prob.aviary_inputs.set_val(Aircraft.Wing.MAX_THICKNESS_LOCATION, 0.266)
 prob.aviary_inputs.set_val(Aircraft.Wing.TAPER_RATIO, 1, units='unitless')
 prob.aviary_inputs.set_val(Aircraft.Wing.SWEEP, 0, units='deg')
 prob.aviary_inputs.set_val(Aircraft.Wing.INCIDENCE, 0, units='deg')
+prob.aviary_inputs.set_val(Aircraft.Wing.CENTER_DISTANCE, 0.511, units='unitless')
 
 prob.aviary_inputs.set_val(Aircraft.HorizontalTail.SPAN, 0.711, units='m')
 prob.aviary_inputs.set_val(Aircraft.HorizontalTail.ROOT_CHORD, 0.232, units='m')
@@ -83,7 +84,6 @@ prob.aviary_inputs.set_val(Aircraft.VerticalTail.TAPER_RATIO, 1, units='unitless
 
 prob.aviary_inputs.set_val(Aircraft.Fuselage.MAX_HEIGHT, 0.172, units='m')
 prob.aviary_inputs.set_val(Aircraft.Fuselage.MAX_WIDTH, 0.114, units='m')
-prob.aviary_inputs.set_val(Aircraft.Wing.CENTER_DISTANCE, 0.511, units='unitless')
 prob.aviary_inputs.set_val(Aircraft.Fuselage.LENGTH, 1.190244, units='m')
 
 prob.aviary_inputs.set_val(Dynamic.Vehicle.MASS, 3.787, units='kg')
@@ -131,6 +131,7 @@ prob.run_aviary_problem()
 with open("variables.txt", "w") as f:
     prob.model.list_vars(out_stream=f, print_arrays=True, units=True)
 
+#Commented out get_val's are not recognized at the moment and I don't know why
 print('Lift:', prob.get_val('traj.cruise.rhs_all.lift', units='lbf')) 
 print('Drag:', prob.get_val('traj.cruise.rhs_all.drag', units='lbf'))
 #print('CL:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CL'))

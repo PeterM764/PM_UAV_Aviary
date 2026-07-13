@@ -1,3 +1,8 @@
+'''
+As far as I can tell at the moment this does not actually test anything
+'''
+
+
 import unittest
 
 import numpy as np
