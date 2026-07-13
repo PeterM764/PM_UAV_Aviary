@@ -9,7 +9,7 @@ import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
 from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
-from aviary.examples.external_subsystems.custom_aero.custom_aero_builder import CustomAeroBuilder 
+from aviary.subsystems.aerodynamics.custom_aero.custom_aero_builder import CustomAeroBuilder 
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
 from aviary.utils.aviary_values import AviaryValues

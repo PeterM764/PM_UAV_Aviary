@@ -3,12 +3,12 @@ import os
 import jax.numpy as jnp
 import openmdao.api as om
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.utils.materials_database import materials
+from aviary.subsystems.mass.UAV_mass.utils.materials_database import materials
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output, add_aviary_option
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.utils.load_airfoil import load_airfoil_if_needed
+from aviary.subsystems.mass.UAV_mass.utils.load_airfoil import load_airfoil_if_needed
 
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
-from PM_UAV_Aviary.aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_metadata import (
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraft
+from aviary.subsystems.mass.UAV_mass.variable_info.mass_variable_metadata import (
     ExtendedMetaData,
 )
 
@@ -41,7 +41,7 @@ class HorizontalTailMass(om.JaxExplicitComponent):
         add_aviary_input(self, Aircraft.HorizontalTail.WETTED_AREA, units='m**2', meta_data=ExtendedMetaData, primal_name='wetted_area')
 
         add_aviary_output(self, Aircraft.HorizontalTail.MASS, units='kg', meta_data=ExtendedMetaData, primal_name='mass')
-
+        
     def compute_primal(self, span, root_chord, wetted_area):
         num_spars = self.options[Aircraft.HorizontalTail.NUM_SPARS]
         rib_lightening_factor = self.options[Aircraft.HorizontalTail.RIB_LIGHTENING_FACTOR]
