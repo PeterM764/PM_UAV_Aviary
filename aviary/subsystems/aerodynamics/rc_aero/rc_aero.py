@@ -5,7 +5,7 @@ from ambiance import Atmosphere
 
 from aviary.variable_info.functions import add_aviary_input
 from aviary.variable_info.variables import Aircraft, Dynamic
-from aviary.examples.external_subsystems.OAS_weight.OAS_aero_analysis import OASAero
+from PM_UAV_Aviary.aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_analysis import OASAero
 
 
 class FuselageDrag(om.ExplicitComponent):

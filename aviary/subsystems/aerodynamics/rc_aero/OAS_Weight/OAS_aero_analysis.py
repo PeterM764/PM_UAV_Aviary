@@ -340,7 +340,7 @@ class OASAero(om.Group):
             self.add_subsystem(point_name, AeroPoint(surfaces=surfaces))
 
             self.promotes(point_name, inputs=[('v', Dynamic.Mission.VELOCITY)], src_indices=[i])
-            self.connect('alpha', point_name + '.alpha', src_indices=[i])
+            self.connect('alpha', point_name + 'alpha', src_indices=[i])
             self.connect('re', point_name + '.re', src_indices=[i])
             self.connect('prob_vars.cg', point_name + '.cg')
             self.connect(Dynamic.Atmosphere.DENSITY, point_name + '.rho', src_indices=[i])

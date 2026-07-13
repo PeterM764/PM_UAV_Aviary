@@ -12,7 +12,7 @@ compared.
 import numpy as np
 
 import aviary.api as av
-from aviary.examples.external_subsystems.OAS_weight.OAS_wing_weight_builder import (
+from PM_UAV_Aviary.aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_wing_weight_builder import (
     OASWingWeightBuilder,
 )
 
