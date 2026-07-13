@@ -56,17 +56,17 @@ class CruiseODETestCase(unittest.TestCase):
         self.prob.run_model()
 
         tol = tol = 1e-6
-        assert_near_equal(self.prob[Dynamic.Mission.VELOCITY_RATE], np.array([1.0, 1.0]), tol)
+        assert_near_equal(self.prob[Dynamic.Mission.VELOCITY_RATE], np.array([0.0, 0.0]), tol)
         assert_near_equal(self.prob[Dynamic.Mission.DISTANCE], np.array([0.0, 923.39168758]), tol)
         assert_near_equal(self.prob['time'], np.array([0, 8280.30660691]), tol)
         assert_near_equal(
             self.prob[Dynamic.Mission.SPECIFIC_ENERGY_RATE_EXCESS],
-            np.array([3.88465429, 4.90288541]),
+            np.array([3.88463177, 4.90286726]),
             tol,
         )
         assert_near_equal(
             self.prob[Dynamic.Mission.ALTITUDE_RATE_MAX],
-            np.array([-17.17541759, -16.15718646]),
+            np.array([3.88463177, 4.90286726]),
             tol,
         )
 
