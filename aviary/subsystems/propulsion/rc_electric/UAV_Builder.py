@@ -6,6 +6,8 @@ from aviary.subsystems.propulsion.engine_model import EngineModel
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.variable_info.variables import Mission
 
+""" Builder for the UAV Propulsion Subsystem (RC Electric) """
+
 class RCBuilder(EngineModel):
     # RCPropMission computes its own max-power chain (battery_max ... prop_max),
     # so tell Aviary NOT to build a duplicate full-throttle copy of the engine.

@@ -55,7 +55,7 @@ class FuselageMass(om.JaxExplicitComponent):
         glue_factor = self.options[Aircraft.Fuselage.GLUE_FACTOR]
         stringer_thickness, units = self.options[Aircraft.Fuselage.STRINGER_THICKNESS]
         rho_stringer, units = self.options[Aircraft.Fuselage.STRINGER_DENSITY]
-        sheeting_thick, units = self.options[Aircraft.Fuselage.SHEETING_THICKNESS]
+        sheeting_thickness, units = self.options[Aircraft.Fuselage.SHEETING_THICKNESS]
         sheeting_coverage = self.options[Aircraft.Fuselage.SHEETING_COVERAGE]
         rho_sheeting, units = self.options[Aircraft.Fuselage.SHEETING_DENSITY]
         sheeting_lightening_factor = self.options[Aircraft.Fuselage.SHEETING_LIGHTENING_FACTOR]
@@ -73,7 +73,7 @@ class FuselageMass(om.JaxExplicitComponent):
 
         # Other volumes
         sheeting_volume = (
-            wetted_area * sheeting_coverage * sheeting_lightening_factor * sheeting_thick
+            wetted_area * sheeting_coverage * sheeting_lightening_factor * sheeting_thickness
         )
         stringer_volume = 4 * stringer_thickness**2 * (length + avg_width + avg_height)
 

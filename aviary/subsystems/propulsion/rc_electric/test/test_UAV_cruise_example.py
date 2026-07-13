@@ -71,7 +71,7 @@ class CruiseExample:
         prob.driver.opt_settings['acceptable_iter'] = 0
         prob.driver.opt_settings['constr_viol_tol'] = 1e-7
         prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-7
-        prob.driver.options['debug_print'] = ['desvars', 'objs', 'nl_cons']
+        prob.driver.options['debug_print'] = ['desvars', 'objs', 'nl_cons', 'ln_cons']
 
         prob.add_design_variables()
 
@@ -82,28 +82,25 @@ class CruiseExample:
         # prob.model.add_design_var(Aircraft.Design.GROSS_MASS, units='kg', lower=2.0, upper=20.0, ref=7.0)
         prob.model.add_design_var('mission:gross_mass', units='kg', lower=2.0, upper=20.0, ref=7.0)
 
-        # Explicit mass geometry design variables (UAV-scale bounds/refs).
-        prob.model.add_design_var(DBFAircraft.Wing.SPAN, units='m', lower=0.4, upper=4.0, ref=2.0)
-        prob.model.add_design_var(DBFAircraft.Wing.ROOT_CHORD, units='m', lower=0.08, upper=1.2, ref=0.4)
-        prob.model.add_design_var(DBFAircraft.Wing.WETTED_AREA, units='m**2', lower=0.2, upper=4.0, ref=1.0)
+        # Geometry design variables at UAV scale.
+        prob.model.add_design_var(Aircraft.Wing.ROOT_CHORD, units='m', lower=0.08, upper=1.2, ref=0.4)
+        prob.model.add_design_var(Aircraft.Wing.WETTED_AREA, units='m**2', lower=0.1, upper=2.0, ref=0.8)
 
-        prob.model.add_design_var(DBFAircraft.HorizontalTail.SPAN, units='m', lower=0.3, upper=2.5, ref=1.0)
-        prob.model.add_design_var(DBFAircraft.HorizontalTail.ROOT_CHORD, units='m', lower=0.08, upper=0.8, ref=0.3)
-        prob.model.add_design_var(DBFAircraft.HorizontalTail.WETTED_AREA, units='m**2', lower=0.05, upper=2.0, ref=0.5)
+        prob.model.add_design_var(Aircraft.HorizontalTail.ROOT_CHORD, units='m', lower=0.08, upper=0.8, ref=0.3)
+        prob.model.add_design_var(Aircraft.HorizontalTail.SPAN, units='m', lower=0.2, upper=2.0, ref=0.8)
+        prob.model.add_design_var(Aircraft.HorizontalTail.WETTED_AREA, units='m**2', lower=0.05, upper=1.2, ref=0.3)
 
-        prob.model.add_design_var(DBFAircraft.VerticalTail.SPAN, units='m', lower=0.3, upper=2.5, ref=1.0)
-        prob.model.add_design_var(DBFAircraft.VerticalTail.ROOT_CHORD, units='m', lower=0.08, upper=0.8, ref=0.3)
-        prob.model.add_design_var(DBFAircraft.VerticalTail.WETTED_AREA, units='m**2', lower=0.05, upper=2.0, ref=0.5)
+        prob.model.add_design_var(Aircraft.VerticalTail.ROOT_CHORD, units='m', lower=0.08, upper=0.8, ref=0.3)
+        prob.model.add_design_var(Aircraft.VerticalTail.SPAN, units='m', lower=0.2, upper=2.0, ref=0.8)
+        prob.model.add_design_var(Aircraft.VerticalTail.WETTED_AREA, units='m**2', lower=0.03, upper=0.8, ref=0.12)
 
-        prob.model.add_design_var(DBFAircraft.Fuselage.LENGTH, units='m', lower=0.8, upper=4.0, ref=2.0)
-        prob.model.add_design_var(DBFAircraft.Fuselage.AVG_HEIGHT, units='m', lower=0.04, upper=0.5, ref=0.15)
-        prob.model.add_design_var(DBFAircraft.Fuselage.AVG_WIDTH, units='m', lower=0.04, upper=0.5, ref=0.15)
-        prob.model.add_design_var(DBFAircraft.Fuselage.WETTED_AREA, units='m**2', lower=0.1, upper=3.0, ref=0.6)
+        prob.model.add_design_var(Aircraft.Fuselage.MAX_HEIGHT, units='m', lower=0.04, upper=0.5, ref=0.15)
+        prob.model.add_design_var(Aircraft.Fuselage.MAX_WIDTH, units='m', lower=0.04, upper=0.5, ref=0.15)
+        prob.model.add_design_var(Aircraft.Fuselage.WETTED_AREA, units='m**2', lower=0.1, upper=2.0, ref=0.6)
 
-        # Keep a few direct geometry bounds as explicit constraints for robustness.
-        prob.model.add_constraint(DBFAircraft.Fuselage.WETTED_AREA, lower=0.1, upper=3.0, units='m**2')
-        prob.model.add_constraint(DBFAircraft.Wing.ROOT_CHORD, lower=0.08, upper=1.2, units='m')
-        prob.model.add_constraint(DBFAircraft.Wing.SPAN, lower=0.4, upper=4.0, units='m')
+        # Keep direct geometric bounds.
+       
+
 
         prob.model.add_subsystem('mean_power_comp', MeanPowerComp())
         prob.model.add_subsystem(
@@ -134,6 +131,14 @@ class CruiseExample:
         prob.set_val(Aircraft.Engine.Motor.MASS, 0.55, units='kg')
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 2.0, units='A')
         prob.set_val(Aircraft.Battery.VOLTAGE, 25.2, units='V')
+
+        # Seed geometry terms near a small-UAV baseline.
+        prob.set_val(Aircraft.Wing.WETTED_AREA, 0.85, units='m**2')
+        prob.set_val(Aircraft.HorizontalTail.SPAN, 1.0, units='m')
+        prob.set_val(Aircraft.HorizontalTail.WETTED_AREA, 0.35, units='m**2')
+        prob.set_val(Aircraft.VerticalTail.SPAN, 1.0, units='m')
+        prob.set_val(Aircraft.VerticalTail.WETTED_AREA, 0.14, units='m**2')
+        prob.set_val(Aircraft.Fuselage.WETTED_AREA, 0.58, units='m**2')
 
         if rc_prop.power_balance_mode == 'feedforward':
             prob.set_val('traj.cruise.controls:throttle', 0.7, units='unitless')
@@ -216,7 +221,7 @@ class TestRCPropMission(unittest.TestCase):
     def test_residual(self):
         nn = 3
 
-        prob = om.Problem()
+        prob = om.Problem(reports=False)
         options = AviaryValues()
         options.set_val(Aircraft.Engine.NUM_ENGINES, 1)
         prob.model.add_subsystem('rc_prop_group', RCPropMission(num_nodes=nn, aviary_options=options), promotes=['*'])
@@ -250,7 +255,7 @@ class TestRCPropMission(unittest.TestCase):
         motor_power = prob.get_val('motor.power', units='W')
 
     def test_premission_calcs(self):
-        prob = om.Problem()
+        prob = om.Problem(reports=False)
         options = AviaryValues()
         options.set_val(Aircraft.Engine.Motor.KV_EQ_SLOPE, 2105.53674)
         options.set_val(Aircraft.Engine.Motor.KV_EQ_INT, -80.83469)
