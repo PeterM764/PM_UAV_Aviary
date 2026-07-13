@@ -1,7 +1,7 @@
 import openmdao.api as om
 
 from aviary.subsystems.subsystem_builder import SubsystemBuilder
-from PM_UAV_Aviary.aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_analysis import OASAero
+from aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_analysis import OASAero
 from aviary.variable_info.variables import Aircraft, Dynamic
 from aviary.utils.aviary_values import AviaryValues
 

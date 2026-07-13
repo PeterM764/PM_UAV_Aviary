@@ -4,8 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 import aviary.api as av
-from PM_UAV_Aviary.aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_builder import OASAeroBuilder
-from PM_UAV_Aviary.aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_analysis import OASAero
+from aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_builder import OASAeroBuilder
+from aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_analysis import OASAero
 from aviary.utils.functions import set_aviary_initial_values
 from aviary.utils.aviary_values import AviaryValues
 
