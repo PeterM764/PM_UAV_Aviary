@@ -20,7 +20,7 @@ class RCBuilder(EngineModel):
         self.power_balance_mode = power_balance_mode
     def build_pre_mission(self, aviary_inputs, **kwargs):  # m, b,
         """Builds an OpenMDAO system for the pre-mission computations of the subsystem."""
-        return RCPropPreMission(aviary_options=self.options)
+        return RCPropPreMission()
 
     def build_mission(self, num_nodes, aviary_inputs, **kwargs):
         """Builds an OpenMDAO system for the mission computations of the subsystem."""
@@ -69,11 +69,6 @@ class RCBuilder(EngineModel):
                 'upper': 3.6, #TODO: this placeholder can be varied
                 # 'val': 2.2,  
             },
-           
-            
-
-
-
         
             Aircraft.Engine.Motor.MASS: {
                
@@ -164,55 +159,87 @@ class RCBuilder(EngineModel):
 
         return parameters
 
-    def get_controls(self, aviary_inputs = None, user_options = None, subsystem_options = None, phase_name=None):
+    def get_controls(self, aviary_inputs=None, user_options=None,
+                     subsystem_options=None, phase_name=None):
 
         if self.power_balance_mode == 'feedforward':
-           return{Dynamic.Vehicle.Propulsion.CURRENT: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT,
-                'units': 'A',
-                'opt': True,
-                # 1 A floor, not 10: at light cruise the balanced current is only a
-                # few amps; a 10 A floor forces ~250 W through the powertrain and
-                # makes the thrust=drag constraint infeasible (IPOPT local infeas).
-                'lower': 1.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
-            Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
-            # SAND: the RPM the prop table sees. Bounds keep it inside the
-            # training data (16.7 - 183 rev/s), so ct/cp are never extrapolated.
-            'rpm_lookup': {
-                'targets': 'rpm_lookup',
-                'units': 'rev/s',
-                'opt': True,
-                'lower': 20.0,
-                'upper': 180.0,
-                'ref': 1.0e2,
-            },
-            'rpm_lookup_max': {
-                'targets': 'rpm_lookup_max',
-                'units': 'rev/s',
-                'opt': True,
-                'lower': 20.0,
-                'upper': 180.0,
-                'ref': 1.0e2,
-            },}
-        return{
+
+            if phase_name == 'climb':
+                current_lower = 1.0
+                current_upper = 100.0
+
+                current_max_lower = 10.0
+                current_max_upper = 100.0
+
+                rpm_lower = 60.0
+                rpm_upper = 180.0
+
+                rpm_max_lower = 80.0
+                rpm_max_upper = 180.0
+
+            else:
+                # Cruise/default values
+                current_lower = 1.0
+                current_upper = 100.0
+
+                current_max_lower = 10.0
+                current_max_upper = 100.0
+
+                rpm_lower = 20.0
+                rpm_upper = 180.0
+
+                rpm_max_lower = 20.0
+                rpm_max_upper = 180.0
+
+            return {
+                Dynamic.Vehicle.Propulsion.CURRENT: {
+                    'targets': Dynamic.Vehicle.Propulsion.CURRENT,
+                    'units': 'A',
+                    'opt': True,
+                    'lower': current_lower,
+                    'upper': current_upper,
+                    'ref': 1.0e2,
+                },
+
+                Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
+                    'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
+                    'units': 'A',
+                    'opt': True,
+                    'lower': current_max_lower,
+                    'upper': current_max_upper,
+                    'ref': 1.0e2,
+                },
+
+                'rpm_lookup': {
+                    'targets': 'rpm_lookup',
+                    'units': 'rev/s',
+                    'opt': True,
+                    'lower': rpm_lower,
+                    'upper': rpm_upper,
+                    'ref': 1.0e2,
+                },
+
+                'rpm_lookup_max': {
+                    'targets': 'rpm_lookup_max',
+                    'units': 'rev/s',
+                    'opt': True,
+                    'lower': rpm_max_lower,
+                    'upper': rpm_max_upper,
+                    'ref': 1.0e2,
+                },
+            }
+
+        # Non-feedforward fallback
+        return {
             Dynamic.Vehicle.Propulsion.CURRENT: {
                 'targets': Dynamic.Vehicle.Propulsion.CURRENT,
                 'units': 'A',
                 'opt': True,
-                'lower': 10.0,
+                'lower': 1.0,
                 'upper': 100.0,
                 'ref': 1.0e2,
             },
+
             Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
                 'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
                 'units': 'A',
@@ -221,13 +248,11 @@ class RCBuilder(EngineModel):
                 'upper': 100.0,
                 'ref': 1.0e2,
             },
-        
         }
-        
-       
+
     def get_mass_names(self, aviary_inputs=None, user_options=None, subsystem_options=None, phase_info=None):
         return [Aircraft.Battery.MASS, Aircraft.Engine.Motor.MASS]#, Aircraft.Engine.MASS]
-    
+
     #TODO add new outputs
     def mission_outputs(self, aviary_inputs=None, user_options=None, subsystem_options=None, phase_info=None):
         return [

@@ -21,12 +21,7 @@ class RCPropPreMission(om.Group):
         add_aviary_option(self, Aircraft.Engine.Motor.KV_EQ_SLOPE)    # m = KV_EQ_SLOPE
         add_aviary_option(self, Aircraft.Engine.Motor.KV_EQ_INT)      # b = KV_EQ_INT
       
-        self.options.declare(
-            'aviary_options',
-            types=AviaryValues,
-            desc='collection of Aircraft/Mission specific options',
-            default=None,
-        )
+    
         self.name = 'rcpropulsion_premission'
 
     def setup(self):
@@ -42,9 +37,9 @@ class RCPropPreMission(om.Group):
             om.ExecComp(
                 #TODO: may add options here
                 'energy = voltage_in * (battery_mass * 7.3 - 0.246)',
-                energy={'val': 0.0, 'units': 'W*h'},
-                voltage_in={'val': 0.0, 'units': 'V'},
-                battery_mass={'val': 0.0, 'units': 'kg'},
+                energy={'val': 1, 'units': 'W*h'},
+                voltage_in={'val': 22.2, 'units': 'V'},
+                battery_mass={'val': 1.0, 'units': 'kg'},
             ),
             promotes_inputs=[('battery_mass', Aircraft.Battery.MASS), ('voltage_in', Aircraft.Battery.VOLTAGE)],
             promotes_outputs=[('energy', Aircraft.Battery.ENERGY_CAPACITY)],
@@ -54,7 +49,7 @@ class RCPropPreMission(om.Group):
             'motor_resistance_calc',
             om.ExecComp(
                 'resistance = 0.0467 * idle_current ** -1.892', 
-                idle_current={'val': 0.0, 'units': 'A'},
+                idle_current={'val': 2.2, 'units': 'A'},
                 resistance={'val': 0.0, 'units': 'ohm'}
             ),
             promotes_inputs=[('idle_current', Aircraft.Engine.Motor.IDLE_CURRENT)],
@@ -68,7 +63,7 @@ class RCPropPreMission(om.Group):
                 'kv = m * max_current / (motor_mass * 1000.0) + b', # The KV empirical fit appears to use motor mass in grams. Aviary provides motor_mass here in kg, so convert kg -> g. or else the number becomes unrealistically high.
 
                 kv={'val': 0.0, 'units': 'rpm/V'},
-                max_current={'val': 0.0, 'units': 'A'},
+                max_current={'val': 100.0, 'units': 'A'},
                 motor_mass={'val': 0.0, 'units': 'kg'},
                 m=self.options[Aircraft.Engine.Motor.KV_EQ_SLOPE],
                 b=self.options[Aircraft.Engine.Motor.KV_EQ_INT],
@@ -79,16 +74,4 @@ class RCPropPreMission(om.Group):
             ],
             promotes_outputs=[('kv', Aircraft.Engine.Motor.KV)]
         )
-        # commented out for now, may add back in later
-        # self.add_constraint(Aircraft.Engine.Motor.KV, upper=540, units='rpm/V')
-        # self.add_subsystem(
-        #     'total_mass',
-        #     om.ExecComp(
-        #         'engine_mass = batt_mass + motor_mass',
-        #         batt_mass={'val': 0.0, 'units': 'kg'},
-        #         motor_mass={'val': 0.0, 'units': 'kg'},
-        #         engine_mass={'val': 0.0, 'units': 'kg'},
-        #     ),
-        #     promotes_inputs=[('batt_mass', Aircraft.Battery.MASS), ('motor_mass', Aircraft.Engine.Motor.MASS)],
-        #     promotes_outputs=[('engine_mass', Aircraft.Engine.MASS)]
-        # )
+       

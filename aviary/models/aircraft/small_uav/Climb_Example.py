@@ -34,14 +34,16 @@ def climb_phase_info():
 
     # Climb external aero.
     phase_info['climb']['external_subsystems'] = [CustomAeroBuilder()]
-    phase_info['climb']['subsystem_options']['core_aerodynamics'] = {
+    phase_info['climb']['subsystem_options']['aerodynamics'] = {
         'method': 'external',
     }
 
     # Keep this simple while debugging.
-    phase_info['climb']['user_options']['num_segments'] = 1
+    phase_info['climb']['user_options']['num_segments'] = 4
     phase_info['climb']['user_options']['order'] = 3
-
+    # Remove legacy options that are not accepted by the current climb phase builder.
+    phase_info['climb']['user_options'].pop('electric_current_polynomial_order', None)
+    phase_info['climb']['user_options'].pop('electric_current_max_polynomial_order', None)
     # Time setup.
     phase_info['climb']['user_options']['time_duration_bounds'] = ((20.0, 90.0), 's')
     phase_info['climb']['initial_guesses']['time'] = ([0.0, 40.0], 's')
@@ -66,8 +68,8 @@ def climb_phase_info():
 
 def set_climb_control_guesses(prob):
     
-    prob.set_val('traj.climb.controls:current_flow', 1.0, units='A')
-    prob.set_val('traj.climb.controls:current_flow_max', 20.0, units='A')
+    prob.set_val('traj.climb.controls:current_flow', 20.0, units='A')
+    prob.set_val('traj.climb.controls:current_flow_max', 80.0, units='A')
 
 
 def build_climb(
@@ -77,9 +79,6 @@ def build_climb(
 ):
     """
     Build and setup the climb-only AviaryProblem.
-
-    This function does not run the optimization. That makes it easy to import
-    inside a test file.
     """
     rc_prop = RCBuilder()
     phase_info = climb_phase_info()
@@ -88,9 +87,12 @@ def build_climb(
     prob.options['group_by_pre_opt_post'] = True
 
     prob.load_inputs(
-        'validation_cases/validation_data/test_models/small_scale_uav.csv',
-        phase_info,
-        engine_builders=[rc_prop],
+    'validation_cases/validation_data/test_models/small_scale_uav.csv',
+    phase_info,
+    )
+
+    prob.load_external_subsystems(
+        external_subsystems=[rc_prop, CustomAeroBuilder()]
     )
 
     prob.check_and_preprocess_inputs()
@@ -104,22 +106,22 @@ def build_climb(
 
     prob.add_driver(optimizer)
 
-    if optimizer == 'IPOPT':
-        prob.driver.opt_settings['max_iter'] = max_iter
-        prob.driver.opt_settings['tol'] = 1.0e-6
+   
+    prob.driver.opt_settings['max_iter'] = 300
+    prob.driver.opt_settings['tol'] = 1.0e-6
 
     prob.driver.options['debug_print'] = []
 
     prob.add_design_variables()
 
-    # Electric aircraft: fuel burned should stay zero.
-    # Keep this only if mission:summary:fuel_burned exists in your model.
-    prob.model.add_constraint(
-        'mission:summary:fuel_burned',
-        equals=0.0,
-        units='lbm',
-        ref=1.0,
-    )
+    # Electric aircraft: fuel burned should stay zero. will only need if adding cruise or other phases
+  
+    # prob.model.add_constraint(
+    #     'mission:summary:fuel_burned',
+    #     equals=0.0,
+    #     units='lbm',
+    #     ref=1.0,
+    # )
 
     # Since the only phase is climb, this minimizes climb time.
     prob.add_objective('time')
@@ -136,7 +138,7 @@ def print_climb_summary(prob):
     checks = [
         'gtow_constraint.GTOW',
         'mission:constraints:mass_residual',
-        'mission:summary:fuel_burned',
+        # 'mission:summary:fuel_burned',
         'traj.climb.rhs_all.thrust_residual',
         'traj.climb.t_duration',
     ]
@@ -154,13 +156,30 @@ def print_climb_summary(prob):
             print(f"\n{name}: NOT FOUND")
             print(err)
 
+def print_current_debug(prob, label):
+    print("\n" + "=" * 60)
+    print(label)
+
+    names = [
+        ('aircraft:engine:motor:idle_current', 'A'),
+        ('aircraft:engine:motor:max_cont_current', 'A'),
+        ('aircraft:engine:motor:mass', 'kg'),
+        ('traj.climb.controls:current_flow', 'A'),
+        ('traj.climb.controls:current_flow_max', 'A'),
+    ]
+
+    for name, units in names:
+        try:
+            print(name, prob.get_val(name, units=units))
+        except Exception as err:
+            print(name, "NOT FOUND:", err)
 
 def main():
     prob = build_climb()
-
+    print_current_debug(prob, "BEFORE RUN")
     failed = prob.run_aviary_problem(suppress_solver_print=False)
     print("FAILED =", failed)
-
+    print_current_debug(prob, "AFTER RUN")
     print_climb_summary(prob)
 
     output_file = Path(__file__).parent / "climb_only_newvars.txt"
@@ -170,3 +189,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+    

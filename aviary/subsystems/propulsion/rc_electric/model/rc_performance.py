@@ -139,7 +139,7 @@ class Motor(om.ExplicitComponent):
 
         add_aviary_input(self, Aircraft.Engine.Motor.MASS, units= 'kg')
         add_aviary_input(self, Aircraft.Engine.Motor.IDLE_CURRENT,  units='A')
-        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, units='A')
+        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, val = np.zeros(nn), units='A')
         add_aviary_input(self, Aircraft.Engine.Motor.RESISTANCE, units='ohm')
         add_aviary_input(self, Aircraft.Engine.Motor.KV, units='rpm/V')
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
@@ -181,8 +181,8 @@ class Motor(om.ExplicitComponent):
 
         self.declare_partials(
             'current_constraint',
-            # 'current',
-            Dynamic.Vehicle.Propulsion.CURRENT,
+            'current',
+            
             rows=ar, cols=ar
         )
 
@@ -198,7 +198,7 @@ class Motor(om.ExplicitComponent):
         voltage_prop = inputs['voltage_in'] - inputs['current'] * R
         outputs[Dynamic.Vehicle.Propulsion.RPM] = lf * kv * voltage_prop
         outputs['power'] = -inputs['current']**2 * R - inputs[Aircraft.Engine.Motor.IDLE_CURRENT] * voltage_prop
-        outputs['current_constraint'] = inputs[Dynamic.Vehicle.Propulsion.CURRENT] - inputs[Aircraft.Engine.Motor.MAX_CONT_CURRENT] 
+        outputs['current_constraint'] = inputs['current'] - inputs[Aircraft.Engine.Motor.MAX_CONT_CURRENT] 
 
     def compute_partials(self, inputs, partials):
         R = inputs[Aircraft.Engine.Motor.RESISTANCE]
@@ -220,7 +220,7 @@ class Motor(om.ExplicitComponent):
         partials['power', Aircraft.Engine.Motor.IDLE_CURRENT] = -voltage_prop
         
         partials['current_constraint', Aircraft.Engine.Motor.MAX_CONT_CURRENT] = -1
-        partials['current_constraint', Dynamic.Vehicle.Propulsion.CURRENT] = 1
+        partials['current_constraint', 'current'] = 1
 
 
 #TODO: reading in of data should be changed later:
@@ -325,7 +325,7 @@ class Propeller(om.ExplicitComponent):
 
         add_aviary_output(self, Dynamic.Vehicle.Propulsion.THRUST, val=np.zeros(nn), units='N')
         add_aviary_output(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
-        self.add_output('rpm_constraint', val=np.zeros(nn))
+        self.add_output('rpm_constraint', val=np.zeros(nn), units='rev/s')
         ar =np.arange(nn)
 
         self.declare_partials(
@@ -375,7 +375,8 @@ class Propeller(om.ExplicitComponent):
         n = inputs [Dynamic.Vehicle.Propulsion.RPM]
         outputs[Dynamic.Vehicle.Propulsion.THRUST] = rho * n**2 * D**4 * inputs["ct"] * num_engines
         outputs[Dynamic.Vehicle.Propulsion.PROP_POWER] = (rho * n**3 * D**5 * inputs["cp"])
-        outputs['rpm_constraint'] = n - 150000 / D
+        n_limit = 63.5 / D
+        outputs['rpm_constraint'] = n - n_limit
 
 
     def compute_partials(self, inputs, partials):
@@ -395,7 +396,7 @@ class Propeller(om.ExplicitComponent):
         partials[Dynamic.Vehicle.Propulsion.PROP_POWER, 'cp'] = rho * n**3 * D**5
 
         partials['rpm_constraint', Dynamic.Vehicle.Propulsion.RPM] = np.ones(len(n))
-        partials['rpm_constraint', Aircraft.Engine.Propeller.DIAMETER] = 150000 / D**2
+        partials['rpm_constraint', Aircraft.Engine.Propeller.DIAMETER] = 63.5 / D**2
 
 
 class PowerResiduals(om.ExplicitComponent):

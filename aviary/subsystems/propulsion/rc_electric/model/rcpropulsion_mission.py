@@ -81,6 +81,7 @@ class RCPropMission(om.Group):
                 ],
             promotes_outputs=[
                 Dynamic.Vehicle.Propulsion.RPM,
+                ('current_constraint', 'current_constraint_nominal'),
                 ]
         )
 
@@ -191,7 +192,8 @@ class RCPropMission(om.Group):
             promotes_inputs=[
                 Aircraft.Battery.VOLTAGE,
                 Aircraft.Battery.RESISTANCE,
-                (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                    #(Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
             ]
         )
 
@@ -200,7 +202,8 @@ class RCPropMission(om.Group):
             ElectronicSpeedController(num_nodes=nn),
             promotes_inputs=[
                 (Dynamic.Vehicle.Propulsion.THROTTLE, 'full_throttle'),
-                (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                 # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
             ]
         )
 
@@ -212,7 +215,8 @@ class RCPropMission(om.Group):
                 Aircraft.Engine.Motor.MAX_CONT_CURRENT,
                 Aircraft.Engine.Motor.RESISTANCE,
                 Aircraft.Engine.Motor.KV,
-                (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                 # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
+                (Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
                 ],
             promotes_outputs=[
                 (Dynamic.Vehicle.Propulsion.RPM, Dynamic.Vehicle.Propulsion.RPM_MAX),
@@ -274,17 +278,7 @@ class RCPropMission(om.Group):
                     ('power_net','power_net_max'),
                 ]
             )
-        else:
-            self.add_subsystem(
-                'power_net_max',
-                PowerImplicit(num_nodes=nn),
-                promotes_inputs=[
-                    (Dynamic.Vehicle.Propulsion.PROP_POWER, Dynamic.Vehicle.Propulsion.PROP_POWER_MAX),
-                ],
-                promotes_outputs=[
-                    (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                ]
-            )
+       
 
         self.connect('battery.voltage_out', 'esc.voltage_in')
         self.connect('esc.voltage_out', 'motor.voltage_in')
@@ -310,10 +304,11 @@ class RCPropMission(om.Group):
 
         if user_feedforward:
             # Keep electrical power mismatch near zero 
-            self.add_constraint('power_net', lower=-0.2, upper=0.2, ref=1e2, units='W')
-
+            self.add_constraint('power_net', lower=-0.05, upper=0.05, ref=1e2, units='W')
+            # Enforce motor continuous-current limit on nominal branch.
+            self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
             # Force commanded cruise RPM to match motor-computed RPM.
-            self.add_constraint('rpm_balance.rpm_defect', lower=-0.25, upper=0.25, ref=1e2, units='rev/s')
+            self.add_constraint('rpm_balance.rpm_defect', lower=-0.1, upper=0.1, ref=1e2, units='rev/s')
 
             # Do the same RPM match for the max-power/full-throttle chain.
             self.add_constraint('rpm_balance_max.rpm_defect', lower=-1.0, upper=1.0, ref=1e2, units='rev/s')
@@ -342,7 +337,7 @@ class RCPropMission(om.Group):
 
             self.linear_solver = om.LinearBlockGS()
 
-        self.options['auto_order'] = True
+        
 
         # Newton + DirectSolver alternative (kept for reference): converges the
         # current_flow state in fewer iterations when the metamodel is well inside
@@ -355,3 +350,11 @@ class RCPropMission(om.Group):
         # self.linear_solver = om.DirectSolver(assemble_jac=True)
 
         # # self.add_constraint(Dynamic.Vehicle.Propulsion.CURRENT, lower=0)
+
+        # Enforce motor continuous-current limit on nominal branch in solver mode.
+        self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
+
+        
+        self.add_constraint('prop.rpm_constraint', upper=0.0, ref=1e2, units='rev/s')
+        self.add_constraint('prop_max.rpm_constraint', upper=0.0, ref=1e2, units='rev/s')
+        self.options['auto_order'] = True
