@@ -3132,7 +3132,7 @@ add_meta_data(
     default_value=1.0,
 )
 
-# Misnamed. This sets if Aircraft.Furnishings.MASS_SCALER is used as a coefficient for additional
+# TODO Misnamed. This sets if Aircraft.Furnishings.MASS_SCALER is used as a coefficient for additional
 # furnishings weight and the alternative (False) is to use the emperical equation. The variable toggle
 # based on gross mass and num_pax is bad Aviary behavior and should occur in fortran_to_aviary instead
 add_meta_data(
@@ -6893,6 +6893,17 @@ add_meta_data(
 )
 
 add_meta_data(
+    Mission.GRAVITY,
+    meta_data=_MetaData,
+    historical_name={'GASP': None, 'FLOPS': None},
+    desc='Gravitational acceleration of the planet.',
+    types=float,
+    option=True,
+    # The default gravity model is set based on Settings.ATMOSPHERE_MODEL
+    units='m/s**2',
+)
+
+add_meta_data(
     Mission.GROSS_MASS,
     meta_data=_MetaData,
     historical_name={'GASP': None, 'FLOPS': None},
@@ -7202,8 +7213,8 @@ add_meta_data(
     Mission.Landing.INITIAL_VELOCITY,
     meta_data=_MetaData,
     historical_name={
-        'GASP': 'INGASP.VGL',
-        'FLOPS': 'AERIN.VAPPR',
+        'GASP': 'VGL',  # DLAND
+        'FLOPS': None,  # output: SUMMARY VAPP
     },
     units='ft/s',
     desc='approach velocity',
@@ -7693,9 +7704,9 @@ add_meta_data(
     meta_data=_MetaData,
     historical_name={'GASP': None, 'FLOPS': None},
     units='unitless',
-    desc='speed during taxi, must be nonzero if pycycle is enabled',
-    option=True,
-    default_value=0.0001,
+    desc='speed during taxi',
+    option=False,
+    default_value=0.0,
 )
 
 #  .----------------.  .----------------.  .----------------.  .----------------.  .----------------.  .-----------------. .----------------.  .----------------.
