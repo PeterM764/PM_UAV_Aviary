@@ -5,8 +5,7 @@ from ambiance import Atmosphere
 
 from aviary.variable_info.functions import add_aviary_input
 from aviary.variable_info.variables import Aircraft, Dynamic
-from aviary.subsystems.aerodynamics.rc_aero.OAS_Weight.OAS_aero_analysis import OASAero
-
+from aviary.subsystems.aerodynamics.rc_aero.OAS_aero_analysis import OASAero
 
 class FuselageDrag(om.ExplicitComponent):
     # based on Roskam VI chapter 4
@@ -20,9 +19,9 @@ class FuselageDrag(om.ExplicitComponent):
         nn = self.options['num_nodes']
 
         # constants for a DBF-sized RC aircraft
-        add_aviary_input(self, Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR, val=1.2, units='unitless') # say 1.2 from figure 4.1
-        self.add_input('Cf_fus', val=0.0044, units='unitless') # turbulent flat plate skin friction coeff, from figure 4.3
-        self.add_input('CD_L_fus', val=0.001, units='unitless') # assume little lift induced drag from fuselage
+        add_aviary_input(self, Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR, 'unitless') # say 1.2 from figure 4.1
+        self.add_input('Cf_fus', 0.0044, units='unitless') # turbulent flat plate skin friction coeff, from figure 4.3
+        self.add_input('CD_L_fus', 0.001, units='unitless') # assume little lift induced drag from fuselage
 
         add_aviary_input(self, Aircraft.Fuselage.LENGTH, units='m')
         add_aviary_input(self, Aircraft.Fuselage.MAX_HEIGHT, units='m') 
@@ -78,9 +77,9 @@ class VTailDrag(om.ExplicitComponent):
         nn = self.options['num_nodes']
 
         # constants for a DBF-sized RC aircraft
-        self.add_input('R_LS', val=1.1, units='unitless') # lifting surface correction factor wt low sweep @ low Mach, from fig 4.2
-        self.add_input('Cf_vtail', val=0.0044, units='unitless') # turbulent flat plate skin friction coeff, from figure 4.3
-        self.add_input('L_prime', val=1.2, units='unitless') # airfoil thickness location parameter, for (t/c)max @ x_t >= 0.3c (NACA 00 series)
+        self.add_input('R_LS', 1.1, units='unitless') # lifting surface correction factor wt low sweep @ low Mach, from fig 4.2
+        self.add_input('Cf_vtail', 0.0044, units='unitless') # turbulent flat plate skin friction coeff, from figure 4.3
+        self.add_input('L_prime', 1.2, units='unitless') # airfoil thickness location parameter, for (t/c)max @ x_t >= 0.3c (NACA 00 series)
 
         add_aviary_input(self, Aircraft.VerticalTail.ROOT_CHORD)
         add_aviary_input(self, Aircraft.VerticalTail.TAPER_RATIO)
@@ -142,7 +141,7 @@ class LandingGearDrag(om.ExplicitComponent):
     def setup(self):
         nn = self.options['num_nodes']
 
-        add_aviary_input(self, Aircraft.LandingGear.DRAG_COEFFICIENT, val=0.011, units='unitless')
+        add_aviary_input(self, Aircraft.LandingGear.DRAG_COEFFICIENT, units='unitless')
         add_aviary_input(self, Dynamic.Atmosphere.DYNAMIC_PRESSURE, shape=nn, units='N/m**2')
         add_aviary_input(self, Aircraft.Wing.AREA, units='m**2')
 

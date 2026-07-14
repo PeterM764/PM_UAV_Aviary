@@ -3,7 +3,6 @@ import openmdao.api as om
 import aviary.api as av
 from aviary.models.external_subsystems.open_aero_struct.OAS_wing_mass_analysis import OAStructures
 
-
 class OASWingMassBuilder(av.SubsystemBuilder):
     """
     Builder for an OpenAeroStruct component that computes a new wing mass.

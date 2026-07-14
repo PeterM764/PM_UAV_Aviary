@@ -48,7 +48,6 @@ phase_info = {
     },
 }
  
-phase_info['cruise']['external_subsystems'] = [aero_builder]
 phase_info['cruise']['subsystem_options']['core_aerodynamics'] = {'method': 'external'}
 phase_info['cruise']['user_options']['num_segments'] = 1
 
@@ -58,6 +57,7 @@ optimizer = 'IPOPT'
 prob = av.AviaryProblem(verbosity=1)
 
 prob.load_inputs('aviary/validation_cases/validation_data/test_models/aircraft_for_bench_FwFm.csv', phase_info=phase_info)
+prob.load_external_subsystems([aero_builder])
 
 prob.aviary_inputs.set_val(Dynamic.Mission.ALTITUDE, 520, units='m') 
 prob.aviary_inputs.set_val(Dynamic.Mission.VELOCITY, 36, units='m/s')
@@ -89,23 +89,19 @@ prob.aviary_inputs.set_val(Aircraft.Fuselage.LENGTH, 1.190244, units='m')
 prob.aviary_inputs.set_val(Dynamic.Vehicle.MASS, 3.787, units='kg')
 
 prob.check_and_preprocess_inputs()
-prob.add_pre_mission_systems()
-prob.add_phases()
-prob.add_post_mission_systems()
-
-prob.link_phases()
+prob.build_model()
 
 prob.add_driver(optimizer=optimizer, max_iter=max_iter)
 
 prob.add_design_variables()
 
 prob.model.add_design_var('aircraft:wing:span', lower=0.1, upper=2.0)
-#prob.model.add_design_var('aircraft:wing:root_chord', lower=0.1, upper=1.0)
-#prob.model.add_design_var('aircraft:wing:incidence', lower=-5.0, upper=10.0)
-#prob.model.add_design_var('aircraft:wing:thickness_to_chord', lower=0.05, upper=0.20)
-#prob.model.add_design_var('aircraft:horizontal_tail:incidence', lower=-5.0, upper=10.0)
+prob.model.add_design_var('aircraft:wing:root_chord', lower=0.1, upper=1.0)
+prob.model.add_design_var('aircraft:wing:incidence', lower=-5.0, upper=10.0)
+prob.model.add_design_var('aircraft:wing:thickness_to_chord', lower=0.05, upper=0.20)
+prob.model.add_design_var('aircraft:horizontal_tail:incidence', lower=-5.0, upper=10.0)
 
-#prob.model.add_constraint('traj.phases.cruise.rhs_all.lifting_surface_CL', lower=0.01, upper=0.2)
+prob.model.add_constraint('traj.phases.cruise.rhs_all.lifting_surface_CL', lower=0.01, upper=0.2)
 prob.model.add_objective('traj.cruise.t_duration', index=-1)
 
 prob.driver.recording_options['record_desvars'] = False
@@ -134,15 +130,15 @@ with open("variables.txt", "w") as f:
 #Commented out get_val's are not recognized at the moment and I don't know why
 print('Lift:', prob.get_val('traj.cruise.rhs_all.lift', units='lbf')) 
 print('Drag:', prob.get_val('traj.cruise.rhs_all.drag', units='lbf'))
-#print('CL:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CL'))
-#print('CD:', prob.get_val('traj.cruise.rhs_all.CD'))
+print('CL:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CL'))
+print('CD:', prob.get_val('traj.cruise.rhs_all.CD'))
 
-#print('CD_fus:', prob.get_val('traj.cruise.rhs_all.CD_fus'))
-#print('CD_vtail:', prob.get_val('traj.cruise.rhs_all.CD_vtail'))
-#print('CD_gear:', prob.get_val('traj.cruise.rhs_all.CD_gear'))
-#print('Lifting surface CD:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CD'))
+print('CD_fus:', prob.get_val('traj.cruise.rhs_all.CD_fus'))
+print('CD_vtail:', prob.get_val('traj.cruise.rhs_all.CD_vtail'))
+print('CD_gear:', prob.get_val('traj.cruise.rhs_all.CD_gear'))
+print('Lifting surface CD:', prob.get_val('traj.cruise.rhs_all.lifting_surface_CD'))
 
 print('Fuselage length:', prob.get_val('aircraft:fuselage:length'))
 print('Fuselage height:', prob.get_val('aircraft:fuselage:max_height'))
-#print('Angle of attack:', prob.get_val('traj.cruise.rhs_all.alpha'))
+print('Angle of attack:', prob.get_val('traj.cruise.rhs_all.alpha'))
 print('Wing span:', prob.get_val(Aircraft.Wing.SPAN))
