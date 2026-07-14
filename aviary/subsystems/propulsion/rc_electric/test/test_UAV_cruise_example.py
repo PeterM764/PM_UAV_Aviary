@@ -59,6 +59,14 @@ class CruiseExample:
 
         prob.link_phases()
 
+        # Use UAV-scale linkage scaling so cruise mass is strongly tied to mission gross mass.
+        for con_name in ('link_cruise_mass.mass', 'link_climb_mass.mass', 'link_mass.mass'):
+            try:
+                prob.model.set_constraint_options(con_name, ref=10.0)
+                break
+            except RuntimeError:
+                continue
+
         prob.add_driver('IPOPT', use_coloring=False, max_iter=100)
         prob.driver.opt_settings['print_level'] = 5
         prob.driver.opt_settings['mu_strategy'] = 'adaptive'
@@ -67,6 +75,7 @@ class CruiseExample:
         prob.driver.opt_settings['acceptable_iter'] = 0
         prob.driver.opt_settings['constr_viol_tol'] = 1e-6
         prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-6
+        prob.driver.options['debug_print'] = ['desvars', 'objs', 'nl_cons', 'ln_cons']
 
         
 
@@ -107,7 +116,7 @@ class CruiseExample:
         prob.model.connect('traj.cruise.timeseries.electric_power_in_total', 'mean_power_comp.p_cruise_kw')
         prob.model.connect('mean_power_comp.p_avg_kw', 'endurance_comp.p_avg_kw')
         prob.model.add_objective('endurance_comp.endurance', ref=-1.0)
-        prob.model.add_constraint(Mission.TOTAL_FUEL_MASS, equals=0.0, units='kg', ref=1e2)
+        prob.model.add_constraint(Mission.TOTAL_FUEL_MASS, equals=0.0, units='kg', ref=50.0)
 
         prob.model.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
         prob.model.set_input_defaults(Aircraft.Engine.Motor.IDLE_CURRENT, val=2.2, units='A')
@@ -119,6 +128,7 @@ class CruiseExample:
         prob.set_initial_guesses()
         prob.set_val(Aircraft.Design.GROSS_MASS, 7.0, units='kg')
         prob.set_val(Mission.GROSS_MASS, 4.1, units='kg')
+        prob.set_val('traj.cruise.states:mass', 4.1, units='kg')
         prob.set_val(Aircraft.Engine.Motor.MASS, 0.55, units='kg')
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 2.0, units='A')
         prob.set_val(Aircraft.Battery.VOLTAGE, 25.2, units='V')
@@ -152,8 +162,58 @@ class CruiseExample:
         prob = self.build_problem()
         # Warm-start the trajectory states/controls before optimization.
         prob.run_aviary_problem(run_driver=False, suppress_solver_print=False, make_plots=False)
+        cruise_mass0 = float(prob.get_val('traj.cruise.timeseries.mass', units='kg')[0][0])
+        prob.set_val(Mission.GROSS_MASS, cruise_mass0, units='kg')
         prob.run_aviary_problem(run_driver=True, suppress_solver_print=False, make_plots=False)
+        self._print_design_vars_with_units(prob)
+        self._print_objectives_with_units(prob)
+        self._print_constraints_with_units(prob)
         return prob
+
+    def _print_design_vars_with_units(self, prob):
+        print('Design Vars With Units')
+        dv_meta = prob.model.get_design_vars(recurse=True, use_prom_ivc=True)
+
+        for name in sorted(dv_meta):
+            units = dv_meta[name].get('units')
+            if units is None:
+                units = 'unitless'
+                value = prob.get_val(name)
+            else:
+                value = prob.get_val(name, units=units)
+
+            value_str = np.array2string(np.asarray(value), precision=8, separator=', ')
+            print(f"{name} [{units}] = {value_str}")
+
+    def _print_objectives_with_units(self, prob):
+        print('Objectives With Units')
+        obj_meta = prob.model.get_objectives(recurse=True, use_prom_ivc=True)
+
+        for name in sorted(obj_meta):
+            units = obj_meta[name].get('units')
+            if units is None:
+                units = 'unitless'
+                value = prob.get_val(name)
+            else:
+                value = prob.get_val(name, units=units)
+
+            value_str = np.array2string(np.asarray(value), precision=8, separator=', ')
+            print(f"{name} [{units}] = {value_str}")
+
+    def _print_constraints_with_units(self, prob):
+        print('Nonlinear Constraints With Units')
+        con_meta = prob.model.get_constraints(recurse=True, use_prom_ivc=True)
+
+        for name in sorted(con_meta):
+            units = con_meta[name].get('units')
+            if units is None:
+                units = 'unitless'
+                value = prob.get_val(name)
+            else:
+                value = prob.get_val(name, units=units)
+
+            value_str = np.array2string(np.asarray(value), precision=8, separator=', ')
+            print(f"{name} [{units}] = {value_str}")
 
 
 class MeanPowerComp(om.ExplicitComponent):
@@ -260,6 +320,17 @@ class TestRCCruiseAttempt(unittest.TestCase):
         electric_power = prob.get_val('traj.cruise.timeseries.electric_power_in_total', units='W')
         distance_resid = prob.get_val('cruise_distance_constraint.distance_resid', units='nmi')[0]
 
+        gross_mass_lbm = prob.get_val('mission:gross_mass', units='lbm')[0]
+        cruise_mass_lbm = prob.get_val('traj.cruise.timeseries.mass', units='lbm')[0][0]
+        link_mass_lbm = prob.get_val('link_cruise_mass.mass')[0]
+        total_fuel_lbm = prob.get_val('mission:total_fuel_mass', units='lbm')[0]
+        mission_fuel_lbm = prob.get_val('mission:fuel_mass', units='lbm')[0]
+        reserve_fuel_lbm = prob.get_val('mission:total_reserve_fuel_mass', units='lbm')[0]
+        fuel_flow_lbmph = prob.get_val(
+            'traj.cruise.timeseries.fuel_flow_rate_negative_total',
+            units='lbm/h',
+        )
+
         print('cruise.endurance =', float(endurance), 'h')
         print('cruise.mission_gross_mass =', float(gross_mass), 'kg')
         print('cruise.motor_mass =', float(motor_mass), 'kg')
@@ -267,6 +338,19 @@ class TestRCCruiseAttempt(unittest.TestCase):
         if current_flow is not None:
             print('cruise.current_flow =', np.array2string(current_flow, precision=6, separator=', '), 'A')
         print('cruise.electric_power_in_total =', np.array2string(electric_power, precision=6, separator=', '), 'W')
+
+        print('mass_diag.gross_mass_lbm =', float(gross_mass_lbm), 'lbm')
+        print('mass_diag.cruise_initial_mass_lbm =', float(cruise_mass_lbm), 'lbm')
+        print('mass_diag.link_cruise_mass_lbm =', float(link_mass_lbm), 'lbm')
+        print('mass_diag.gross_minus_cruise_lbm =', float(gross_mass_lbm - cruise_mass_lbm), 'lbm')
+        print('mass_diag.total_fuel_lbm =', float(total_fuel_lbm), 'lbm')
+        print('mass_diag.mission_fuel_lbm =', float(mission_fuel_lbm), 'lbm')
+        print('mass_diag.reserve_fuel_lbm =', float(reserve_fuel_lbm), 'lbm')
+        print(
+            'mass_diag.fuel_flow_rate_negative_total_lbmph =',
+            np.array2string(fuel_flow_lbmph, precision=6, separator=', '),
+            'lbm/h',
+        )
        
        
 
