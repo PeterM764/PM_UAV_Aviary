@@ -148,11 +148,12 @@ class CruiseExample:
 
         return prob
 
-    # def _print_design_vars_with_units(self, prob):
+    def run(self):
         prob = self.build_problem()
+        # Warm-start the trajectory states/controls before optimization.
         prob.run_aviary_problem(run_driver=False, suppress_solver_print=False, make_plots=False)
         prob.run_aviary_problem(run_driver=True, suppress_solver_print=False, make_plots=False)
-        self._print_mass_source_probe(prob)
+        return prob
 
 
 class MeanPowerComp(om.ExplicitComponent):
