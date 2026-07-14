@@ -135,3 +135,5 @@ class MassBuilder(SubsystemBuilder):
             Aircraft.Design.STRUCTURE_MASS,
 
         ]
+
+   

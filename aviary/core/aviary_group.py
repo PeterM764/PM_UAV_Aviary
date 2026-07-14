@@ -965,13 +965,13 @@ class AviaryGroup(om.Group):
             self.add_constraint(
                 Mission.Constraints.MASS_RESIDUAL,
                 lower=0.0,
-                ref=1e5,
+                ref=1,
             )
         else:
             self.add_constraint(
                 Mission.Constraints.MASS_RESIDUAL,
                 equals=0.0,
-                ref=1e5,
+                ref=1,
             )
 
         # If a target distance (or time) has been specified for this phase distance (or time) is
@@ -1078,7 +1078,7 @@ class AviaryGroup(om.Group):
 
         if not ignore_capacity_constraint:
             self.add_constraint(
-                Mission.Constraints.EXCESS_FUEL_MASS_CAPACITY, lower=0, ref=1.0e5, units='lbm'
+                Mission.Constraints.EXCESS_FUEL_MASS_CAPACITY, lower=0, ref=1.0, units='lbm'
             )
         else:
             if verbosity >= Verbosity.BRIEF:
