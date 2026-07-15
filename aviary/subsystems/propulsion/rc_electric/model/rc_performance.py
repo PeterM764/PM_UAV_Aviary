@@ -91,6 +91,7 @@ class ElectronicSpeedController(om.ExplicitComponent):
         self.declare_partials('voltage_out', ['voltage_in', Dynamic.Vehicle.Propulsion.THROTTLE], rows=ar, cols=ar)
         self.declare_partials('power', ['voltage_in', Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.THROTTLE], rows=ar, cols=ar)
         self.declare_partials('current_out', Dynamic.Vehicle.Propulsion.CURRENT, val=1.0, rows=ar, cols=ar)
+    
     def compute(self, inputs, outputs):
         
         a = self.options['n']
