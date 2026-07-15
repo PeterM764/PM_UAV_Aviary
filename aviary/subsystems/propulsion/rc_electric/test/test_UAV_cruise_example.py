@@ -76,8 +76,9 @@ class CruiseExample:
         prob.driver.opt_settings['constr_viol_tol'] = 1e-6
         prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-6
 
-        
 
+
+        
         # Set UAV-scale gross mass DV for this test setup.
         prob.model.add_design_var(Mission.GROSS_MASS, units='kg', lower=0.5, upper=20, ref=4)
 
