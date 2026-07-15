@@ -59,26 +59,19 @@ class CruiseExample:
 
         prob.link_phases()
 
-        # Use UAV-scale linkage scaling so cruise mass is strongly tied to mission gross mass.
-        for con_name in ('link_cruise_mass.mass', 'link_climb_mass.mass', 'link_mass.mass'):
-            try:
-                prob.model.set_constraint_options(con_name, ref=10.0)
-                break
-            except RuntimeError:
-                continue
+       
 
-        prob.add_driver('IPOPT', use_coloring=False, max_iter=100)
+        prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
         prob.driver.opt_settings['print_level'] = 5
         prob.driver.opt_settings['mu_strategy'] = 'adaptive'
         prob.driver.opt_settings['tol'] = 1e-6
         prob.driver.opt_settings['acceptable_tol'] = 5e-6
-        prob.driver.opt_settings['acceptable_iter'] = 0
         prob.driver.opt_settings['constr_viol_tol'] = 1e-6
         prob.driver.opt_settings['acceptable_constr_viol_tol'] = 5e-6
+        prob.driver.options['debug_print'] = ['desvars', 'objs', 'nl_cons', 'ln_cons']
 
 
 
-        
         # Set UAV-scale gross mass DV for this test setup.
         prob.model.add_design_var(Mission.GROSS_MASS, units='kg', lower=0.5, upper=20, ref=4)
 
@@ -116,7 +109,7 @@ class CruiseExample:
         prob.model.connect('traj.cruise.timeseries.electric_power_in_total', 'mean_power_comp.p_cruise_kw')
         prob.model.connect('mean_power_comp.p_avg_kw', 'endurance_comp.p_avg_kw')
         prob.model.add_objective('endurance_comp.endurance', ref=-1.0)
-        prob.model.add_constraint(Mission.TOTAL_FUEL_MASS, equals=0.0, units='kg', ref=50.0)
+        prob.model.add_constraint(Mission.TOTAL_FUEL_MASS, equals=0.0, units='kg', ref=1e2)
 
         prob.model.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
         prob.model.set_input_defaults(Aircraft.Engine.Motor.IDLE_CURRENT, val=2.2, units='A')
