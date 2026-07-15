@@ -5,7 +5,6 @@ from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
 
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
-from aviary.utils.aviary_values import AviaryValues
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic 
 
 
@@ -13,14 +12,23 @@ class TestRCPropPre(unittest.TestCase):
     @use_tempdirs
     def test_premission_calcs(self):
         prob = om.Problem()
-        options = AviaryValues()
 
-        options.set_val(Aircraft.Engine.Motor.KV_EQ_SLOPE, 2105.53674)
-        options.set_val(Aircraft.Engine.Motor.KV_EQ_INT, -80.83469)
+        kv_slope = 2105.53674
+        kv_intercept = -80.83469
+
+        rc_calcs = RCPropPreMission()
+
+        rc_calcs.options[
+            Aircraft.Engine.Motor.KV_EQ_SLOPE
+        ] = kv_slope
+
+        rc_calcs.options[
+            Aircraft.Engine.Motor.KV_EQ_INT
+        ] = kv_intercept
 
         prob.model.add_subsystem(
             'rc_calcs',
-            RCPropPreMission(aviary_options=options),
+            rc_calcs,
             promotes=['*']
         )
 
