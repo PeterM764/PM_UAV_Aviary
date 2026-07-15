@@ -2,7 +2,7 @@ from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission impo
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
 from aviary.utils.aviary_values import AviaryValues
 from aviary.subsystems.propulsion.engine_model import EngineModel
-
+import numpy as np
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.variable_info.variables import Mission
 
@@ -144,7 +144,7 @@ class RCBuilder(EngineModel):
                 'units': 'A',
             },
             Aircraft.Engine.Motor.MAX_CONT_CURRENT: {
-                'val': 100,  
+                'val': 120,  
                 'units': 'A',
             },
             Aircraft.Engine.Propeller.DIAMETER: {
@@ -200,18 +200,19 @@ class RCBuilder(EngineModel):
                     'upper': current_upper,
                     'ref': 1.0e2,
                 },
-
-                Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                    # The mission ODE exposes the continuous-current limit through
-                    # the motor/max-current input rather than a standalone
-                    # current_flow_max ODE input.
-                    'targets': Aircraft.Engine.Motor.MAX_CONT_CURRENT,
-                    'units': 'A',
-                    'opt': True,
-                    'lower': current_max_lower,
-                    'upper': current_max_upper,
-                    'ref': 1.0e2,
-                },
+                
+                #This variable was removed from the subsystem and is no longer used
+                # Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
+                #     # The mission ODE exposes the continuous-current limit through
+                #     # the motor/max-current input rather than a standalone
+                #     # current_flow_max ODE input.
+                #     'targets': Aircraft.Engine.Motor.MAX_CONT_CURRENT,
+                #     'units': 'A',
+                #     'opt': True,
+                #     'lower': current_max_lower,
+                #     'upper': current_max_upper,
+                #     'ref': 1.0e2,
+                # },
 
                 'rpm_lookup': {
                     'targets': 'rpm_lookup',
@@ -243,14 +244,14 @@ class RCBuilder(EngineModel):
                 'ref': 1.0e2,
             },
 
-            Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
+            # Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
+            #     'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
+            #     'units': 'A',
+            #     'opt': True,
+            #     'lower': 10.0,
+            #     'upper': 100.0,
+            #     'ref': 1.0e2,
+            # },
         }
 
     def get_mass_names(self, aviary_inputs=None, user_options=None, subsystem_options=None, phase_info=None):
