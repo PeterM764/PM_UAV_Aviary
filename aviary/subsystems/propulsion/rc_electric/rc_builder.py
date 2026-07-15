@@ -202,7 +202,10 @@ class RCBuilder(EngineModel):
                 },
 
                 Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                    'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
+                    # The mission ODE exposes the continuous-current limit through
+                    # the motor/max-current input rather than a standalone
+                    # current_flow_max ODE input.
+                    'targets': Aircraft.Engine.Motor.MAX_CONT_CURRENT,
                     'units': 'A',
                     'opt': True,
                     'lower': current_max_lower,

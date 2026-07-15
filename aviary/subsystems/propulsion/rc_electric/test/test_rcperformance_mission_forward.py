@@ -38,7 +38,7 @@ class TestRCPropMission(unittest.TestCase):
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')
         prob.set_val(Dynamic.Mission.VELOCITY, 20, units='ft/s')
         prob.set_val(Dynamic.Vehicle.Propulsion.CURRENT, np.full(nn, 30), units='A')
-        prob.set_val(Dynamic.Vehicle.Propulsion.CURRENT_MAX, np.full(nn, 120), units='A')
+        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
 
         prob.run_model()
 

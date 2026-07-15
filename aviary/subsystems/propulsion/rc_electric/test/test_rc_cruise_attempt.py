@@ -8,7 +8,7 @@ import numpy as np
 import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
-from aviary.examples.external_subsystems.dbf_based_mass.dbf_mass_builder import DBFMassBuilder
+from aviary.subsystems.mass.UAV_mass.mass_builder import MassBuilder
 from aviary.subsystems.aerodynamics.custom_aero.custom_aero_builder import CustomAeroBuilder 
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
 from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
@@ -109,7 +109,7 @@ class TestRCPropMission(unittest.TestCase):
 # relative path (like the dbf_based_mass unit tests), so this must run from the repo root.
 class TestRCCruiseAttempt(unittest.TestCase):
     def setUp(self):
-        self.phase_info = {'pre_mission': {'include_takeoff': False,  'optimize_mass': False, 'external_subsystems': [DBFMassBuilder()]},
+        self.phase_info = {'pre_mission': {'include_takeoff': False,  'optimize_mass': False, 'external_subsystems': [MassBuilder()]},
    
     'cruise': {
         'subsystem_options': {'aerodynamics': {'method': 'external'}},
