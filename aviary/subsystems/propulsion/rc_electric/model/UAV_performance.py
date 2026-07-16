@@ -24,7 +24,7 @@ class Battery(om.ExplicitComponent):
         #TODO: add Battery options
         add_aviary_input(self, Aircraft.Battery.VOLTAGE, units = "V")
         add_aviary_input(self, Aircraft.Battery.RESISTANCE, units='ohm')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
         add_aviary_input(self, Aircraft.Battery.MASS,  units= 'kg')
         # self.add_input('current', val=np.zeros(nn), units='A')
 
@@ -78,8 +78,8 @@ class ElectronicSpeedController(om.ExplicitComponent):
         nn = self.options['num_nodes']
 
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.THROTTLE, val=np.zeros(nn), units='unitless')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.THROTTLE, shape=(nn,), units='unitless')
 
         self.add_output('efficiency', val=np.zeros(nn), units='unitless')
         self.add_output('voltage_out', val=np.zeros(nn), units = 'V')
@@ -143,11 +143,11 @@ class Motor(om.ExplicitComponent):
         add_aviary_input(self, Aircraft.Engine.Motor.RESISTANCE, units='ohm')
         add_aviary_input(self, Aircraft.Engine.Motor.KV, units='rpm/V')
         self.add_input('voltage_in', val=np.zeros(nn), units = 'V')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, val=np.zeros(nn), units='A')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
         self.add_input('current', val=np.zeros(nn), units = 'A')
 
         ################ TODO Alex #####################
-        add_aviary_output(self, Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn),  units='rpm')
+        add_aviary_output(self, Dynamic.Vehicle.Propulsion.RPM, shape=(nn,), units='rpm')
 
         # (no bound here: RPM is derated via load_factor instead; an output upper= is inert on an explicit comp anyway)
         ################ TODO Alex #####################
@@ -189,6 +189,7 @@ class Motor(om.ExplicitComponent):
         self.declare_partials(
             'current_constraint', 
             Aircraft.Engine.Motor.MAX_CONT_CURRENT,
+            rows=ar, cols=np.zeros(nn, dtype=int)
         )
 
     def compute(self, inputs, outputs):
@@ -201,6 +202,7 @@ class Motor(om.ExplicitComponent):
         outputs['current_constraint'] = inputs[Dynamic.Vehicle.Propulsion.CURRENT] - inputs[Aircraft.Engine.Motor.MAX_CONT_CURRENT] 
 
     def compute_partials(self, inputs, partials):
+        nn = self.options['num_nodes']
         R = inputs[Aircraft.Engine.Motor.RESISTANCE]
         lf = self.options['load_factor']
 
@@ -219,8 +221,8 @@ class Motor(om.ExplicitComponent):
         partials['power', Aircraft.Engine.Motor.RESISTANCE] = -inputs['current']**2 - inputs[Aircraft.Engine.Motor.IDLE_CURRENT] * dvoltage_prop_dresistance
         partials['power', Aircraft.Engine.Motor.IDLE_CURRENT] = -voltage_prop
         
-        partials['current_constraint', Aircraft.Engine.Motor.MAX_CONT_CURRENT] = -1
-        partials['current_constraint', Dynamic.Vehicle.Propulsion.CURRENT] = 1
+        partials['current_constraint', Aircraft.Engine.Motor.MAX_CONT_CURRENT] = -np.ones(nn)
+        partials['current_constraint', Dynamic.Vehicle.Propulsion.CURRENT] = np.ones(nn)
 
 
 #TODO: reading in of data should be changed later:
@@ -250,43 +252,7 @@ class Vectorization(om.ExplicitComponent):
         outputs['temp_diameter'] = inputs[Aircraft.Engine.Propeller.DIAMETER] * np.ones(nn)
         outputs['temp_pitch'] = inputs[Aircraft.Engine.Propeller.PITCH] * np.ones(nn)
 
-# class RangeClamp(om.ExplicitComponent):
-#     """
-#     Clamp an input to [lower, upper].
 
-#     Used to keep the inputs to the propeller surrogate (PropCoefficients, a
-#     lagrange2 MetaModelSemiStructuredComp) inside its trained range. Outside that
-#     range the surrogate extrapolates and can return NaN, which kills the whole
-#     nonlinear solve. The optimizer (and intermediate solver iterates) can drive RPM
-#     out of range, so clamping the lookup makes the model evaluable everywhere. The
-#     actual (unclamped) RPM is still used by Propeller for the thrust formula; only
-#     the ct/cp *lookup* sees the clamped value. The clamp gradient is 1 inside the
-#     range and 0 at the rails, so normal operation (well inside the range) is
-#     unaffected.
-#     """
-
-#     def initialize(self):
-#         self.options.declare('num_nodes', default=1, types=int)
-#         self.options.declare('lower', types=float)
-#         self.options.declare('upper', types=float)
-#         self.options.declare('units', default=None, types=(str, type(None)))
-
-#     def setup(self):
-#         nn = self.options['num_nodes']
-#         u = self.options['units']
-#         self.add_input('x_in', val=np.ones(nn), units=u)
-#         self.add_output('x_out', val=np.ones(nn), units=u)
-#         ar = np.arange(nn)
-#         self.declare_partials('x_out', 'x_in', rows=ar, cols=ar)
-
-#     def compute(self, inputs, outputs):
-#         outputs['x_out'] = np.clip(inputs['x_in'], self.options['lower'], self.options['upper'])
-
-#     def compute_partials(self, inputs, partials):
-#         x = inputs['x_in']
-#         partials['x_out', 'x_in'] = (
-#             (x > self.options['lower']) & (x < self.options['upper'])
-#         ).astype(float)
 
 
 class PropCoefficients(om.MetaModelSemiStructuredComp):
@@ -315,17 +281,17 @@ class Propeller(om.ExplicitComponent):
     def setup(self): 
         nn = self.options['num_nodes']
         num_eng = self.options[Aircraft.Engine.NUM_ENGINES]
-        add_aviary_input(self, Dynamic.Atmosphere.DENSITY, val=np.zeros(nn), units = 'kg/m**3')
+        add_aviary_input(self, Dynamic.Atmosphere.DENSITY, shape=(nn,), units='kg/m**3')
         add_aviary_input(self, Aircraft.Engine.Propeller.DIAMETER, units = 'm')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.RPM, val=np.zeros(nn), units = 'rev/s')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.RPM, shape=(nn,), units='rev/s')
         self.add_input("ct", val=np.zeros(nn), units='unitless')
         self.add_input("cp", val=np.zeros(nn), units='unitless')
         
         
 
-        add_aviary_output(self, Dynamic.Vehicle.Propulsion.THRUST, val=np.zeros(nn), units='N')
-        add_aviary_output(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
-        self.add_output('rpm_constraint', val=np.zeros(nn))
+        add_aviary_output(self, Dynamic.Vehicle.Propulsion.THRUST, shape=(nn,), units='N')
+        add_aviary_output(self, Dynamic.Vehicle.Propulsion.PROP_POWER, shape=(nn,), units='W')
+        self.add_output('rpm_constraint', val=np.zeros(nn), units='rev/s')
         ar =np.arange(nn)
 
         self.declare_partials(
@@ -375,7 +341,8 @@ class Propeller(om.ExplicitComponent):
         n = inputs [Dynamic.Vehicle.Propulsion.RPM]
         outputs[Dynamic.Vehicle.Propulsion.THRUST] = rho * n**2 * D**4 * inputs["ct"] * num_engines
         outputs[Dynamic.Vehicle.Propulsion.PROP_POWER] = (rho * n**3 * D**5 * inputs["cp"])
-        outputs['rpm_constraint'] = n - 150000 / D
+        n_limit = 63.5 / D
+        outputs['rpm_constraint'] = n - n_limit
 
 
     def compute_partials(self, inputs, partials):
@@ -395,7 +362,7 @@ class Propeller(om.ExplicitComponent):
         partials[Dynamic.Vehicle.Propulsion.PROP_POWER, 'cp'] = rho * n**3 * D**5
 
         partials['rpm_constraint', Dynamic.Vehicle.Propulsion.RPM] = np.ones(len(n))
-        partials['rpm_constraint', Aircraft.Engine.Propeller.DIAMETER] = 150000 / D**2
+        partials['rpm_constraint', Aircraft.Engine.Propeller.DIAMETER] = 63.5 / D**2
 
 
 class PowerResiduals(om.ExplicitComponent):
@@ -407,7 +374,7 @@ class PowerResiduals(om.ExplicitComponent):
         self.add_input('power_batt', val=np.zeros(nn), units='W')
         self.add_input('power_esc', val=np.zeros(nn), units='W')
         self.add_input('power_motor', val=np.zeros(nn), units='W')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, shape=(nn,), units='W')
 
         self.add_output('power_net', val=np.ones(nn), ref=1e3, units='W')
 
@@ -426,7 +393,7 @@ class PowerImplicit(om.ImplicitComponent):
         self.add_input('power_batt', val=np.zeros(nn), units='W')
         self.add_input('power_esc', val=np.zeros(nn), units='W')
         self.add_input('power_motor', val=np.zeros(nn), units='W')
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, val=np.zeros(nn), units='W')
+        add_aviary_input(self, Dynamic.Vehicle.Propulsion.PROP_POWER, shape=(nn,), units='W')
 
         self.add_output(Dynamic.Vehicle.Propulsion.CURRENT, lower=np.zeros(nn), val=np.ones(nn)*30, units='A')
 
@@ -447,92 +414,3 @@ class PowerImplicit(om.ImplicitComponent):
 
 
 
-class RCPropGroup(om.Group):
-    def initialize(self):
-        self.options.declare('num_nodes', default=1, types=int)
-        self.options.declare(Aircraft.Engine.NUM_ENGINES, default=1)
-    def setup(self):
-        nn = self.options['num_nodes']
-        num_eng = self.options[Aircraft.Engine.NUM_ENGINES]
-        self.add_subsystem(
-            'battery',
-            Battery(num_nodes=nn),
-            promotes_inputs=[
-                Aircraft.Battery.VOLTAGE,
-                Aircraft.Battery.MASS,
-                Aircraft.Battery.RESISTANCE,
-                Dynamic.Vehicle.Propulsion.CURRENT,
-            ]
-        )
-        self.add_subsystem(
-            'esc',
-            ElectronicSpeedController(num_nodes=nn),
-            promotes_inputs=[
-                Dynamic.Vehicle.Propulsion.THROTTLE,
-                Dynamic.Vehicle.Propulsion.CURRENT,
-            ]
-        )
-        self.add_subsystem('motor', Motor(num_nodes=nn), 
-            promotes_inputs=[
-                Aircraft.Engine.Motor.IDLE_CURRENT, 
-                Aircraft.Engine.Motor.MAX_CONT_CURRENT,
-                Aircraft.Engine.Motor.MASS,
-                Aircraft.Engine.Motor.KV,
-                Aircraft.Engine.Motor.RESISTANCE,
-                Dynamic.Vehicle.Propulsion.CURRENT,
-                ],
-            promotes_outputs=[
-                Dynamic.Vehicle.Propulsion.RPM,
-                
-                ]
-        )
-        self.add_subsystem('vectorize_geo', Vectorization(num_nodes=nn), 
-            promotes_inputs=[Aircraft.Engine.Propeller.DIAMETER, Aircraft.Engine.Propeller.PITCH],
-            promotes_outputs=['temp_diameter', 'temp_pitch']
-            )
-        self.add_subsystem(
-            'propco', 
-            PropCoefficients(method='lagrange2', extrapolate=True, training_data_gradients=True, vec_size=nn), 
-            promotes_inputs=[
-                Dynamic.Vehicle.Propulsion.RPM, 
-                Dynamic.Mission.VELOCITY, 
-                'temp_diameter', 
-                'temp_pitch',
-            ],
-            promotes_outputs=['ct', 'cp']
-        )
-        self.add_subsystem(
-            'prop', 
-            Propeller(num_nodes=nn, **{Aircraft.Engine.NUM_ENGINES: num_eng}),
-            promotes_inputs=[
-                Aircraft.Engine.Propeller.DIAMETER, 
-                Dynamic.Vehicle.Propulsion.RPM, 
-                'ct', 
-                'cp',  
-                Dynamic.Atmosphere.DENSITY
-                ],
-            promotes_outputs=[
-                Dynamic.Vehicle.Propulsion.PROP_POWER, 
-                Dynamic.Vehicle.Propulsion.THRUST
-                ]
-        )
-        self.add_subsystem(
-            'power_net',
-            PowerImplicit(num_nodes=nn),
-            promotes_inputs=[
-                Dynamic.Vehicle.Propulsion.PROP_POWER
-            ],
-            promotes_outputs=[
-                Dynamic.Vehicle.Propulsion.CURRENT
-            ]
-        )
-
-        self.connect('battery.voltage_out', 'esc.voltage_in')
-        self.connect('esc.voltage_out', 'motor.voltage_in')
-
-        self.connect('battery.power', 'power_net.power_batt')
-        self.connect('esc.power', 'power_net.power_esc')
-        self.connect('motor.power', 'power_net.power_motor')
-        self.connect(Dynamic.Vehicle.Propulsion.CURRENT, 'motor.current')
-
-    
