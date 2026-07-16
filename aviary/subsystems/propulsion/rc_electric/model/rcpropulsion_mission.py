@@ -2,7 +2,7 @@ import numpy as np
 import openmdao.api as om
 
 from aviary.subsystems.propulsion.rc_electric.model.rc_performance import \
-    Battery,  CurrentConstraint, ElectronicSpeedController, Motor, PropCoefficients, Propeller, PowerImplicit, Vectorization, PowerResiduals
+    Battery, ElectronicSpeedController, Motor, PropCoefficients, Propeller, PowerImplicit, Vectorization, PowerResiduals
 from aviary.utils.aviary_values import AviaryValues
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 
@@ -74,7 +74,6 @@ class RCPropMission(om.Group):
             Motor(num_nodes=nn, load_factor=motor_load_factor),
             promotes_inputs=[
                 Aircraft.Engine.Motor.IDLE_CURRENT, 
-                #Aircraft.Engine.Motor.MAX_CONT_CURRENT, removed since we dont use that as a input anymore for motor it only needs esc current. 
                 #Dynamic.Vehicle.Propulsion.CURRENT, The current the motor recieve s is through the esc current out in the connection set below
                 Aircraft.Engine.Motor.RESISTANCE, 
                 Aircraft.Engine.Motor.KV,
@@ -85,18 +84,7 @@ class RCPropMission(om.Group):
                 ]
         )
         # added the current limit constraint to the mission file instead of it being inside the motor subsystem
-        self.add_subsystem(
-            'current_limit',
-            CurrentConstraint(num_nodes=nn),
-            promotes_inputs=[
-                Dynamic.Vehicle.Propulsion.CURRENT,
-                Aircraft.Engine.Motor.MAX_CONT_CURRENT,
-            ],
-            promotes_outputs=[
-                ('current_constraint', 'current_constraint_nominal'),
-            ],
-        )
-
+        
         self.add_subsystem('vectorize_geo', Vectorization(num_nodes=nn), 
             promotes_inputs=[Aircraft.Engine.Propeller.DIAMETER, Aircraft.Engine.Propeller.PITCH],
             promotes_outputs=['temp_diameter', 'temp_pitch']
@@ -204,7 +192,6 @@ class RCPropMission(om.Group):
                 Aircraft.Battery.VOLTAGE,
                 Aircraft.Battery.RESISTANCE,
                     #(Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                #(Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
             ]
         )
 
@@ -214,7 +201,6 @@ class RCPropMission(om.Group):
             promotes_inputs=[
                 (Dynamic.Vehicle.Propulsion.THROTTLE, 'full_throttle'),
                  # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
-                #(Dynamic.Vehicle.Propulsion.CURRENT, Aircraft.Engine.Motor.MAX_CONT_CURRENT),
             ]
         )
 
@@ -223,7 +209,6 @@ class RCPropMission(om.Group):
             Motor(num_nodes=nn, load_factor=motor_load_factor),
             promotes_inputs=[
                 Aircraft.Engine.Motor.IDLE_CURRENT,
-                #Aircraft.Engine.Motor.MAX_CONT_CURRENT, removed as before in motor
                 Aircraft.Engine.Motor.RESISTANCE,
                 Aircraft.Engine.Motor.KV,
                  # (Dynamic.Vehicle.Propulsion.CURRENT, Dynamic.Vehicle.Propulsion.CURRENT_MAX),
@@ -318,16 +303,12 @@ class RCPropMission(om.Group):
             # Keep electrical power mismatch near zero 
             self.add_constraint('power_net', lower=-0.05, upper=0.05, ref=1e2, units='W')
             # Enforce motor continuous-current limit on nominal branch.
-            self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
+            #self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
             # Force commanded cruise RPM to match motor-computed RPM.
             self.add_constraint('rpm_balance.rpm_defect', lower=-0.1, upper=0.1, ref=1e2, units='rev/s')
 
             # Do the same RPM match for the max-power/full-throttle chain.
             self.add_constraint('rpm_balance_max.rpm_defect', lower=-1.0, upper=1.0, ref=1e2, units='rev/s')
-
-            # Enforce motor continuous-current limit.
-            #self.add_constraint('current_constraint_max', upper=0, ref=1e2) this is no longer needed since that constraint output doesnt exist 
-            # and instad we already use aircraft.engine.motor.max_cont_current
 
             # Keep max RPM in a physically valid and table-safe range.
             self.add_constraint(Dynamic.Vehicle.Propulsion.RPM_MAX, lower=1, upper=125, ref=1e3, units='rps')
@@ -365,7 +346,7 @@ class RCPropMission(om.Group):
         # # self.add_constraint(Dynamic.Vehicle.Propulsion.CURRENT, lower=0)
 
         # Enforce motor continuous-current limit on nominal branch in solver mode.
-            self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
+        #self.add_constraint('current_constraint_nominal', upper=0, ref=1e2)
 
         
         self.add_constraint('prop.rpm_constraint', upper=0.0, ref=1e2, units='rev/s')

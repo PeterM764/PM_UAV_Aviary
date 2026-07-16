@@ -53,7 +53,6 @@ class TestRCPropMission(unittest.TestCase):
         prob.set_val(Aircraft.Battery.RESISTANCE, 0.05, units='ohm')
         prob.set_val(Dynamic.Vehicle.Propulsion.THROTTLE, np.full(nn, 0.8))
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
         prob.set_val(Aircraft.Engine.Motor.RESISTANCE, 0.032, units='ohm')
         prob.set_val(Aircraft.Engine.Motor.KV, 420, units='rpm/V')
         prob.set_val(Dynamic.Atmosphere.DENSITY, 1.225, units='kg/m**3')
@@ -82,7 +81,6 @@ class TestRCPropMission(unittest.TestCase):
         prob.set_val(Aircraft.Battery.MASS, 0.707, units='kg')
         prob.set_val(Aircraft.Battery.VOLTAGE, 22.2, units='V')
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
         prob.set_val(Aircraft.Engine.Motor.MASS, 0.288, units='kg')
 
         prob.run_model()
@@ -230,7 +228,6 @@ class TestRCCruiseAttempt(unittest.TestCase):
         
         prob.model.set_input_defaults('aircraft:battery:voltage', val=22.2, units='V')
         prob.model.set_input_defaults('aircraft:engine:motor:idle_current', val=2.2, units='A')
-        prob.model.set_input_defaults('aircraft:engine:motor:max_cont_current', val=100.0, units='A')
 
         prob.setup()
 

@@ -59,7 +59,6 @@ class TestRCBuilder(unittest.TestCase):
 
         prob.model.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
         prob.model.set_input_defaults(Aircraft.Engine.Motor.IDLE_CURRENT, val=0.91, units='A')
-        prob.model.set_input_defaults(Aircraft.Engine.Motor.MAX_CONT_CURRENT, max_current_values, units='A')
 
 
         setup_model_options(prob, options)
@@ -69,7 +68,6 @@ class TestRCBuilder(unittest.TestCase):
         prob.set_val(Aircraft.Battery.MASS, 0.5, units='kg')
         prob.set_val(Dynamic.Vehicle.Propulsion.THROTTLE, np.linspace(0, 1, nn))
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, max_current_values, units='A')
         prob.set_val(Dynamic.Atmosphere.DENSITY, 1.225, units='kg/m**3')
         prob.set_val(Aircraft.Engine.Propeller.DIAMETER, 20, units='inch')
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')

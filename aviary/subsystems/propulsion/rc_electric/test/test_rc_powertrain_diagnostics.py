@@ -157,7 +157,6 @@ class TestPowertrainSolves(unittest.TestCase):
         p.set_val(Aircraft.Engine.Motor.RESISTANCE, 0.05, units='ohm')
         p.set_val(Aircraft.Engine.Motor.KV, 400.0, units='rpm/V')
         p.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 2.2, units='A')
-        p.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 100.0, units='A')
         p.set_val(Aircraft.Engine.Propeller.DIAMETER, DIAMETER, units='m')
         p.set_val(Aircraft.Engine.Propeller.PITCH, PITCH, units='inch')
         p.set_val(Dynamic.Atmosphere.DENSITY, RHO, units='kg/m**3')

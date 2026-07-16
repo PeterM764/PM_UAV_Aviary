@@ -7,7 +7,6 @@ from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
 from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Battery
 from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Motor
-from aviary.subsystems.propulsion.rc_electric.model.rc_performance import CurrentConstraint
 from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Propeller
 from aviary.subsystems.propulsion.rc_electric.model.rc_performance import ElectronicSpeedController
 from aviary.subsystems.propulsion.rc_electric.model.rc_performance import Vectorization
@@ -61,7 +60,6 @@ class TestMotor(unittest.TestCase):
         prob.set_val('current', np.full(nn, 10.0), units='A')
                      
         # prob.set_val(Dynamic.Vehicle.Propulsion.CURRENT, np.full(nn, 10.0), units='A') they are commented out since they are not needed for the motor
-        # prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A') and only needed for the current constraint
 
         prob.run_model()
 
@@ -76,8 +74,6 @@ class TestMotor(unittest.TestCase):
 
         #power = -I**2 * R - idle * voltage_prop = -10**2 * 0.032 - 0.91 * 21.88 = -32 - 19.9 = -51.9 W
 
-        # current_constraint = Dynamic.Vehicle.Propulsion.CURRENT - Aircraft.Engine.Motor.MAX_CONT_CURRENT = 10 - 120 = -110 A
-
 
         assert_near_equal(rpm, np.full(nn, 9189.6), tolerance=1e-5)
        
@@ -89,41 +85,6 @@ class TestMotor(unittest.TestCase):
             method='fd',
             )
         assert_check_partials(partial_data, atol=5e-4, rtol=1e-4)
-
-class TestCurrentConstraint(unittest.TestCase):
-    @use_tempdirs
-    def test_current_constraint(self):
-            nn = 3
-            prob = om.Problem()
-            prob.model.add_subsystem('current_limit', CurrentConstraint(num_nodes=nn), promotes=['*'],)
-
-            prob.setup()
-
-            # Three cases:
-            # 100 A is below the 120 A limit.
-            # 120 A is exactly at the limit.
-            # 130 A is above the limit.
-            current_values = np.array([100.0, 120.0, 130.0])
-            max_current_values = np.full(nn, 120.0)
-
-            prob.set_val(Dynamic.Vehicle.Propulsion.CURRENT,current_values,units='A',)
-            prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT,max_current_values,units='A',)
-
-            prob.run_model()
-            actual_constraint = prob.get_val('current_constraint',units='A', )
-            expected_constraint = (current_values - max_current_values)
-            assert_near_equal(actual_constraint,expected_constraint, tolerance=1e-10, )
-
-            partial_data = prob.check_partials(
-                out_stream=None,
-                compact_print=True,
-                show_only_incorrect=True,
-                form='central',
-                method='fd',
-            )
-
-            assert_check_partials( partial_data, atol=5e-4, rtol=1e-4, )
-
 
 class TestPropeller(unittest.TestCase):
     @use_tempdirs

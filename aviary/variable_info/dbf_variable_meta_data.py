@@ -38,14 +38,6 @@ av.add_meta_data(
 )
 
 av.add_meta_data(
-    Aircraft.Engine.Motor.MAX_CONT_CURRENT,
-    meta_data=ExtendedMetaData,
-    units='A',
-    desc='Maximum continuous current that flows through a single motor.',
-    multivalue=True,
-)
-
-av.add_meta_data(
     Aircraft.Engine.Motor.RESISTANCE,
     meta_data=ExtendedMetaData,
     units='ohm',

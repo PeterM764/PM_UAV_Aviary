@@ -204,24 +204,7 @@ class Motor(om.ExplicitComponent):
             
            
 # This is to calc residuals for current and its done outside of the motor class to avoid confusion
-class CurrentConstraint(om.ExplicitComponent):
-    def initialize(self):
-        self.options.declare('num_nodes', default=1, types=int)
 
-    def setup(self):
-        nn = self.options['num_nodes']
-        ar = np.arange(nn)
-
-        add_aviary_input(self, Dynamic.Vehicle.Propulsion.CURRENT, shape=(nn,), units='A')
-        add_aviary_input(self, Aircraft.Engine.Motor.MAX_CONT_CURRENT, units='A')
-        self.add_output('current_constraint', val=np.zeros(nn), units='A', desc='Ensure that you are not going over max amperage/NEGATIVE IS GOOD')
-
-        self.declare_partials('current_constraint', Aircraft.Engine.Motor.MAX_CONT_CURRENT, rows=ar, cols=np.zeros(nn, dtype=int), val=-1.0)
-        self.declare_partials('current_constraint', Dynamic.Vehicle.Propulsion.CURRENT,  rows=ar, cols=ar, val=1.0)
-
-    def compute(self, inputs, outputs):
-        outputs['current_constraint'] = inputs[Dynamic.Vehicle.Propulsion.CURRENT] - inputs[Aircraft.Engine.Motor.MAX_CONT_CURRENT]
- 
 #TODO: reading in of data should be changed later:
 from aviary.subsystems.propulsion.rc_electric.Parsing.PropDataReader import PropDataReader
 xt, ct, cp = PropDataReader()

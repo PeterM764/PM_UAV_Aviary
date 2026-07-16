@@ -143,10 +143,6 @@ class RCBuilder(EngineModel):
                 'val': 2.2,  
                 'units': 'A',
             },
-            Aircraft.Engine.Motor.MAX_CONT_CURRENT: {
-                'val': 120,  
-                'units': 'A',
-            },
             Aircraft.Engine.Propeller.DIAMETER: {
                 'val': prop_diam,
                 'units': 'm',
@@ -200,20 +196,7 @@ class RCBuilder(EngineModel):
                     'upper': current_upper,
                     'ref': 1.0e2,
                 },
-                
-                #This variable was removed from the subsystem and is no longer used
-                # Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                #     # The mission ODE exposes the continuous-current limit through
-                #     # the motor/max-current input rather than a standalone
-                #     # current_flow_max ODE input.
-                #     'targets': Aircraft.Engine.Motor.MAX_CONT_CURRENT,
-                #     'units': 'A',
-                #     'opt': True,
-                #     'lower': current_max_lower,
-                #     'upper': current_max_upper,
-                #     'ref': 1.0e2,
-                # },
-
+            
                 'rpm_lookup': {
                     'targets': 'rpm_lookup',
                     'units': 'rev/s',

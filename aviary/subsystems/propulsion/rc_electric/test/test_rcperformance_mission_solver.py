@@ -35,7 +35,6 @@ class TestRCPropMission(unittest.TestCase):
         prob.set_val(Aircraft.Battery.RESISTANCE, 0.05, units='ohm')
         prob.set_val(Dynamic.Vehicle.Propulsion.THROTTLE, np.full(nn, 0.8))
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
         prob.set_val(Aircraft.Engine.Motor.RESISTANCE, 0.032, units='ohm')
         prob.set_val(Aircraft.Engine.Motor.KV, 420, units='rpm/V')
         prob.set_val(Dynamic.Atmosphere.DENSITY, 1.225, units='kg/m**3')

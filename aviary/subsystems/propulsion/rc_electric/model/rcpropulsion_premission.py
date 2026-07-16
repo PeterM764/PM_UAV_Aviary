@@ -69,7 +69,6 @@ class RCPropPreMission(om.Group):
                 b=self.options[Aircraft.Engine.Motor.KV_EQ_INT],
             ),
             promotes_inputs=[
-                ('max_current', Aircraft.Engine.Motor.MAX_CONT_CURRENT),
                 ('motor_mass', Aircraft.Engine.Motor.MASS),
             ],
             promotes_outputs=[('kv', Aircraft.Engine.Motor.KV)]
