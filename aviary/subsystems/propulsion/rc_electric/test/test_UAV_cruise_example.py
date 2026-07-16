@@ -19,7 +19,7 @@ from aviary.subsystems.mass.UAV_mass.variable_info.mass_variables import Aircraf
 
 #This is where you set the power balance mode for the RCPropMission. Options are 'feedforward' or 'solver'.
 #Example for solver, RCBBuilder(power_balance_mode='solver')
-rc_prop = RCBuilder(power_balance_mode='solver')
+rc_prop = RCBuilder()
 
 
 def _build_cruise_phase_info():
@@ -61,7 +61,7 @@ class CruiseExample:
 
        
 
-        prob.add_driver('IPOPT', use_coloring=False, max_iter=15)
+        prob.add_driver('IPOPT', use_coloring=False, max_iter=0)
         prob.driver.opt_settings['print_level'] = 5
         prob.driver.opt_settings['mu_strategy'] = 'adaptive'
         prob.driver.opt_settings['tol'] = 1e-6
@@ -119,13 +119,13 @@ class CruiseExample:
 
         prob.set_solver_print(level=0)
         prob.set_initial_guesses()
-        prob.set_val(Aircraft.Design.GROSS_MASS, 7.0, units='kg')
+        prob.set_val(Aircraft.Design.GROSS_MASS, 4.4, units='kg')
         prob.set_val(Mission.GROSS_MASS, 4.1, units='kg')
         prob.set_val('traj.cruise.states:mass', 4.1, units='kg')
         prob.set_val(Aircraft.Engine.Motor.MASS, 0.55, units='kg')
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 2.0, units='A')
         prob.set_val(Aircraft.Battery.VOLTAGE, 25.2, units='V')
-
+        prob.set_val('traj.cruise.controls:rpm_slack', 4000.0, units='rpm')
         # Seed geometry terms near a small-UAV baseline.
         prob.set_val(Aircraft.Wing.ROOT_CHORD, 0.4, units='m')
         prob.set_val(Aircraft.Wing.WETTED_AREA, 0.85, units='m**2')
@@ -143,9 +143,6 @@ class CruiseExample:
         if rc_prop.power_balance_mode == 'feedforward':
             prob.set_val('traj.cruise.controls:throttle', 0.7, units='unitless')
             prob.set_val('traj.cruise.controls:current_flow', 40.0, units='A')
-            prob.set_val('traj.cruise.controls:current_flow_max', 60.0, units='A')
-            prob.set_val('traj.cruise.controls:rpm_lookup', 90.0, units='rev/s')
-            prob.set_val('traj.cruise.controls:rpm_lookup_max', 122.0, units='rev/s')
             prob.set_val('traj.cruise.states:mass', 4.4, units='kg')
             
 
@@ -154,9 +151,7 @@ class CruiseExample:
     def run(self):
         prob = self.build_problem()
         # Warm-start the trajectory states/controls before optimization.
-        prob.run_aviary_problem(run_driver=False, suppress_solver_print=False, make_plots=False)
-        cruise_mass0 = float(prob.get_val('traj.cruise.timeseries.mass', units='kg')[0][0])
-        prob.set_val(Mission.GROSS_MASS, cruise_mass0, units='kg')
+        
         prob.run_aviary_problem(run_driver=True, suppress_solver_print=False, make_plots=False)
         return prob
 

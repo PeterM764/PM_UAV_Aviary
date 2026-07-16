@@ -186,22 +186,23 @@ class RCBuilder(EngineModel):
 
             # SAND: the RPM the prop table sees. Bounds keep it inside the
             # training data (16.7 - 183 rev/s), so ct/cp are never extrapolated.
-            'rpm_lookup': {
-                'targets': 'rpm_lookup',
+            'rpm_slack': {
+                'targets': 'rpm_slack',
                 'units': 'rev/s',
                 'opt': True,
                 'lower': 20.0,
                 'upper': 180.0,
                 'ref': 1.0e2,
             },
-            'rpm_lookup_max': {
-                'targets': 'rpm_lookup_max',
-                'units': 'rev/s',
-                'opt': True,
-                'lower': 20.0,
-                'upper': 180.0,
-                'ref': 1.0e2,
-            },}
+            # 'rpm_slack_max': {
+            #     'targets': 'rpm_slack_max',
+            #     'units': 'rev/s',
+            #     'opt': True,
+            #     'lower': 20.0,
+            #     'upper': 180.0,
+            #     'ref': 1.0e2,
+            # },
+            }
         # Solver mode computes current/current_max internally in RCPropMission.
         # Declaring them as Dymos controls creates duplicate connections.
         return {}
