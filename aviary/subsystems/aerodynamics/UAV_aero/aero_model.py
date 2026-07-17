@@ -1,7 +1,33 @@
+'''
+This model firstly introduces explicit components for fuselage drag, vtail drag, and 
+landing gear drag.
+
+Then, an explicit component is created to compute the time averages of total coefficient of drag,
+fuselage coefficient of drag*, and total coefficient of lift. 
+
+Next, the total aircraft aero group is created, with the fuse drag, vtail drag, and landing
+gear drag components as subsystems. 
+
+Also in this group are execcomps that sum the individual CD's from each of the subsystems 
+and output total CD. 
+
+Lastly within total aircraft aero there is an OASAero subsystem that comes from 
+OAS_aero_analysis and computes wing/htail lift and drag, as well as angle of attack.
+
+Questions: 
+    Is everything wired correctly? 
+
+    Are all necessary inputs/outputs being considered?
+
+    Why do we have the time average of fuselage CD but not other individual components' CD? 
+
+    Is OASAero being used correctly/Is there a better way to use it?
+'''
+
 import numpy as np
 import openmdao.api as om
 
-from  import Atmosphere
+from ambiance import Atmosphere
 
 from aviary.variable_info.functions import add_aviary_input
 from aviary.variable_info.variables import Aircraft, Dynamic
@@ -207,26 +233,6 @@ class Averages(om.ExplicitComponent):
         partials['avg_CD_fus', 'CD_fus'] = np.ones(nn) / nn
         partials['avg_CL', 'lifting_surface_CL'] = np.ones(nn) / nn
 
-class AeroFromOAS(om.ExplicitComponent):
-    def initialize(self):
-        self.options.declare('num_nodes', types=int)
-
-    def setup(self):
-        nn = self.options['num_nodes']
-
-        # Inputs FROM OAS
-        self.add_input('OAS_CL', shape=(nn,), units='unitless')
-        self.add_input('OAS_CD', shape=(nn,), units='unitless')
-        self.add_input('OAS_alpha', shape=(nn,), units='deg')
-        self.add_input('OAS_drag', shape=(nn,), units='N')
-
-        # Outputs TO Aviary mission ODE
-        self.add_output(Dynamic.Vehicle.LIFT, shape=(nn,), units='N')
-        self.add_output(Dynamic.Vehicle.DRAG, shape=(nn,), units='N')
-        self.add_output('lifting_surface_CL', shape=(nn,), units='unitless')
-        self.add_output('lifting_surface_CD', shape=(nn,), units='unitless')
-        self.add_output('alpha', shape=(nn,), units='deg')
-
 class TotalAircraftAero(om.Group):
     def initialize(self):
         self.options.declare('num_nodes', types=int)
@@ -240,32 +246,8 @@ class TotalAircraftAero(om.Group):
             'OAS_aero',
             OASAero(num_nodes=nn, aviary_inputs=aviary_inputs),
             promotes_inputs=['*'],
-            promotes_outputs=[
-                # 'lifting_surface_drag', 
-                # Dynamic.Vehicle.LIFT, 
-                # Dynamic.Atmosphere.DYNAMIC_PRESSURE,
-                # 'lifting_surface_CL',
-                # 'lifting_surface_CD',
-                # 'alpha'
-                ]
+            promotes_outputs=[]
         )
-
-        self.add_subsystem(
-            'aero_from_oas',
-            AeroFromOAS(num_nodes=nn),
-            promotes_outputs=[
-                Dynamic.Vehicle.LIFT,
-                Dynamic.Vehicle.DRAG,
-                'lifting_surface_CL',
-                'lifting_surface_CD',
-                'alpha'
-            ]
-        )
-
-        self.connect('OAS_aero.lifting_surface_CL', 'aero_from_oas.OAS_CL')
-        self.connect('OAS_aero.lifting_surface_CD', 'aero_from_oas.OAS_CD')
-        self.connect('OAS_aero.alpha', 'aero_from_oas.OAS_alpha')
-        self.connect('OAS_aero.lifting_surface_drag', 'aero_from_oas.OAS_drag')
 
         self.add_subsystem(
             'fuselage_drag',

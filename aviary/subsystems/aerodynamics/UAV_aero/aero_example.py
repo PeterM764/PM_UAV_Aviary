@@ -1,3 +1,21 @@
+'''
+This example tries to run an optimization on t_duration based on the aero_model but 
+doesn't work right now because of the multiple promoted outputs error - suggests issues with
+wiring or loading of external subsystems. 
+
+THE ERROR: 
+    output traj.cruise.rhs_all.drag refers to multiple outputs: traj.phases.cruise.rhs_all.
+    core_aerodynamics.total_aircraft_drag.drag and traj.phases.cruise.rhs_all.solver_sub.aerodynamics.
+    Drag.drag.simple_drag.drag... similar error also has come up for lift, etc. 
+
+    This implies that the external subsystem is not replacing core aviary aero, but rather that they 
+    are both being looked at simultaneously. 
+
+    My suspicions of this error lie primarily in the use of OAS_aero_analysis in aero_example and in 
+    the possibility of the external subsystem being loaded incorrecty in phase_info/phase_info being 
+    loaded incorrectly in general
+'''
+
 import openmdao.api as om
 import numpy as np
 import matplotlib.pyplot as plt
