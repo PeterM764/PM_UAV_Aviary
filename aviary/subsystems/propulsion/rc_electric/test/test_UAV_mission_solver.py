@@ -5,7 +5,7 @@ import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
 
-from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
+from aviary.subsystems.propulsion.rc_electric.model.UAV_mission import RCPropMission
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.utils.aviary_values import AviaryValues
 
@@ -45,12 +45,26 @@ class TestRCPropMission(unittest.TestCase):
 
         prob.run_model()
 
+        current_flow = prob.get_val(Dynamic.Vehicle.Propulsion.CURRENT, units='A')
+        rpm = prob.get_val(Dynamic.Vehicle.Propulsion.RPM, units='rev/s')
+        rpm_max = prob.get_val(Dynamic.Vehicle.Propulsion.RPM_MAX, units='rev/s')
+        rpm_constraint = prob.get_val('prop.rpm_constraint', units='rev/s')
+        rpm_constraint_max = prob.get_val('prop_max.rpm_constraint', units='rev/s')
         battery_power = prob.get_val('battery.power', units='W')
         esc_power = prob.get_val('esc.power', units='W')
         motor_power = prob.get_val('motor.power', units='W')
         prop_power = prob.get_val(Dynamic.Vehicle.Propulsion.PROP_POWER, units='W')
         power_residual = battery_power + esc_power + motor_power - prop_power
-        print(battery_power, esc_power, motor_power, prop_power)
+
+        assert_near_equal(current_flow, np.full(nn, 54.72669143), tolerance=1e-6)
+        assert_near_equal(rpm, np.full(nn, 90.72377608), tolerance=1e-6)
+        assert_near_equal(rpm_max, np.full(nn, 123.98997508), tolerance=1e-6)
+        assert_near_equal(rpm_constraint, np.full(nn, -34.27622392), tolerance=1e-6)
+        assert_near_equal(rpm_constraint_max, np.full(nn, -1.01002492), tolerance=1e-6)
+        assert_near_equal(battery_power, np.full(nn, 1065.18201197), tolerance=1e-6)
+        assert_near_equal(esc_power, np.full(nn, -58.77227848), tolerance=1e-6)
+        assert_near_equal(motor_power, np.full(nn, -107.63443504), tolerance=1e-6)
+        assert_near_equal(prop_power, np.full(nn, 898.77529845), tolerance=1e-6)
         assert_near_equal(power_residual, np.zeros(3), tolerance=1e-5)
         partial_data = prob.check_partials(
             out_stream=None,

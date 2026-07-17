@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 phase_info = {
     'pre_mission': {'include_takeoff': False,  'optimize_mass': False},
     'climb': {
@@ -38,33 +41,38 @@ phase_info = {
     'cruise': {
         'subsystem_options': {'core_aerodynamics': {'method': 'computed'}},
         'user_options': {
-            'num_segments': 1,
+            'num_segments': 5,
             'order': 3,
-            'mach_optimize': True,
+            'mach_optimize': False,
             'mach_polynomial_order': 1,
-            'mach_initial': (0.1, 'unitless'),
+            'mach_initial': (0.0538, 'unitless'),
+            'mach_final': (0.0538, 'unitless'),
             # 'mach_ref': (0.05, 'unitless'),
-            'mass_ref': (1, 'kg'),
-            'distance_initial': (0, 'ft'),
+            'mass_ref': (4.0, 'kg'),
             'distance_ref': (1.0e2, 'ft'),
             # 'alt_ref': (100, 'ft'),
             # 'mach_final': (0.05, 'unitless'),
-            'altitude_optimize': False,
+            
             'altitude_polynomial_order': 1,
-            'altitude_initial': (200, 'ft'),
-            'altitude_final': (200, 'ft'),
+            'altitude_optimize': False,
+            'altitude_initial': (200.0, 'ft'),
+            'altitude_final': (200.0, 'ft'),
+            'distance_initial': (0.0, 'm'),
+            'distance_ref': (1000.0, 'm'),
+            'target_distance': (1000.0, 'm'),
             'throttle_enforcement': 'control',
             'electric_current_polynomial_order': 3,
             'electric_current_max_polynomial_order': 3,
             # 'throttle_polynomial_order': 1,
-            'time_initial': (0.0, 'min'),
-            # 'time_initial_bounds': ((0.2, 20), 's'),
-            'time_duration_bounds': ((0.5,5), 's'),
-            'target_distance': (200, 'ft'),
+            
+            #Time 
+            'time_initial': (0.0, 's'),
+            'time_duration_bounds': ((20,90.0), 's'),
         },
         'initial_guesses': {
             'distance': ([0, 200], 'ft'),
-            'time': ([0, 3], 's'),
+            'time': ([0, 54.7], 's'),
+            'mach': ([0.0538, 0.0538], 'unitless'),
         },
     },
     'descent': {
@@ -92,3 +100,39 @@ phase_info = {
         # 'constraint_range':True,
     },
 }
+
+
+def get_cruise_phase_info(
+    *,
+    throttle_enforcement='control',
+    throttle_bounds=None,
+    external_subsystems=None,
+    include_climb=False,
+    include_descent=False,
+):
+    """Return a cruise-focused phase_info copy with unsupported cruise options removed."""
+    cruise_phase_info = deepcopy(phase_info)
+
+    if not include_climb:
+        cruise_phase_info.pop('climb', None)
+    if not include_descent:
+        cruise_phase_info.pop('descent', None)
+
+    cruise_options = cruise_phase_info['cruise']['user_options']
+    cruise_options.pop('electric_current_polynomial_order', None)
+    cruise_options.pop('electric_current_max_polynomial_order', None)
+    cruise_options['throttle_enforcement'] = throttle_enforcement
+
+    if throttle_bounds is None:
+        cruise_options.pop('throttle_bounds', None)
+    else:
+        cruise_options['throttle_bounds'] = throttle_bounds
+
+    if external_subsystems is not None:
+        cruise_phase_info['cruise']['external_subsystems'] = list(external_subsystems)
+
+    cruise_phase_info['cruise']['subsystem_options']['aerodynamics'] = {
+        'method': 'external',
+    }
+
+    return cruise_phase_info

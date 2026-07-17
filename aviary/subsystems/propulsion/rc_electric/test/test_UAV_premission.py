@@ -4,7 +4,7 @@ import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
 
-from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
+from aviary.subsystems.propulsion.rc_electric.model.UAV_premission import RCPropPreMission
 from aviary.utils.aviary_values import AviaryValues
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic 
 

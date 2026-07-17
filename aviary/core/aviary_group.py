@@ -965,13 +965,13 @@ class AviaryGroup(om.Group):
             self.add_constraint(
                 Mission.Constraints.MASS_RESIDUAL,
                 lower=0.0,
-                ref=1e5,
+                ref=1e7,
             )
         else:
             self.add_constraint(
                 Mission.Constraints.MASS_RESIDUAL,
                 equals=0.0,
-                ref=1e5,
+                ref=1e7,
             )
 
         # If a target distance (or time) has been specified for this phase distance (or time) is
@@ -1005,7 +1005,7 @@ class AviaryGroup(om.Group):
                 self.add_constraint(
                     f'{phase_name}_distance_constraint.distance_resid',
                     equals=0.0,
-                    ref=1e2,
+                    ref=1e-3,
                 )
 
             # this is only used for analytic phases with a target duration
@@ -1500,6 +1500,7 @@ class AviaryGroup(om.Group):
         for subsystem in all_subsystems:
             dv_dict = subsystem.get_design_vars(aviary_inputs=self.aviary_inputs)
             for dv_name, dv_dict in dv_dict.items():
+                dv_dict = {key: value for key, value in dv_dict.items() if key != 'val'}
                 self.add_design_var(dv_name, **dv_dict)
 
         if self.mission_method is SOLVED_2DOF:  # TODO: to be removed soon
@@ -1508,9 +1509,9 @@ class AviaryGroup(om.Group):
                 self.add_design_var(
                     Aircraft.Design.GROSS_MASS,
                     units='lbm',
-                    lower=10,
-                    upper=900.0e3,
-                    ref=175.0e3,
+                    lower=2,
+                    upper=100,
+                    ref=8,
                 )
 
         elif self.mission_method in (
@@ -1523,17 +1524,17 @@ class AviaryGroup(om.Group):
             if problem_type is ProblemType.SIZING:
                 self.add_design_var(
                     Aircraft.Design.GROSS_MASS,
-                    lower=10.0,
-                    upper=None,
+                    lower=10,
+                    upper=900.0e3,
                     units='lbm',
-                    ref=175e3,
+                    ref=175.0e2,
                 )
                 self.add_design_var(
                     Mission.GROSS_MASS,
-                    lower=10.0,
-                    upper=None,
+                    lower=10,
+                    upper=900.0e3,
                     units='lbm',
-                    ref=175e3,
+                    ref=175.0e2,
                 )
 
                 self.add_subsystem(
@@ -1578,10 +1579,10 @@ class AviaryGroup(om.Group):
             elif problem_type is ProblemType.MULTI_MISSION:
                 self.add_design_var(
                     Mission.GROSS_MASS,
-                    lower=10.0,
-                    upper=900e3,
+                    lower=2,
+                    upper=100,
                     units='lbm',
-                    ref=175e3,
+                    ref=8,
                 )
 
                 # TODO: RANGE_RESIDUAL constraint should be added based on what the

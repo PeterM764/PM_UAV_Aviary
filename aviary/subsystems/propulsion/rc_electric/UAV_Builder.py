@@ -1,10 +1,12 @@
-from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_premission import RCPropPreMission
-from aviary.subsystems.propulsion.rc_electric.model.rcpropulsion_mission import RCPropMission
+from aviary.subsystems.propulsion.rc_electric.model.UAV_premission import RCPropPreMission
+from aviary.subsystems.propulsion.rc_electric.model.UAV_mission import RCPropMission
 from aviary.utils.aviary_values import AviaryValues
 from aviary.subsystems.propulsion.engine_model import EngineModel
 
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic
 from aviary.variable_info.variables import Mission
+
+""" Builder for the UAV Propulsion Subsystem (RC Electric) """
 
 class RCBuilder(EngineModel):
     # RCPropMission computes its own max-power chain (battery_max ... prop_max),
@@ -124,7 +126,7 @@ class RCBuilder(EngineModel):
             except KeyError:
                 return default
 
-        prop_diam = _maybe(Aircraft.Engine.Propeller.DIAMETER, 'm')
+        prop_diam = _maybe(Aircraft.Engine.Propeller.DIAMETER, 'inch')
         prop_pitch = _maybe(Aircraft.Engine.Propeller.PITCH, 'inch')
 
         parameters = {
@@ -148,13 +150,15 @@ class RCBuilder(EngineModel):
                 'val': 2.2,  
                 'units': 'A',
             },
+
+            #Single value for the motor's maximum continuous current, this cannot change during the mission, but can be optimized as a design variable.
             Aircraft.Engine.Motor.MAX_CONT_CURRENT: {
                 'val': 100,  
                 'units': 'A',
             },
             Aircraft.Engine.Propeller.DIAMETER: {
                 'val': prop_diam,
-                'units': 'm',
+                'units': 'inch',
             },
             Aircraft.Engine.Propeller.PITCH: {
                 'val': prop_pitch,
@@ -178,51 +182,30 @@ class RCBuilder(EngineModel):
                 'upper': 100.0,
                 'ref': 1.0e2,
             },
-            Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
+
+
             # SAND: the RPM the prop table sees. Bounds keep it inside the
             # training data (16.7 - 183 rev/s), so ct/cp are never extrapolated.
-            'rpm_lookup': {
-                'targets': 'rpm_lookup',
+            'rpm_slack': {
+                'targets': 'rpm_slack',
                 'units': 'rev/s',
                 'opt': True,
                 'lower': 20.0,
                 'upper': 180.0,
                 'ref': 1.0e2,
             },
-            'rpm_lookup_max': {
-                'targets': 'rpm_lookup_max',
-                'units': 'rev/s',
-                'opt': True,
-                'lower': 20.0,
-                'upper': 180.0,
-                'ref': 1.0e2,
-            },}
-        return{
-            Dynamic.Vehicle.Propulsion.CURRENT: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
-            Dynamic.Vehicle.Propulsion.CURRENT_MAX: {
-                'targets': Dynamic.Vehicle.Propulsion.CURRENT_MAX,
-                'units': 'A',
-                'opt': True,
-                'lower': 10.0,
-                'upper': 100.0,
-                'ref': 1.0e2,
-            },
-        
-        }
+            # 'rpm_slack_max': {
+            #     'targets': 'rpm_slack_max',
+            #     'units': 'rev/s',
+            #     'opt': True,
+            #     'lower': 20.0,
+            #     'upper': 180.0,
+            #     'ref': 1.0e2,
+            # },
+            }
+        # Solver mode computes current/current_max internally in RCPropMission.
+        # Declaring them as Dymos controls creates duplicate connections.
+        return {}
         
        
     def get_mass_names(self, aviary_inputs=None, user_options=None, subsystem_options=None, phase_info=None):

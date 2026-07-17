@@ -87,6 +87,7 @@ class WingMass(om.JaxExplicitComponent):
             num_spars = self.options[Aircraft.Wing.NUM_SPARS]
             rib_lightening_factor = self.options[Aircraft.Wing.RIB_LIGHTENING_FACTOR]
             rib_thickness, units = self.options[Aircraft.Wing.RIB_THICKNESS]
+            rib_thickness = jnp.asarray(rib_thickness)
             rho_skin, units = self.options[Aircraft.Wing.AREAL_SKIN_DENSITY]
             spar_outer_diameter, units = self.options[Aircraft.Wing.SPAR_OUTER_DIAMETER]
             rho_spar, units = self.options[Aircraft.Wing.SPAR_DENSITY]

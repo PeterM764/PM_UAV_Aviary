@@ -6,7 +6,7 @@ import openmdao.api as om
 from openmdao.utils.testing_utils import use_tempdirs
 from packaging import version
 
-from aviary.subsystems.propulsion.rc_electric.rc_builder import RCBuilder
+from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
 from aviary.subsystems.propulsion.propulsion_mission import PropulsionMission, PropulsionSum
 from aviary.subsystems.propulsion.utils import build_engine_deck
 from aviary.utils.aviary_values import AviaryValues
@@ -22,10 +22,6 @@ from aviary.variable_info.variables import Mission, Settings
 
 class TestRCBuilder(unittest.TestCase):
     """Integrates RCBuilder into a full PropulsionMission over a 0->1 throttle sweep.
-
-    Body must live inside the test method (not at module level): testflo imports every
-    test module to discover tests, and on Windows re-imports it in each spawned worker,
-    so a module-level run_model() executes a full solve at import time in every process.
     """
 
     @use_tempdirs

@@ -39,7 +39,8 @@ def load_airfoil_if_needed(comp, Part):
         return
 
     path = comp.options[Part.AIRFOIL_PATH]
-    path = os.path.abspath(path)
+
+    
 
     x, y = load_airfoil_csv(path, header=True)
     comp.n_area = 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
