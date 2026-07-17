@@ -1,7 +1,7 @@
 import numpy as np
 import openmdao.api as om
 
-from ambiance import Atmosphere
+from  import Atmosphere
 
 from aviary.variable_info.functions import add_aviary_input
 from aviary.variable_info.variables import Aircraft, Dynamic
