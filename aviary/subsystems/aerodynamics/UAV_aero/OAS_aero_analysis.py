@@ -15,6 +15,7 @@ import numpy as np
 import openmdao.api as om
 
 from ambiance import Atmosphere
+#from aviary.subsystems.atmosphere import Atmosphere
 
 from openaerostruct.aerodynamics.aero_groups import AeroPoint
 from openaerostruct.geometry.geometry_group import Geometry
@@ -236,6 +237,7 @@ class OASAero(om.Group):
 
         self.add_subsystem(
             'aero_conditions',
+            #replace with atmosphere component in aviary/subsystems/atmosphere
             AeroConditions(num_nodes=nn),
             promotes_inputs=[
                 Dynamic.Mission.ALTITUDE,
