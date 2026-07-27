@@ -20,6 +20,7 @@ QUESTIONS:
 
 import openmdao.api as om
 
+import numpy as np
 from aviary.subsystems.subsystem_builder import SubsystemBuilder
 from aviary.subsystems.aerodynamics.UAV_aero.aero_model import TotalAircraftAero
 from aviary.variable_info.variables import Aircraft, Dynamic
@@ -60,64 +61,86 @@ class AeroBuilder(SubsystemBuilder):
         params = {}
 
         params[Aircraft.Wing.SPAN] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True,
         }
         params[Aircraft.Wing.ROOT_CHORD] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True,
         }
         params[Aircraft.Wing.SWEEP] = {
+            'val': '0.0',
             'units': 'deg',
             'static_target': True,
         }
         params[Aircraft.Wing.INCIDENCE] = {
+            'val': '0.0',
             'units': 'deg',
             'static_target': True
         }
         params[Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR] = {
-        'units': 'unitless',
-        'static_target': True,
+            'val': '0.0',
+            'units': 'unitless',
+            'static_target': True,
         }
         params[Aircraft.HorizontalTail.SPAN] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         params[Aircraft.HorizontalTail.ROOT_CHORD] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         params[Aircraft.HorizontalTail.SWEEP] = {
+            'val': '0.0',
             'units': 'deg',
             'static_target': True
         }
         params[Aircraft.Fuselage.MAX_HEIGHT] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         params[Aircraft.Fuselage.MAX_WIDTH] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         params[Aircraft.Fuselage.LENGTH] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         params[Aircraft.VerticalTail.SPAN] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         params[Aircraft.VerticalTail.ROOT_CHORD] = {
+            'val': '1.0',
             'units': 'm',
             'static_target': True
         }
         return params
     
     def build_mission(self, num_nodes, aviary_inputs, **kwargs):
-        return TotalAircraftAero(
+        mission = TotalAircraftAero(
             aviary_inputs=aviary_inputs,
-            num_nodes=num_nodes
+            num_nodes=num_nodes,
         )
+        
+        #removes the ambiguity for promoted 'velocity' in openaerostruct and dymos
+        mission.set_input_defaults(
+            'velocity',
+            val=np.zeros(num_nodes),
+            units='m/s',
+        )
+
+        return mission
     
     def needs_mission_solver(self, aviary_inputs=None, subsystem_options=None, **kwargs):
-        return False      #changed from false to true
+        return True      #changed from false to true
