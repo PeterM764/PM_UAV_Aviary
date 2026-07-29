@@ -13,8 +13,8 @@ class AeroBuilder(SubsystemBuilder):
     def mission_inputs(self, aviary_inputs=None, user_options=None, subsystem_options=None,
     ):
         return [
-            Dynamic.Mission.ALTITUDE,
-            Dynamic.Mission.VELOCITY,
+            'altitude',
+            'velocity',
             Dynamic.Vehicle.MASS,
         ]
     
@@ -40,94 +40,94 @@ class AeroBuilder(SubsystemBuilder):
         params = {}
 
         # Wing geometry
-        params[Aircraft.Wing.SPAN] = {
-            'val': 1.0, 
-            'units': 'ft',
-            'static_target': True,
-        }
-        params[Aircraft.Wing.ROOT_CHORD] = {
-            'val': 1.0,            
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.Wing.SWEEP] = {
-            'val': 1.0,         
-            'units': 'deg',
-            'static_target': True,
-        }
-        params[Aircraft.Wing.INCIDENCE] = {
-            'val': 1.0,
-            'units': 'deg',
-            'static_target': True,
-        }
-        params[Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR] = {
-            'val': 1.0,
-            'units': 'unitless',
-            'static_target': True,
-        }
-        params[Aircraft.Wing.AREA] = {
-            'val': 1.0,    
-            'units': 'm**2',
-            'static_target': True,
-        }
+        # params[Aircraft.Wing.SPAN] = {
+        #     'val': 1.0, 
+        #     'units': 'ft',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Wing.ROOT_CHORD] = {
+        #     'val': 1.0,            
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Wing.SWEEP] = {
+        #     'val': 1.0,         
+        #     'units': 'deg',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Wing.INCIDENCE] = {
+        #     'val': 1.0,
+        #     'units': 'deg',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR] = {
+        #     'val': 1.0,
+        #     'units': 'unitless',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Wing.AREA] = {
+        #     'val': 1.0,    
+        #     'units': 'm**2',
+        #     'static_target': True,
+        # }
 
         # Horizontal tail
-        params[Aircraft.HorizontalTail.SPAN] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.HorizontalTail.ROOT_CHORD] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.HorizontalTail.SWEEP] = {
-            'val': 1.0,
-            'units': 'deg',
-            'static_target': True,
-        }
+        # params[Aircraft.HorizontalTail.SPAN] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.HorizontalTail.ROOT_CHORD] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.HorizontalTail.SWEEP] = {
+        #     'val': 1.0,
+        #     'units': 'deg',
+        #     'static_target': True,
+        # }
         
         # Fuselage
-        params[Aircraft.Fuselage.LENGTH] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.Fuselage.MAX_HEIGHT] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.Fuselage.MAX_WIDTH] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
+        # params[Aircraft.Fuselage.LENGTH] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Fuselage.MAX_HEIGHT] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.Fuselage.MAX_WIDTH] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
 
         # Vertical tail
-        params[Aircraft.VerticalTail.SPAN] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.VerticalTail.ROOT_CHORD] = {
-            'val': 1.0,
-            'units': 'm',
-            'static_target': True,
-        }
-        params[Aircraft.VerticalTail.TAPER_RATIO] = {
-            'val': 1.0,          
-            'units': 'unitless',
-            'static_target': True,
-        }
+        # params[Aircraft.VerticalTail.SPAN] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.VerticalTail.ROOT_CHORD] = {
+        #     'val': 1.0,
+        #     'units': 'm',
+        #     'static_target': True,
+        # }
+        # params[Aircraft.VerticalTail.TAPER_RATIO] = {
+        #     'val': 1.0,          
+        #     'units': 'unitless',
+        #     'static_target': True,
+        # }
 
         # Landing gear
-        params[Aircraft.LandingGear.DRAG_COEFFICIENT] = {
-            'val': 1.0,
-            'units': 'unitless',
-            'static_target': True,
-        }
+        # params[Aircraft.LandingGear.DRAG_COEFFICIENT] = {
+        #     'val': 1.0,
+        #     'units': 'unitless',
+        #     'static_target': True,
+        # }
         return params
     
     def build_mission(self, num_nodes, aviary_inputs, **kwargs):

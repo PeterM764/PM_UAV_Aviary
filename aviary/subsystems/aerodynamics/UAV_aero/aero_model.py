@@ -1,7 +1,7 @@
 import numpy as np
 import openmdao.api as om
 
-from ambiance import Atmosphere
+from aviary.subsystems.atmosphere.atmosphere import Atmosphere
 
 from aviary.variable_info.functions import add_aviary_input
 from aviary.variable_info.variables import Aircraft, Dynamic
@@ -215,14 +215,13 @@ class TotalAircraftAero(om.Group):
     def setup(self):
         nn = self.options['num_nodes']
         aviary_inputs = self.options['aviary_inputs']
-
+        
         self.add_subsystem(
             'OAS_aero',
             OASAero(num_nodes=nn, aviary_inputs=aviary_inputs),
             promotes_inputs=['*'],
             promotes_outputs=[      #added outputs to be promoted
                 Dynamic.Vehicle.LIFT,
-                Dynamic.Atmosphere.DYNAMIC_PRESSURE,
                 'alpha',
                 'lifting_surface_drag',
                 ('lifting_surface_CL',
@@ -277,6 +276,8 @@ class TotalAircraftAero(om.Group):
             promotes_outputs=[('drag', Dynamic.Vehicle.DRAG)]
         )
 
+        self.set_input_defaults('dynamic_pressure', units='N/m**2')
+        
         # would like to not need this
         self.add_subsystem(
             'averages',

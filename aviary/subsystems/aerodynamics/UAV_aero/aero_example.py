@@ -1,6 +1,6 @@
 import openmdao.api as om
 import numpy as np
-np.seterr(divide='raise', invalid='raise')
+#np.seterr(divide='raise', invalid='raise')
 import matplotlib.pyplot as plt
 
 import aviary.api as av
@@ -69,8 +69,8 @@ prob.load_inputs('aviary/validation_cases/validation_data/test_models/small_scal
 print("Builder name:", aero_builder.name)
 prob.load_external_subsystems([aero_builder])
 
-prob.aviary_inputs.set_val(Dynamic.Mission.ALTITUDE, 520, units='m') 
-prob.aviary_inputs.set_val(Dynamic.Mission.VELOCITY, 36, units='m/s')
+prob.aviary_inputs.set_val('altitude', 520, units='m') 
+prob.aviary_inputs.set_val('velocity', 36, units='m/s')
 
 prob.aviary_inputs.set_val(Aircraft.Wing.SPAN, 1.524, units='ft')  
 prob.aviary_inputs.set_val(Aircraft.Wing.ROOT_CHORD, 0.508, units='m')
