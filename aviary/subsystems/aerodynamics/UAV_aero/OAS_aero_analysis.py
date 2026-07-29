@@ -1,15 +1,3 @@
-'''
-This is the part of the aero model that uses OAS to compute lift and drag of wing and htail,
-as well as aerodynamic conditions and angle of attack.
-
-It's hard to tell what is good here and what is broken without knowing how 
-OpenAeroStruct works, so it would be a good idea to investigate further in the docs:
-
-https://mdolab-openaerostruct.readthedocs-hosted.com/en/latest/installation.html
-
-I am highly suspicious of the viability of this file and how it is implemented on aero_model.
-'''
-
 import numpy as np
 
 import openmdao.api as om
@@ -224,7 +212,6 @@ class AlphaComp(om.ImplicitComponent):
         partials['alpha', Dynamic.Vehicle.MASS] = -g * np.cos(a)
         partials['alpha', 'alpha'] = (m * g * np.sin(a) * np.pi / 180.0)
 
-
 class OASAero(om.Group):
 
     def initialize(self):
@@ -234,7 +221,7 @@ class OASAero(om.Group):
     def setup(self):
         nn = self.options['num_nodes']
         aviary_inputs = self.options['aviary_inputs']
-
+        
         self.add_subsystem(
             'aero_conditions',
             #replace with atmosphere component in aviary/subsystems/atmosphere
@@ -269,10 +256,8 @@ class OASAero(om.Group):
             'symmetry': True,
             'span': 1, # set to 1, aviary inputs will be scaling factor
             'root_chord': 1,
-            'taper': 1,
-            'sweep': 1,
-            'span_cos_spacing': 1,
-            'chord_cos_spacing': 1,
+            'span_cos_spacing': 1.0,
+            'chord_cos_spacing': 1.0,
             'num_twist_cp': 1
         }
 
@@ -309,10 +294,8 @@ class OASAero(om.Group):
             'symmetry': True,
             'span': 1,
             'root_chord': 1,
-            'taper': 1,
-            'sweep': 1,
-            'span_cos_spacing': 1,
-            'chord_cos_spacing': 1,
+            'span_cos_spacing': 1.0,
+            'chord_cos_spacing': 1.0,
             'offset': np.array([htail_dist, 0, 0]), # offset from wing in x-direction
         }
 

@@ -1,23 +1,3 @@
-'''
-The builder for aero external subsystem. 
-
-inputs: altitude and velocity
-
-outputs: lift, drag, alpha, avg_CL, lifting_surface_CD
-
-parameters: geometry of wing, tail, fuselage; span, root_chord, sweep, etc
-
-QUESTIONS:
-    Should there be a PRE-MISSION for an aero external subsystem?
-
-    Do we or do we not need needs_mission_solver,i.e. is there a solver that gets used?
-
-    Is everything being called/used in a way that is up to date with 2026 Aviary?
-
-    Where are the returned outputs being used as opposed to all of the other outputs 
-    that warrants them being outputs and not the others?
-'''
-
 import openmdao.api as om
 
 import numpy as np
@@ -36,7 +16,6 @@ class AeroBuilder(SubsystemBuilder):
             Dynamic.Mission.ALTITUDE,
             Dynamic.Mission.VELOCITY,
             Dynamic.Vehicle.MASS,
-            'aircraft:*',
         ]
     
     def mission_outputs(
@@ -56,74 +35,98 @@ class AeroBuilder(SubsystemBuilder):
             'CD_vtail',
             'CD_gear',
         ]
-    
+
     def get_parameters(self, aviary_inputs=None, **kwargs):
         params = {}
 
+        # Wing geometry
         params[Aircraft.Wing.SPAN] = {
-            'val': '1.0',
-            'units': 'm',
+            'val': 1.0, 
+            'units': 'ft',
             'static_target': True,
         }
         params[Aircraft.Wing.ROOT_CHORD] = {
-            'val': '1.0',
+            'val': 1.0,            
             'units': 'm',
             'static_target': True,
         }
         params[Aircraft.Wing.SWEEP] = {
-            'val': '0.0',
+            'val': 1.0,         
             'units': 'deg',
             'static_target': True,
         }
         params[Aircraft.Wing.INCIDENCE] = {
-            'val': '0.0',
+            'val': 1.0,
             'units': 'deg',
-            'static_target': True
+            'static_target': True,
         }
         params[Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR] = {
-            'val': '0.0',
+            'val': 1.0,
             'units': 'unitless',
             'static_target': True,
         }
+        params[Aircraft.Wing.AREA] = {
+            'val': 1.0,    
+            'units': 'm**2',
+            'static_target': True,
+        }
+
+        # Horizontal tail
         params[Aircraft.HorizontalTail.SPAN] = {
-            'val': '1.0',
+            'val': 1.0,
             'units': 'm',
-            'static_target': True
+            'static_target': True,
         }
         params[Aircraft.HorizontalTail.ROOT_CHORD] = {
-            'val': '1.0',
+            'val': 1.0,
             'units': 'm',
-            'static_target': True
+            'static_target': True,
         }
         params[Aircraft.HorizontalTail.SWEEP] = {
-            'val': '0.0',
+            'val': 1.0,
             'units': 'deg',
-            'static_target': True
+            'static_target': True,
+        }
+        
+        # Fuselage
+        params[Aircraft.Fuselage.LENGTH] = {
+            'val': 1.0,
+            'units': 'm',
+            'static_target': True,
         }
         params[Aircraft.Fuselage.MAX_HEIGHT] = {
-            'val': '1.0',
+            'val': 1.0,
             'units': 'm',
-            'static_target': True
+            'static_target': True,
         }
         params[Aircraft.Fuselage.MAX_WIDTH] = {
-            'val': '1.0',
+            'val': 1.0,
             'units': 'm',
-            'static_target': True
+            'static_target': True,
         }
-        params[Aircraft.Fuselage.LENGTH] = {
-            'val': '1.0',
-            'units': 'm',
-            'static_target': True
-        }
+
+        # Vertical tail
         params[Aircraft.VerticalTail.SPAN] = {
-            'val': '1.0',
+            'val': 1.0,
             'units': 'm',
-            'static_target': True
+            'static_target': True,
         }
         params[Aircraft.VerticalTail.ROOT_CHORD] = {
-            'val': '1.0',
+            'val': 1.0,
             'units': 'm',
-            'static_target': True
+            'static_target': True,
+        }
+        params[Aircraft.VerticalTail.TAPER_RATIO] = {
+            'val': 1.0,          
+            'units': 'unitless',
+            'static_target': True,
+        }
+
+        # Landing gear
+        params[Aircraft.LandingGear.DRAG_COEFFICIENT] = {
+            'val': 1.0,
+            'units': 'unitless',
+            'static_target': True,
         }
         return params
     
@@ -143,4 +146,4 @@ class AeroBuilder(SubsystemBuilder):
         return mission
     
     def needs_mission_solver(self, aviary_inputs=None, subsystem_options=None, **kwargs):
-        return True      #changed from false to true
+        return True

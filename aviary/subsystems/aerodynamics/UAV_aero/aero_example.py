@@ -72,7 +72,7 @@ prob.load_external_subsystems([aero_builder])
 prob.aviary_inputs.set_val(Dynamic.Mission.ALTITUDE, 520, units='m') 
 prob.aviary_inputs.set_val(Dynamic.Mission.VELOCITY, 36, units='m/s')
 
-prob.aviary_inputs.set_val(Aircraft.Wing.SPAN, 1.524, units='m')  
+prob.aviary_inputs.set_val(Aircraft.Wing.SPAN, 1.524, units='ft')  
 prob.aviary_inputs.set_val(Aircraft.Wing.ROOT_CHORD, 0.508, units='m')
 prob.aviary_inputs.set_val(Aircraft.Wing.THICKNESS_TO_CHORD, 0.10) 
 prob.aviary_inputs.set_val(Aircraft.Wing.MAX_THICKNESS_LOCATION, 0.266) 
@@ -100,9 +100,9 @@ prob.aviary_inputs.set_val(Dynamic.Vehicle.MASS, 3.787, units='kg')
 
 prob.check_and_preprocess_inputs()
 prob.build_model()
-#prob.add_driver(optimizer=optimizer, max_iter=max_iter)
+prob.add_driver(optimizer=optimizer, max_iter=max_iter)
 
-#prob.add_design_variables()
+prob.add_design_variables()
 
 #prob.model.add_design_var('aircraft:wing:span', lower=0.1, upper=2.0)
 #prob.model.add_design_var('aircraft:wing:root_chord', lower=0.1, upper=1.0)
@@ -111,7 +111,7 @@ prob.build_model()
 #prob.model.add_design_var('aircraft:horizontal_tail:incidence', lower=-5.0, upper=10.0)
 
 #prob.model.add_constraint('traj.phases.cruise.rhs_all.lifting_surface_CL', lower=0.01, upper=0.2)
-#prob.model.add_objective('traj.cruise.t_duration', index=-1)
+prob.model.add_objective('traj.cruise.t_duration', index=-1)
 
 #prob.driver.recording_options['record_desvars'] = False
 #prob.driver.recording_options['record_responses'] = False
@@ -135,9 +135,10 @@ prob.set_val(Aircraft.Wing.SHEAR_CONTROL_MASS, 1.0)
 prob.set_val(Aircraft.Wing.SHEAR_CONTROL_MASS_SCALER, 1.0)
 prob.set_val(Aircraft.Wing.MISC_MASS, 1.0)
 prob.set_val(Aircraft.Wing.MISC_MASS_SCALER, 1.0)
-
-
-prob.run_model() 
+prob.set_val(Aircraft.LandingGear.MAIN_GEAR_OLEO_LENGTH, 0.3, units='m')
+prob.set_val(Aircraft.LandingGear.NOSE_GEAR_OLEO_LENGTH, 0.25, 'm')
+prob.set_val(Aircraft.Wing.CONTROL_SURFACE_AREA, 0.02, 'm**2')
+#prob.run_model() 
 print('\nALPHA COMPONENT INPUTS:')
 
 prob.model.list_inputs(
@@ -147,7 +148,7 @@ prob.model.list_inputs(
     prom_name=True,
     print_arrays=True,
 )
-#prob.run_aviary_problem()
+prob.run_aviary_problem()
 
 #with open("variables.txt", "w") as f:
 #   prob.model.list_vars(out_stream=f, print_arrays=True, units=True)
