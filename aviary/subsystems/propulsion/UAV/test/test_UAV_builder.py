@@ -6,7 +6,7 @@ import openmdao.api as om
 from openmdao.utils.testing_utils import use_tempdirs
 from packaging import version
 
-from aviary.subsystems.propulsion.rc_electric.UAV_Builder import RCBuilder
+from aviary.subsystems.propulsion.UAV.UAV_Builder import UAVBuilder
 from aviary.subsystems.propulsion.propulsion_mission import PropulsionMission, PropulsionSum
 from aviary.subsystems.propulsion.utils import build_engine_deck
 from aviary.utils.aviary_values import AviaryValues
@@ -20,8 +20,8 @@ from aviary.variable_info.variables import Mission, Settings
 
 
 
-class TestRCBuilder(unittest.TestCase):
-    """Integrates RCBuilder into a full PropulsionMission over a 0->1 throttle sweep.
+class TestUAVBuilder(unittest.TestCase):
+    """Integrates UAVBuilder into a full PropulsionMission over a 0->1 throttle sweep.
     """
 
     @use_tempdirs
@@ -36,7 +36,7 @@ class TestRCBuilder(unittest.TestCase):
         options.set_val(Aircraft.Engine.NUM_ENGINES, 2)
         options.set_val(Aircraft.Engine.NUM_WING_ENGINES, 2)
 
-        engine = RCBuilder(options=options, power_balance_mode='feedforward') #change between solver/feedforward to test both modes
+        engine = UAVBuilder(options=options, power_balance_mode='feedforward') #change between solver/feedforward to test both modes
         preprocess_propulsion(options, engine_models=[engine])
 
     
@@ -54,7 +54,7 @@ class TestRCBuilder(unittest.TestCase):
 
         prob.model.set_input_defaults(Aircraft.Battery.VOLTAGE, val=22.2, units='V')
         prob.model.set_input_defaults(Aircraft.Engine.Motor.IDLE_CURRENT, val=0.91, units='A')
-        prob.model.set_input_defaults(Aircraft.Engine.Motor.MAX_CONT_CURRENT, val=120, units='A')
+        
 
 
         setup_model_options(prob, options)
@@ -64,7 +64,7 @@ class TestRCBuilder(unittest.TestCase):
         prob.set_val(Aircraft.Battery.MASS, 0.5, units='kg')
         prob.set_val(Dynamic.Vehicle.Propulsion.THROTTLE, np.linspace(0, 1, nn))
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 120, units='A')
+    
         prob.set_val(Dynamic.Atmosphere.DENSITY, 1.225, units='kg/m**3')
         prob.set_val(Aircraft.Engine.Propeller.DIAMETER, 20, units='inch')
         prob.set_val(Aircraft.Engine.Propeller.PITCH, 10, units='inch')
@@ -79,10 +79,7 @@ class TestRCBuilder(unittest.TestCase):
         prop_power = prob.get_val('rc_electric.prop_power', units='W')
         power_residual = battery_power + esc_power + motor_power - prop_power
 
-        # The regression this guards is the propeller-surrogate NaN cliff (see
-        # rcpropulsion_mission notes): the powertrain must stay finite across the full
-        # throttle sweep. Not asserting residual==0 here, since NonlinearBlockGS runs
-        # with err_on_non_converge=False and the cliff is near throttle=1.0.
+       
         self.assertFalse(
             np.isnan(power_residual).any(), 'powertrain produced NaN over the throttle sweep'
         )

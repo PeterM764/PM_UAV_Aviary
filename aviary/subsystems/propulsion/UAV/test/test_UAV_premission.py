@@ -4,12 +4,12 @@ import openmdao.api as om
 from openmdao.utils.assert_utils import assert_check_partials, assert_near_equal
 from openmdao.utils.testing_utils import use_tempdirs
 
-from aviary.subsystems.propulsion.rc_electric.model.UAV_premission import RCPropPreMission
+from aviary.subsystems.propulsion.UAV.model.UAV_premission import UAVPropPreMission
 from aviary.utils.aviary_values import AviaryValues
 from aviary.variable_info.dbf_variables import Aircraft, Dynamic 
 
 
-class TestRCPropPre(unittest.TestCase):
+class TestUAVPreMission(unittest.TestCase):
     @use_tempdirs
     def test_premission_calcs(self):
         prob = om.Problem()
@@ -17,10 +17,10 @@ class TestRCPropPre(unittest.TestCase):
 
         options.set_val(Aircraft.Engine.Motor.KV_EQ_SLOPE, 2105.53674)
         options.set_val(Aircraft.Engine.Motor.KV_EQ_INT, -80.83469)
-
+        
         prob.model.add_subsystem(
             'rc_calcs',
-            RCPropPreMission(aviary_options=options),
+            UAVPropPreMission(aviary_options=options),
             promotes=['*']
         )
 
@@ -29,7 +29,7 @@ class TestRCPropPre(unittest.TestCase):
         prob.set_val(Aircraft.Battery.MASS, 0.707, units='kg')
         prob.set_val(Aircraft.Battery.VOLTAGE, 22.2, units='V')
         prob.set_val(Aircraft.Engine.Motor.IDLE_CURRENT, 0.91, units='A')
-        prob.set_val(Aircraft.Engine.Motor.MAX_CONT_CURRENT, 80, units='A')
+        
         prob.set_val(Aircraft.Engine.Motor.MASS, 0.288, units='kg')
 
         prob.run_model()
@@ -39,7 +39,7 @@ class TestRCPropPre(unittest.TestCase):
         resistance = prob.get_val(Aircraft.Engine.Motor.RESISTANCE, 'ohm')
         energy = prob.get_val(Aircraft.Battery.ENERGY_CAPACITY, 'W*h')
 
-        kv_expected = 2105.53674 * 80 / 288 - 80.83469
+        kv_expected = 2105.53674 * 100 / 288 - 80.83469
         resistance_expected = 0.05582266503
         energy_expected = 109.11522
 
