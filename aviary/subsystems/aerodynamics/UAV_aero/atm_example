@@ -1,0 +1,53 @@
+import openmdao.api as om
+import numpy as np
+
+from aviary.variable_info.variables import Aircraft, Dynamic
+from aviary.utils.aviary_values import AviaryValues
+
+from aviary.subsystems.aerodynamics.UAV_aero.aero_model import OASAero
+
+nn = 1  # single node test
+
+# --- Minimal AviaryValues ---
+av_inputs = AviaryValues()
+
+# Required geometry values
+av_inputs.set_val(Aircraft.Wing.SPAN, 1.524, units='m')
+av_inputs.set_val(Aircraft.Wing.ROOT_CHORD, 0.508, units='m')
+av_inputs.set_val(Aircraft.Wing.THICKNESS_TO_CHORD, 0.10)
+av_inputs.set_val(Aircraft.Wing.MAX_THICKNESS_LOCATION, 0.266)
+av_inputs.set_val(Aircraft.Wing.TAPER_RATIO, 1)
+av_inputs.set_val(Aircraft.Wing.SWEEP, 0, units='deg')
+av_inputs.set_val(Aircraft.Wing.INCIDENCE, 0, units='deg')
+av_inputs.set_val(Aircraft.Wing.CENTER_DISTANCE, 0.511)
+
+av_inputs.set_val(Aircraft.HorizontalTail.SPAN, 0.711, units='m')
+av_inputs.set_val(Aircraft.HorizontalTail.ROOT_CHORD, 0.232, units='m')
+av_inputs.set_val(Aircraft.HorizontalTail.THICKNESS_TO_CHORD, 0.14)
+av_inputs.set_val(Aircraft.HorizontalTail.TAPER_RATIO, 1)
+av_inputs.set_val(Aircraft.HorizontalTail.SWEEP, 0, units='deg')
+
+av_inputs.set_val(Aircraft.Fuselage.LENGTH, 1.190244, units='m')
+
+# Mission inputs
+av_inputs.set_val(Dynamic.Mission.ALTITUDE, np.array([520.0]), units='m')
+av_inputs.set_val(Dynamic.Mission.VELOCITY, np.array([36.0]), units='m/s')
+av_inputs.set_val(Dynamic.Vehicle.MASS, np.array([3.787]), units='kg')
+
+# --- Build minimal OpenMDAO problem ---
+prob = om.Problem()
+
+prob.model = OASAero(num_nodes=nn, aviary_inputs=av_inputs)
+
+prob.setup(force_alloc_complex=True)
+
+prob.run_model()
+
+# --- Print key values ---
+print("density:", prob.get_val("density"))
+print("dynamic_viscosity:", prob.get_val("dynamic_viscosity"))
+print("re:", prob.get_val("re"))
+print("alpha:", prob.get_val("alpha"))
+print("CL:", prob.get_val("lifting_surface_CL"))
+print("CD:", prob.get_val("lifting_surface_CD"))
+print("Lift:", prob.get_val("lifting_surface_drag"))  # name depends on your CollectLiftDrag

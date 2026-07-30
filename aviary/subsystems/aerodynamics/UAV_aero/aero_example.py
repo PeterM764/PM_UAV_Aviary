@@ -59,7 +59,6 @@ phase_info = {
     },
 }
 
-
 max_iter = 50
 optimizer = 'IPOPT' 
 
@@ -128,6 +127,20 @@ prob.model.add_objective('traj.cruise.t_duration', index=-1)
 #})
 
 prob.setup()
+
+nn = prob.get_val('traj.phases.cruise.rhs_all.mass').shape[0]
+
+prob.set_val('traj.phases.cruise.rhs_all.mass',
+             np.ones((nn, 1)) * 3.787,
+             units='kg')
+prob.set_val('traj.phases.cruise.rhs_all.altitude',
+             np.ones((nn, 1)) * 520.0,
+             units='m')
+
+prob.set_val('traj.phases.cruise.rhs_all.mach',
+             np.ones((nn, 1)) * 0.085,
+             units='unitless')
+
 prob.set_initial_guesses()
 
 prob.set_val(Aircraft.Hydraulics.SYSTEM_PRESSURE, 1.0)
