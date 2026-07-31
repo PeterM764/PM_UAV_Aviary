@@ -1,8 +1,6 @@
 import numpy as np
 import openmdao.api as om
 
-from aviary.subsystems.atmosphere.atmosphere import Atmosphere
-
 from aviary.variable_info.functions import add_aviary_input
 from aviary.variable_info.variables import Aircraft, Dynamic
 from aviary.subsystems.aerodynamics.UAV_aero.OAS_aero_analysis import OASAero
@@ -215,40 +213,61 @@ class TotalAircraftAero(om.Group):
     def setup(self):
         nn = self.options['num_nodes']
         aviary_inputs = self.options['aviary_inputs']
-        
+
         self.add_subsystem(
             'OAS_aero',
             OASAero(num_nodes=nn, aviary_inputs=aviary_inputs),
-            promotes_inputs=['*'],
+            promotes_inputs=[
+                Dynamic.Mission.ALTITUDE,
+                Dynamic.Mission.VELOCITY,
+                Dynamic.Vehicle.MASS,
+            ],
             promotes_outputs=[      #added outputs to be promoted
                 Dynamic.Vehicle.LIFT,
-                'alpha',
+                Dynamic.Atmosphere.DYNAMIC_PRESSURE,
+                'lift_balance_residual',
                 'lifting_surface_drag',
-                ('lifting_surface_CL',
-                Dynamic.Vehicle.LIFT_COEFFICIENT,
-                ),
+                ('lifting_surface_CL', Dynamic.Vehicle.LIFT_COEFFICIENT),
                 'lifting_surface_CD',
-            ]
+            ],
         )
 
         self.add_subsystem(
             'fuselage_drag',
             FuselageDrag(num_nodes=nn),
-            promotes_inputs=['*'],
+            promotes_inputs=[
+                Aircraft.Wing.FUSELAGE_INTERFERENCE_FACTOR,
+                Aircraft.Fuselage.LENGTH,
+                Aircraft.Fuselage.MAX_HEIGHT,
+                Aircraft.Fuselage.MAX_WIDTH,
+                Aircraft.Wing.AREA,
+                Dynamic.Atmosphere.DYNAMIC_PRESSURE,
+            ],
             promotes_outputs=['CD_fus', 'D_fus']
         )
 
         self.add_subsystem(
             'vtail_drag',
             VTailDrag(num_nodes=nn),
-            promotes_inputs=['*'],
+            promotes_inputs=[
+                Aircraft.VerticalTail.ROOT_CHORD,
+                Aircraft.VerticalTail.TAPER_RATIO,
+                Aircraft.VerticalTail.SPAN,
+                Aircraft.Wing.AREA,
+                Dynamic.Atmosphere.DYNAMIC_PRESSURE,
+                Aircraft.VerticalTail.THICKNESS_TO_CHORD,
+            ],
             promotes_outputs=['CD_vtail', 'D_vtail']
         )
 
         self.add_subsystem(
             'landing_gear_drag',
             LandingGearDrag(num_nodes=nn),
-            promotes_inputs=['*'],
+            promotes_inputs=[
+                Aircraft.LandingGear.DRAG_COEFFICIENT,
+                Aircraft.Wing.AREA,
+                Dynamic.Atmosphere.DYNAMIC_PRESSURE,
+            ],
             promotes_outputs=['CD_gear', 'D_gear']
         )
 
@@ -261,7 +280,7 @@ class TotalAircraftAero(om.Group):
                         CD_gear={'shape': (nn,), 'units': 'unitless'},
                         CD={'shape': (nn,), 'units': 'unitless'}),
             promotes_inputs=['CD_fus', 'CD_vtail', 'lifting_surface_CD', 'CD_gear'],
-            promotes_outputs=[('CD', Dynamic.Vehicle.DRAG_COEFFICIENT)]
+            promotes_outputs=[('CD', 'drag_coefficient')]
         )
 
         self.add_subsystem(
@@ -276,13 +295,11 @@ class TotalAircraftAero(om.Group):
             promotes_outputs=[('drag', Dynamic.Vehicle.DRAG)]
         )
 
-        self.set_input_defaults('dynamic_pressure', units='N/m**2')
-        
         # would like to not need this
         self.add_subsystem(
             'averages',
             Averages(num_nodes=nn),
-            promotes_inputs=[('CD', Dynamic.Vehicle.DRAG_COEFFICIENT), 'CD_fus', 'lifting_surface_CL'],
+            promotes_inputs=[('CD', 'drag_coefficient'), 'CD_fus', 'lifting_surface_CL'],
             promotes_outputs=['avg_CD', 'avg_CD_fus', 'avg_CL']
         )
         

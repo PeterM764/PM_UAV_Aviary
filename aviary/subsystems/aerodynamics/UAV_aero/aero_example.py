@@ -1,6 +1,6 @@
 import openmdao.api as om
 import numpy as np
-#np.seterr(divide='raise', invalid='raise')
+
 import matplotlib.pyplot as plt
 
 import aviary.api as av

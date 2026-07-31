@@ -2,7 +2,6 @@ import numpy as np
 
 import openmdao.api as om
 
-#from ambiance import Atmosphere
 from aviary.subsystems.atmosphere.atmosphere import Atmosphere
 
 from openaerostruct.aerodynamics.aero_groups import AeroPoint
@@ -11,89 +10,7 @@ from openaerostruct.meshing.mesh_generator import generate_mesh
 
 from aviary.variable_info.functions import add_aviary_input, add_aviary_output
 from aviary.variable_info.variables import Aircraft, Dynamic
-
-
-
-# class AeroConditions(om.ExplicitComponent):
-#     # compute atmospheric conditions, Reynolds number, dynamic pressure
-#     def initialize(self):
-#         self.options.declare('num_nodes', types=int)
-
-#     def setup(self):
-#         nn = self.options['num_nodes']
-
-#         add_aviary_input(self, Dynamic.Mission.ALTITUDE, shape=nn, units='m')
-#         add_aviary_input(self, Dynamic.Mission.VELOCITY, shape=nn, units='m/s')
-#         add_aviary_input(self, Aircraft.Wing.ROOT_CHORD, units='m')
-
-#         add_aviary_output(self, Dynamic.Atmosphere.TEMPERATURE, shape=nn, units='K')
-#         add_aviary_output(self, Dynamic.Atmosphere.KINEMATIC_VISCOSITY, shape=nn, units='m**2/s')
-#         add_aviary_output(self, Dynamic.Atmosphere.DENSITY, shape=nn, units='kg/m**3')
-#         add_aviary_output(self, Dynamic.Atmosphere.DYNAMIC_PRESSURE, shape=nn, units='N/m**2')
-        
-#         self.add_output(name='dynamic_viscosity', shape=nn, units='kg/m/s')
-#         self.add_output(name='re', shape=nn, units='1/m')
-
-#         rows_cols = np.arange(nn)
-#         self.declare_partials('re', Dynamic.Mission.VELOCITY, rows=rows_cols, cols=rows_cols)
-#         self.declare_partials('re', Aircraft.Wing.ROOT_CHORD)
-#         self.declare_partials('re', Dynamic.Mission.ALTITUDE, method='fd')
-
-#         self.declare_partials(Dynamic.Atmosphere.DYNAMIC_PRESSURE, Dynamic.Mission.VELOCITY, rows=rows_cols, cols=rows_cols)
-
-#         self.declare_partials(Dynamic.Atmosphere.TEMPERATURE, '*', method='fd')
-#         self.declare_partials(Dynamic.Atmosphere.DENSITY, '*', method='fd')
-#         self.declare_partials('dynamic_viscosity', '*', method='fd')
-#         self.declare_partials(Dynamic.Atmosphere.KINEMATIC_VISCOSITY, '*', method='fd')
-
-#     def compute(self, inputs, outputs):
-#         V = inputs[Dynamic.Mission.VELOCITY]
-#         h = inputs[Dynamic.Mission.ALTITUDE]
-#         L = inputs[Aircraft.Wing.ROOT_CHORD]
-
-#         nn = self.options['num_nodes']
-#         T = np.zeros(nn)
-#         rho = np.zeros(nn)
-#         mu = np.zeros(nn)
-#         nu = np.zeros(nn)
-#         Re = np.zeros(nn)
-
-#         for i in range(nn):
-#             atm = Atmosphere(h[i])
-#             print(i, atm.temperature)
-#             T[i] = atm.temperature[0]
-#             rho[i] = atm.density[0]
-#             mu[i] = atm.dynamic_viscosity[0]
-#             nu[i] = mu[i] / rho[i]
-#             Re[i] = V[i] * L[0] / nu[i]
-
-#         outputs[Dynamic.Atmosphere.TEMPERATURE] = T
-#         outputs[Dynamic.Atmosphere.DENSITY] = rho
-#         outputs['dynamic_viscosity'] = mu
-#         outputs[Dynamic.Atmosphere.KINEMATIC_VISCOSITY] = nu
-#         outputs['re'] = Re
-#         outputs[Dynamic.Atmosphere.DYNAMIC_PRESSURE] = 0.5 * rho * V**2
-
-#     def compute_partials(self, inputs, partials):
-#         V = inputs[Dynamic.Mission.VELOCITY]
-#         L = inputs[Aircraft.Wing.ROOT_CHORD]
-#         #nu = inputs[Dynamic.Atmosphere.KINEMATIC_VISCOSITY]
-#         h = inputs[Dynamic.Mission.ALTITUDE]
-
-#         nn = self.options['num_nodes']
-#         rho = np.zeros(nn)
-#         nu = np.zeros(nn)
-#         for i in range(nn):
-#             atm = Atmosphere(h[i])
-#             rho[i] = atm.density[0]
-#             nu[i] = atm.dynamic_viscosity[0] / rho[i]
-
-#         partials['re', Dynamic.Mission.VELOCITY] = L / nu
-#         partials['re', Aircraft.Wing.ROOT_CHORD] = V / nu
-#         #partials['re', Dynamic.Atmosphere.KINEMATIC_VISCOSITY] = -V * L / nu**2
-        
-#         partials[Dynamic.Atmosphere.DYNAMIC_PRESSURE, Dynamic.Mission.VELOCITY] = rho * V
-#         #partials[Dynamic.Atmosphere.DYNAMIC_PRESSURE, Dynamic.Atmosphere.DENSITY] = 0.5 * V**2
+#Remove this and add the mars atmoshpere from the aviary subsystems atmosphere input not make anew subsystem but import one...?
 
 class CollectLiftDrag(om.ExplicitComponent):
     def initialize(self):
@@ -179,40 +96,42 @@ class BroadcastHTailChord(om.ExplicitComponent):
         nn = 10
         partials['broadcast_htail_chord', Aircraft.HorizontalTail.ROOT_CHORD] = np.ones(nn)
 
-class AlphaComp(om.ImplicitComponent):
+class AlphaComp(om.ExplicitComponent):
     # compute AoA using aircraft mass, assuming lift = weight * cos(alpha)
     def initialize(self):
         self.options.declare('num_nodes', types=int)
 
     def setup(self):
         nn = self.options['num_nodes']
-
+        rows_cols = np.arange(nn)
         add_aviary_input(self, Dynamic.Vehicle.LIFT, shape=nn, units='N')
         add_aviary_input(self, Dynamic.Vehicle.MASS, shape=nn, units='kg')
-        self.add_output('alpha', shape=nn, units='deg')
+        self.add_input( 'alpha', val=np.full(nn, 3.0), units='deg', )
 
-        rows_cols = np.arange(nn)
-        self.declare_partials('alpha', Dynamic.Vehicle.LIFT, rows=rows_cols, cols=rows_cols)
-        self.declare_partials('alpha', Dynamic.Vehicle.MASS, rows=rows_cols, cols=rows_cols)
-        self.declare_partials('alpha', 'alpha', rows=rows_cols, cols=rows_cols)
+        # This output will be constrained to zero.
+        self.add_output( 'lift_balance_residual', val=np.zeros(nn),  units='N', desc='Lift equilibrium residual', )
+        self.declare_partials('lift_balance_residual', Dynamic.Vehicle.LIFT, rows=rows_cols, cols=rows_cols)
+        self.declare_partials('lift_balance_residual', Dynamic.Vehicle.MASS, rows=rows_cols, cols=rows_cols)
+        self.declare_partials('lift_balance_residual', 'alpha', rows=rows_cols, cols=rows_cols)
 
-    def apply_nonlinear(self, inputs, outputs, residuals):
+    def compute(self, inputs, outputs):
         L = inputs[Dynamic.Vehicle.LIFT]
         m = inputs[Dynamic.Vehicle.MASS]
-        g = 9.8 # m/s
-        a = np.radians(outputs['alpha'])
-        residuals['alpha'] = L - (m * g * np.cos(a))
+        g = 9.8 # m/s**2
+        a = np.radians(inputs['alpha'])
+        outputs['lift_balance_residual'] = L - (m * g * np.cos(a))
 
-    def linearize(self, inputs, outputs, partials):
+    def compute_partials(self, inputs, partials):
         nn = self.options['num_nodes']
         L = inputs[Dynamic.Vehicle.LIFT]
         m = inputs[Dynamic.Vehicle.MASS]
         g = 9.8 # m/s
-        a = np.radians(outputs['alpha'])
+        a = np.radians(inputs['alpha'])
 
-        partials['alpha', Dynamic.Vehicle.LIFT] = np.ones(nn)
-        partials['alpha', Dynamic.Vehicle.MASS] = -g * np.cos(a)
-        partials['alpha', 'alpha'] = (m * g * np.sin(a) * np.pi / 180.0)
+        partials['lift_balance_residual', Dynamic.Vehicle.LIFT] = np.ones(nn)
+        partials['lift_balance_residual', Dynamic.Vehicle.MASS] = -g * np.cos(a)
+        partials['lift_balance_residual', 'alpha'] = (m * g * np.sin(a) * np.pi / 180.0)
+
 
 class OASAero(om.Group):
 
@@ -223,29 +142,16 @@ class OASAero(om.Group):
     def setup(self):
         nn = self.options['num_nodes']
         aviary_inputs = self.options['aviary_inputs']
-        
-        # self.add_subsystem(
-        #     'aero_conditions',
-        #     #replace with atmosphere component in aviary/subsystems/atmosphere
-        #     AeroConditions(num_nodes=nn),
-        #     promotes_inputs=[
-        #         Dynamic.Mission.ALTITUDE,
-        #         Dynamic.Mission.VELOCITY,
-        #         Aircraft.Wing.ROOT_CHORD],
-        #     promotes_outputs=['re', Dynamic.Atmosphere.DYNAMIC_PRESSURE, Dynamic.Atmosphere.DENSITY]
-        # )
+
         self.add_subsystem(
             'atm',
             Atmosphere(num_nodes=nn),
-            promotes_inputs=['altitude'],
-            promotes_outputs=[
-                Dynamic.Atmosphere.DENSITY,
-                Dynamic.Atmosphere.SPEED_OF_SOUND,
-                Dynamic.Atmosphere.TEMPERATURE,
-                'dynamic_viscosity'
-                ]
-            )
-
+            promotes_inputs=[
+                Dynamic.Mission.ALTITUDE,
+                Dynamic.Mission.VELOCITY,
+            ],
+            promotes_outputs=[Dynamic.Atmosphere.DYNAMIC_PRESSURE, Dynamic.Atmosphere.DENSITY]
+        )
         self.add_subsystem(
             'reynolds_calc',
             om.ExecComp(
@@ -258,8 +164,9 @@ class OASAero(om.Group):
             promotes_inputs=['rho', 'v'],
             promotes_outputs=['re']
         )
+
         self.connect(Dynamic.Atmosphere.DENSITY, 'rho')
-        self.connect('dynamic_viscosity', 'reynolds_calc.mu')
+        self.connect('atm.dynamic_viscosity', 'reynolds_calc.mu')
         self.promotes('reynolds_calc', inputs=[('v', 'velocity')])
 
         self.add_subsystem(
@@ -285,8 +192,10 @@ class OASAero(om.Group):
             'symmetry': True,
             'span': 1, # set to 1, aviary inputs will be scaling factor
             'root_chord': 1,
-            'span_cos_spacing': 1.0,
-            'chord_cos_spacing': 1.0,
+            #'taper': aviary_inputs.get_val(Aircraft.Wing.TAPER_RATIO),
+            #'sweep': aviary_inputs.get_val(Aircraft.Wing.SWEEP),
+            'span_cos_spacing': 1,
+            'chord_cos_spacing': 1,
             'num_twist_cp': 1
         }
 
@@ -307,6 +216,8 @@ class OASAero(om.Group):
             'CL0': 0.1,
             'CD0': 0.015
         }
+        
+        # HTAIL      
 
         # location of htail relative to aerodynamic center of wing
         wing_dist = aviary_inputs.get_val(Aircraft.Wing.CENTER_DISTANCE, units='unitless')
@@ -319,10 +230,12 @@ class OASAero(om.Group):
             'num_x': 6,
             'wing_type': 'rect', 
             'symmetry': True,
-            'span': 1.5,
-            'root_chord': 0.5,
-            'span_cos_spacing': 1.0,
-            'chord_cos_spacing': 1.0,
+            'span': 1,
+            'root_chord': 1,
+            #'taper': aviary_inputs.get_val(Aircraft.HorizontalTail.TAPER_RATIO),
+            #'sweep': aviary_inputs.get_val(Aircraft.HorizontalTail.SWEEP),
+            'span_cos_spacing': 1,
+            'chord_cos_spacing': 1,
             'offset': np.array([htail_dist, 0, 0]), # offset from wing in x-direction
         }
 
@@ -354,9 +267,14 @@ class OASAero(om.Group):
         self.add_subsystem(
             'alpha_comp',
             AlphaComp(num_nodes=nn),
-            promotes_inputs=[Dynamic.Vehicle.LIFT, Dynamic.Vehicle.MASS],
-            promotes_outputs=['alpha']
-        )
+            promotes_inputs=[
+                Dynamic.Vehicle.LIFT,
+                Dynamic.Vehicle.MASS,
+            ],
+            promotes_outputs=[
+                'lift_balance_residual',
+            ],
+         )
 
         for surface in surfaces: 
             geom_group = Geometry(surface=surface)
@@ -364,28 +282,23 @@ class OASAero(om.Group):
             
         for i in range(nn):
             point_name = 'aero_point_'+ str(i)
-            self.add_subsystem(point_name, AeroPoint(surfaces=surfaces))
+            ap = AeroPoint(surfaces=surfaces)
+            self.add_subsystem(point_name, ap)
 
-            self.promotes(point_name, inputs=[('v', 'velocity')], src_indices=[i])
+            self.set_input_defaults(f'{point_name}.alpha', val=0.0, units='deg')
 
-            #new stuff
+            self.promotes(point_name, inputs=[('v', Dynamic.Mission.VELOCITY)], src_indices=[i])
+
             self.connect(Dynamic.Atmosphere.DENSITY, f'{point_name}.rho', src_indices=[i])
-            self.connect('re', f'{point_name}.re', src_indices=[i])
-            
-            # self.connect('speed_of_sound', f'{point_name}.a', src_indices=[i])
-            # self.connect('dynamic_viscosity', f'{point_name}.mu', src_indices=[i])
-            # self.connect('kinematic_viscosity', f'{point_name}.nu', src_indices=[i])
 
-            self.connect('alpha', f'{point_name}.alpha', src_indices=[i])
-            #self.connect('re', f'{point_name}.re', src_indices=[i])
+            self.connect('re', f'{point_name}.re', src_indices=[i])
             self.connect('prob_vars.cg', f'{point_name}.cg')
-            #self.connect(Dynamic.Atmosphere.DENSITY, f'{point_name}.rho', src_indices=[i])
             
             self.connect(f'{point_name}.total_perf.L', f'collect_lift_drag.L_{i}')
             self.connect(f'{point_name}.total_perf.D', f'collect_lift_drag.D_{i}')
             self.connect(f'{point_name}.CL', f'collect_lift_drag.CL_{i}')
             self.connect(f'{point_name}.CD', f'collect_lift_drag.CD_{i}')
-            
+                    
             for surface in surfaces:
                 name = surface['name']
 
@@ -408,18 +321,17 @@ class OASAero(om.Group):
     def configure(self):
         # changing any value in Aviary applies a scaling factor to the existing geometry in the mesh
         # that's why all the values are 1 in the mesh dictionaries
+
         self.promotes('wing', inputs=[('mesh.stretch.span', Aircraft.Wing.SPAN)])
         self.promotes('htail', inputs=[('mesh.stretch.span', Aircraft.HorizontalTail.SPAN)])
 
         self.connect('broadcast_wing_chord', 'wing.mesh.scale_x.chord')
         self.connect('broadcast_htail_chord', 'htail.mesh.scale_x.chord')
 
-        #self.promotes('wing', inputs=[('mesh.taper.taper', Aircraft.Wing.TAPER_RATIO)])
-        # self.promotes('htail', inputs=[('mesh.taper.taper', Aircraft.HorizontalTail.TAPER_RATIO)])
+        # self.connect(Aircraft.Wing.TAPER_RATIO, 'wing.mesh.taper.taper')
+        # self.connect(Aircraft.HorizontalTail.TAPER_RATIO, 'htail.mesh.taper.taper')
 
-        self.promotes('wing', inputs=[('mesh.sweep.sweep', Aircraft.Wing.SWEEP)])
-        self.promotes('htail', inputs=[('mesh.sweep.sweep', Aircraft.HorizontalTail.SWEEP)])
+        # self.connect(Aircraft.Wing.SWEEP, 'wing.mesh.sweep.sweep')
+        # self.connect(Aircraft.HorizontalTail.SWEEP, 'htail.mesh.sweep.sweep')
 
         self.connect('broadcast_incidence', 'wing.mesh.rotate.twist')
-        atm = self._get_subsystem('atm')
-        atm.list_outputs(print_arrays=True)
